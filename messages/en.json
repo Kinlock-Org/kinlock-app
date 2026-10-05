@@ -1,0 +1,28 @@
+{
+  "app": {
+    "name": "Kinlock",
+    "tagline": "Money that can only reach the school or landlord it was meant for."
+  },
+  "common": {
+    "notImplemented": "This page is not built yet.",
+    "indicative": "Indicative",
+    "usdOnlyNote": "No reliable exchange rate is available for this currency, so only the USD amount is shown.",
+    "rateRiskNote": "Exchange rates change. The local-currency amount is an estimate and is not guaranteed."
+  },
+  "receipt": {
+    "headline": "Payment to verified payee",
+    "valid": "Valid",
+    "notValid": "Not valid"
+  },
+  "pages": {
+    "home": { "title": "Kinlock" },
+    "request": { "title": "Create a payment request" },
+    "send": { "title": "Send a locked payment" },
+    "lock": { "title": "Lock details" },
+    "claim": { "title": "Claim a payment" },
+    "payee": { "title": "Payee dashboard" },
+    "attester": { "title": "Attester checks" },
+    "receipt": { "title": "Receipt" },
+    "verify": { "title": "Verify a receipt" }
+  }
+}

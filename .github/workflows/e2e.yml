@@ -1,0 +1,18 @@
+# DRAFT (ask-first: CI). Playwright happy path against testnet (M3-19).
+name: e2e
+on:
+  pull_request:
+permissions:
+  contents: read
+jobs:
+  e2e:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: pnpm/action-setup@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: pnpm
+      - run: pnpm install --frozen-lockfile
+      - run: echo 'E2E not configured yet (M3-19)'

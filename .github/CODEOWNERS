@@ -1,0 +1,6 @@
+# Illustrative: teams are created in roadmap F-12. Replace handles as needed.
+*                    @Kinlock-Org/maintainers
+/next.config.ts      @Kinlock-Org/maintainers @Kinlock-Org/contract-reviewers
+/proxy.ts            @Kinlock-Org/maintainers @Kinlock-Org/contract-reviewers
+/app/claim/**        @Kinlock-Org/maintainers @Kinlock-Org/contract-reviewers
+/lib/claim-links/**  @Kinlock-Org/maintainers @Kinlock-Org/contract-reviewers
