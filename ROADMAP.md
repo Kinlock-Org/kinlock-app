@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 1 | 1 | 22 | 0 | 0 | 0 | 4% |
+| 4 App | 24 | 2 | 3 | 19 | 0 | 0 | 0 | 8% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **31** | **10** | **133** | **0** | **25** | **0** | **18%** |
+| **All** | **199** | **32** | **12** | **130** | **0** | **25** | **0** | **18%** |
 
 ---
 
@@ -291,7 +291,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | ID | Task | Repo | Pri | Status | Depends on | Done when |
 |---|---|---|---|---|---|---|
 | M3-01 | Scaffold `kinlock-app`: Next.js, Tailwind, lint, CI | app | P0 | DONE | G1 | CI green |
-| M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | TODO | M3-01 | Wallets swappable; signing flow tested |
+| M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | IN PROGRESS | M3-01 | Wallets swappable; signing flow tested |
 | M3-03 | `lib/sdk.ts` and Zod-validated public config | app | P0 | TODO | M2-02 | Single SDK instance; env validation |
 | M3-04 | Landing page and plain-language explainer | app | P1 | TODO | M3-01 | Content reviewed against wording rules |
 | M3-05 | `/request`: payee creates a payment-request link | app | P0 | TODO | M2-03 | Link pre-fills the sender form; carries no authority |
@@ -303,8 +303,8 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-11 | `/payee` dashboard (lists via indexer) | app | P0 | TODO | M2-12 | Filter by status and reference |
 | M3-12 | `/attester` tooling: read-only account checks (trustline, authorization, XLM float) | app | P1 | TODO | M1-26 | Checks match the checklist script |
 | M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | TODO | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
-| M3-14 | Security headers, strict CSP, `Referrer-Policy`, no third-party scripts on `/claim/*` | app | P0 | TODO | M3-09 | Automated test confirms fragment never appears in any network request |
-| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | TODO | M3-01 | Used everywhere money or time is shown |
+| M3-14 | Security headers, strict CSP, `Referrer-Policy`, no third-party scripts on `/claim/*` | app | P0 | IN PROGRESS | M3-09 | Automated test confirms fragment never appears in any network request |
+| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | IN PROGRESS | M3-01 | Used everywhere money or time is shown |
 | M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | TODO | M3-13 | Audit checklist passed |
 | M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
@@ -312,7 +312,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | TODO | M3-13 | Reviewer sign-off |
 | M3-21 | Error and empty states: trustline failure, expired, revoked, suspended, indexer lag | app | P0 | TODO | M3-09 | Each state has clear guidance |
 | M3-22 | Testnet hosting and environment config | app | P0 | TODO | M3-19 | Public testnet URL live |
-| M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | IN PROGRESS | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
+| M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | DONE | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
 | M3-24 | CI guard: fail on hard-coded country, currency, anchor, or locale literals outside registry data, tests, and fixtures | all | P1 | TODO | M3-01, M2-01 | Guard runs in app and sdk CI; passing and failing examples tested |
 
 ---
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-06 | `feat/app-foundations` | app | DONE: M3-23. IN PROGRESS: M3-02, M3-14, M3-15 | Wallet adapter on Stellar Wallets Kit (browser-only); AssetLabel (code + issuer, full issuer for screen readers), AmountDisplay and DateTimeDisplay (UTC + local) on Intl with exact decimal strings; inline-string check and formatting tests across en/de/hi/ar/ja and USD/JPY/KWD. Claim pages get a per-request nonce CSP via proxy.ts (verified on a production build: all 8 Next.js scripts carry the nonce; the old static `script-src 'self'` would have blocked them). Fixed a date formatter that would have thrown |
 | 2026-10-06 | `chore/license-and-publishing` | org | DONE: F-10. IN PROGRESS: F-11. DEC-02, DEC-03 resolved | Apache-2.0 for every repo (ADR-0022, `LICENSE` + template); TypeScript packages publish to npm under `@kinlock` from CI on tag (ADR-0023). F-11 waits on an owner creating the npm org and the `NPM_TOKEN` secret. Canonical roadmap re-merged from all repos (picks up M2-01, M3-01). `sync-docs.sh --check` now also fails on ADRs a repo has that the canonical copy lacks (it missed that drift before) |
 | 2026-10-06 | `chore/ts-tooling` | sdk | DONE: M2-01. DEC-22, DEC-23 resolved (ADR-0021) | Biome (lint + format), Vitest, and tsx added; CI now runs lint, typecheck, test, and build. Tests pin the SDK's public API to the approved list and the contract's enum order, and check the indexer refuses bad config |
 | 2026-10-06 | `chore/roadmap-sync` (lockfile) | sdk | no row changes (M2-01 stays IN PROGRESS: lint and test tooling pending DEC-22) | Commit `pnpm-lock.yaml` for the dependency versions approved by the owner on 2026-10-06, so CI's frozen install works; typecheck and build pass |
