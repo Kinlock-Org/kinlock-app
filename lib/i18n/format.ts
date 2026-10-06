@@ -9,6 +9,9 @@ export function formatCurrency(_decimalAmount: string, _currency: string, _local
 }
 
 /** Shows both UTC and the viewer's local time (hard requirement). */
-export function formatDateTimeUtcAndLocal(_unixSeconds: bigint, _locale: string): { utc: string; local: string } {
+export function formatDateTimeUtcAndLocal(
+  _unixSeconds: bigint,
+  _locale: string,
+): { utc: string; local: string } {
   throw new Error("formatDateTimeUtcAndLocal is not implemented yet (M3-15)");
 }

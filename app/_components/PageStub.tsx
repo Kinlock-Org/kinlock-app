@@ -1,4 +1,4 @@
-import { t, type MessageKey } from "@/lib/i18n/messages";
+import { type MessageKey, t } from "@/lib/i18n/messages";
 
 /** Placeholder used by scaffolded routes until each page is built. */
 export function PageStub({ titleKey }: { titleKey: MessageKey }) {

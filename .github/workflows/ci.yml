@@ -1,4 +1,4 @@
-# DRAFT (ask-first: CI). lint, typecheck, test, build.
+# lint (Biome), typecheck, test (Vitest), build.
 name: ci
 on:
   pull_request:
@@ -15,4 +15,7 @@ jobs:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: pnpm typecheck && pnpm build
+      - run: pnpm lint
+      - run: pnpm typecheck
+      - run: pnpm test
+      - run: pnpm build
