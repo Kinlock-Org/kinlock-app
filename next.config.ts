@@ -1,19 +1,8 @@
 /**
- * [sec] Security headers. DRAFT: CSP must be finalized in M3-14 (connect-src needs the RPC and
- * indexer origins from config). /claim/* gets the strictest policy: no third-party scripts.
+ * [sec] Site-wide security headers. /claim/* also gets a per-request nonce CSP from proxy.ts
+ * (roadmap M3-14). Referrer-Policy no-referrer keeps any URL from leaking to other sites.
  */
 import type { NextConfig } from "next";
-
-const claimCsp = [
-  "default-src 'self'",
-  "script-src 'self'",
-  "style-src 'self' 'unsafe-inline'",
-  "img-src 'self' data:",
-  "connect-src 'self'",
-  "frame-ancestors 'none'",
-  "base-uri 'none'",
-  "form-action 'self'",
-].join("; ");
 
 const nextConfig: NextConfig = {
   async headers() {
@@ -23,11 +12,8 @@ const nextConfig: NextConfig = {
         headers: [
           { key: "Referrer-Policy", value: "no-referrer" },
           { key: "X-Content-Type-Options", value: "nosniff" },
+          { key: "X-Frame-Options", value: "DENY" },
         ],
-      },
-      {
-        source: "/claim/:path*",
-        headers: [{ key: "Content-Security-Policy", value: claimCsp }],
       },
     ];
   },
