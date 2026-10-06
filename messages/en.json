@@ -15,14 +15,39 @@
     "notValid": "Not valid"
   },
   "pages": {
-    "home": { "title": "Kinlock" },
-    "request": { "title": "Create a payment request" },
-    "send": { "title": "Send a locked payment" },
-    "lock": { "title": "Lock details" },
-    "claim": { "title": "Claim a payment" },
-    "payee": { "title": "Payee dashboard" },
-    "attester": { "title": "Attester checks" },
-    "receipt": { "title": "Receipt" },
-    "verify": { "title": "Verify a receipt" }
+    "home": {
+      "title": "Kinlock"
+    },
+    "request": {
+      "title": "Create a payment request"
+    },
+    "send": {
+      "title": "Send a locked payment"
+    },
+    "lock": {
+      "title": "Lock details"
+    },
+    "claim": {
+      "title": "Claim a payment"
+    },
+    "payee": {
+      "title": "Payee dashboard"
+    },
+    "attester": {
+      "title": "Attester checks"
+    },
+    "receipt": {
+      "title": "Receipt"
+    },
+    "verify": {
+      "title": "Verify a receipt"
+    }
+  },
+  "money": {
+    "issuer": "Issuer"
+  },
+  "time": {
+    "utc": "UTC",
+    "local": "Your time"
   }
 }
