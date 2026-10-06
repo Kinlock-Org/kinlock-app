@@ -1,6 +1,7 @@
 {
   "name": "kinlock-app",
   "private": true,
+  "license": "Apache-2.0",
   "type": "module",
   "packageManager": "pnpm@10.18.3",
   "scripts": {
