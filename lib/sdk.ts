@@ -10,6 +10,7 @@ import type {
   CreateLockParams,
   KinlockConfig,
   Lock,
+  Payee,
   PreflightParams,
   PreflightResult,
   ReceiptRef,
@@ -69,6 +70,9 @@ export const decline = (lockId: bigint, signer: Signer) =>
 /** Chain read. The only lock read money-moving pages may use. */
 export const getLock = (lockId: bigint): Promise<Lock | null> =>
   sdk.getLock(kinlockConfig(), lockId);
+/** Chain read of a payee (status for the refund rule). */
+export const getPayee = (payeeId: string): Promise<Payee | null> =>
+  sdk.getPayee(kinlockConfig(), payeeId);
 export const preflight = (params: PreflightParams): Promise<PreflightResult[]> =>
   sdk.preflight(kinlockConfig(), params);
 export const verifyReceipt = (ref: ReceiptRef): Promise<VerifyReceiptResult> =>

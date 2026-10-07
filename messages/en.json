@@ -48,7 +48,36 @@
       "title": "Send a locked payment"
     },
     "lock": {
-      "title": "Lock details"
+      "title": "Lock details",
+      "intro": "Read directly from the blockchain.",
+      "invalidId": "This lock number isn't valid.",
+      "payeeLabel": "Payee",
+      "payeeStatus": {
+        "Active": "Active",
+        "Suspended": "Suspended",
+        "Revoked": "Revoked"
+      },
+      "payeeUnknown": "Not registered",
+      "releasedLabel": "Paid to the payee",
+      "returnedLabel": "Returned to the sender",
+      "refundHeading": "Refund",
+      "refundAvailable": {
+        "Expired": "The claim period has ended. You can take back the money that wasn't claimed.",
+        "Revoked": "This payee's verification was revoked. You can take back the money that wasn't claimed.",
+        "SuspendedTimeout": "This payee has been suspended for more than 14 days. You can take back the money that wasn't claimed."
+      },
+      "refundAmount": "Amount you would get back",
+      "refundFrom": "A refund becomes possible from",
+      "refundNever": "This lock is closed; there is nothing to refund.",
+      "refundSenderOnly": "Only the sender's wallet can refund. Connect the wallet that created this lock.",
+      "refund": "Refund to my wallet",
+      "refunding": "Waiting for your wallet…",
+      "refunded": "The money was returned to your wallet.",
+      "receiptLink": "View receipt",
+      "errorNotAllowed": "The blockchain doesn't allow a refund yet. Nothing was moved.",
+      "errorClosed": "This lock is already closed.",
+      "errorTx": "The transaction didn't go through (it may have been declined in your wallet). Nothing was moved; you can try again.",
+      "errorGeneric": "Something went wrong. Nothing was moved; you can try again."
     },
     "claim": {
       "title": "Claim a payment",

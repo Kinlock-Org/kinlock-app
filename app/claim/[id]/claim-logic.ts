@@ -32,11 +32,11 @@ export async function checkReference(
   return { status: hash === lock.refHash ? "match" : "mismatch", reference: parts.reference };
 }
 
-/** The receipt event's index in a transaction (Released or Declined), for the receipt URL. */
+/** The receipt event's index in a transaction (Released, Declined or Refunded), for the receipt URL. */
 export async function findReceiptIndex(
   txHash: string,
   verify: (ref: { txHash: string; eventIndex: number }) => Promise<VerifyReceiptResult>,
-  kind: "Released" | "Declined" = "Released",
+  kind: "Released" | "Declined" | "Refunded" = "Released",
   maxIndex = 7,
 ): Promise<number | null> {
   for (let eventIndex = 0; eventIndex <= maxIndex; eventIndex++) {

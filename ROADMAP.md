@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 6 | 4 | 14 | 0 | 0 | 0 | 25% |
+| 4 App | 24 | 6 | 5 | 13 | 0 | 0 | 0 | 25% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **36** | **13** | **125** | **0** | **25** | **0** | **21%** |
+| **All** | **199** | **36** | **14** | **124** | **0** | **25** | **0** | **21%** |
 
 ---
 
@@ -297,7 +297,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-05 | `/request`: payee creates a payment-request link | app | P0 | IN PROGRESS | M2-03 | Link pre-fills the sender form; carries no authority |
 | M3-06 | `/send`: sender flow with preflight results, USD amount, indicative local-currency equivalent (USD-only fallback), rate-risk note | app | P0 | TODO | M2-05, M3-16 | Creates a lock on testnet end to end |
 | M3-07 | Claim-link generation, browser-only storage, export option | app | P0 | DONE | M2-03 | Nothing stored or sent server-side |
-| M3-08 | `/locks/[id]`: sender detail from chain and refund action | app | P0 | TODO | M2-02 | Refund shown only when allowed |
+| M3-08 | `/locks/[id]`: sender detail from chain and refund action | app | P0 | IN PROGRESS | M2-02 | Refund shown only when allowed |
 | M3-09 | `/claim/[id]`: payee claim page; verify reference against `ref_hash`; release | app | P0 | DONE | M2-03 | Release works; wrong reference flagged |
 | M3-10 | Payee `decline` action | app | P0 | DONE | M3-09 | Returns remainder; confirmation step |
 | M3-11 | `/payee` dashboard (lists via indexer) | app | P0 | TODO | M2-12 | Filter by status and reference |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-07 | kinlock-app feat/app-lock-page | app | M3-08 IN PROGRESS | `/locks/[id]`: lock and payee read from chain (`@kinlock/sdk` 0.3.0 `getPayee`); Refund shown only when the contract allows it (expired, payee Revoked, or Suspended past 14 days), otherwise when it becomes possible; only the sender's wallet can refund; receipt link after. Verified on testnet locks 4, 9, 10; refund through a real wallet pending (lock 10 expires 16:08 UTC). Docs synced (ADR-0030, AGENTS.md) |
 | 2026-10-07 | kinlock-app feat/app-decline (owner test) | app | M3-09 DONE, M3-10 DONE | Owner tested with Freighter on testnet as the payout account of lock 9: claimed payment 1 (tx 84e3a768…, 0.50 USDC to the payout) and declined the rest (tx 49bccbaf…, 0.50 USDC back to the sender); both receipts verify on chain and the indexer shows lock 9 Declined |
 | 2026-10-07 | kinlock-app feat/app-decline | app | M3-10 IN PROGRESS | Claim page: payout account can return the unclaimed remainder to the sender, behind a confirmation step showing the exact amount and that it can't be undone; receipt link after. Logic unit-tested; the wallet-driven click-through needs a real wallet |
 | 2026-10-07 | kinlock-app feat/app-claim-page | app | M3-09 IN PROGRESS | `/claim/[id]`: lock read from chain, reference checked against `ref_hash` in the browser (match, mismatch flagged, missing), tranche states mirroring the contract rule, wallet connect, release only for the payout account, receipt link after release. Verified on testnet lock 9 in a browser (no request carried the reference or salt); release through a real wallet still to verify |
