@@ -32,18 +32,26 @@ export async function checkReference(
   return { status: hash === lock.refHash ? "match" : "mismatch", reference: parts.reference };
 }
 
-/** The Released event's index in a release transaction, for the receipt URL (null if none). */
+/** The receipt event's index in a transaction (Released or Declined), for the receipt URL. */
 export async function findReceiptIndex(
   txHash: string,
   verify: (ref: { txHash: string; eventIndex: number }) => Promise<VerifyReceiptResult>,
+  kind: "Released" | "Declined" = "Released",
   maxIndex = 7,
 ): Promise<number | null> {
   for (let eventIndex = 0; eventIndex <= maxIndex; eventIndex++) {
     const r = await verify({ txHash, eventIndex });
-    if (r.valid && r.kind === "Released") return eventIndex;
+    if (r.valid && r.kind === kind) return eventIndex;
   }
   return null;
 }
+
+/** What hasn't been released or returned yet: what a decline sends back to the sender. */
+export const remainder = (lock: Lock): bigint => lock.total - lock.released - lock.returned;
+
+/** The payout account may decline while the lock is Open (contract `decline`; no time limit). */
+export const canDecline = (lock: Lock, isPayout: boolean): boolean =>
+  isPayout && lock.state === "Open" && remainder(lock) > 0n;
 
 const CONTRACT_ERRORS: Record<string, MessageKey> = {
   TrancheNotUnlocked: "pages.claim.errorNotUnlocked",
@@ -53,7 +61,7 @@ const CONTRACT_ERRORS: Record<string, MessageKey> = {
   PayeeNotActive: "pages.claim.errorPayeeNotActive",
 };
 
-/** A user-facing message for an error from a release attempt. */
+/** A user-facing message for an error from a release or decline attempt. */
 export function releaseErrorKey(error: unknown): MessageKey {
   const e = error as { code?: string; contractError?: string } | null;
   if (e?.code === "CONTRACT_ERROR" && e.contractError) {

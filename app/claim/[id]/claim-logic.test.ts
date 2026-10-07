@@ -1,6 +1,13 @@
 import type { Lock } from "@kinlock/sdk";
 import { describe, expect, it, vi } from "vitest";
-import { checkReference, findReceiptIndex, releaseErrorKey, trancheStatus } from "./claim-logic";
+import {
+  canDecline,
+  checkReference,
+  findReceiptIndex,
+  releaseErrorKey,
+  remainder,
+  trancheStatus,
+} from "./claim-logic";
 
 const lock = (over: Partial<Lock> = {}): Lock => ({
   id: 9n,
@@ -74,7 +81,7 @@ describe("findReceiptIndex", () => {
       reason: "not_found" as const,
       receipt: null,
     }));
-    expect(await findReceiptIndex("ab".repeat(32), verify, 2)).toBeNull();
+    expect(await findReceiptIndex("ab".repeat(32), verify, "Released", 2)).toBeNull();
   });
 });
 
@@ -91,5 +98,32 @@ describe("releaseErrorKey", () => {
     );
     expect(releaseErrorKey({ code: "TX_FAILED" })).toBe("pages.claim.errorTx");
     expect(releaseErrorKey(new Error("x"))).toBe("pages.claim.errorGeneric");
+  });
+});
+
+describe("decline helpers", () => {
+  it("returns only the remainder, and only the payout account may decline an Open lock", () => {
+    const l = lock({ total: 20n, released: 10n, returned: 0n });
+    expect(remainder(l)).toBe(10n);
+    expect(canDecline(l, true)).toBe(true);
+    expect(canDecline(l, false)).toBe(false);
+    expect(canDecline(lock({ state: "Completed" }), true)).toBe(false);
+    expect(canDecline(lock({ total: 20n, released: 20n }), true)).toBe(false);
+  });
+
+  it("finds a Declined receipt when asked for that kind", async () => {
+    const verify = vi.fn(async ({ eventIndex }: { txHash: string; eventIndex: number }) =>
+      eventIndex === 1
+        ? {
+            valid: true,
+            tier: "live_rpc" as const,
+            kind: "Declined" as const,
+            reason: "verified" as const,
+            receipt: null,
+          }
+        : { valid: false, tier: null, kind: null, reason: "not_found" as const, receipt: null },
+    );
+    expect(await findReceiptIndex("ab".repeat(32), verify, "Declined")).toBe(1);
+    expect(await findReceiptIndex("ab".repeat(32), verify, "Released", 3)).toBeNull();
   });
 });
