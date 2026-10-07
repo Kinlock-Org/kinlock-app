@@ -51,7 +51,51 @@
       "title": "Lock details"
     },
     "claim": {
-      "title": "Claim a payment"
+      "title": "Claim a payment",
+      "loading": "Reading this payment from the blockchain…",
+      "invalidId": "This claim link isn't valid.",
+      "notFound": "No payment with this number exists on the blockchain.",
+      "readFailed": "The payment couldn't be read from the blockchain. Check your connection and try again.",
+      "lockLabel": "Payment",
+      "stateLabel": "Status",
+      "state": {
+        "Open": "Open",
+        "Completed": "Fully paid out",
+        "Refunded": "Refunded to the sender",
+        "Declined": "Returned to the sender"
+      },
+      "total": "Total",
+      "payoutLabel": "Paid out only to",
+      "expiresLabel": "Unclaimed money can be refunded to the sender from",
+      "referenceLabel": "Payment reference",
+      "referenceMatch": "The reference in this link matches the payment on the blockchain.",
+      "referenceMismatch": "Warning: the reference in this link does NOT match this payment. Check with the sender before releasing.",
+      "referenceMissing": "This link has no payment reference, so it can't be checked. Ask the sender for the full claim link.",
+      "tranchesHeading": "Payments",
+      "trancheLabel": "Payment",
+      "unlocksLabel": "Can be claimed from",
+      "status": {
+        "released": "Paid out",
+        "claimable": "Ready to claim",
+        "locked": "Not yet claimable",
+        "expired": "Claim period ended",
+        "closed": "No longer claimable"
+      },
+      "connect": "Connect wallet",
+      "connectedAs": "Connected wallet",
+      "wrongAccount": "This wallet isn't the payout account for this payment. Connect the payout account shown above to claim.",
+      "release": "Claim this payment",
+      "releasing": "Waiting for your wallet…",
+      "released": "Payment claimed.",
+      "receiptLink": "View receipt",
+      "errorNotUnlocked": "This payment can't be claimed yet.",
+      "errorExpired": "The claim period has ended; the sender can now get a refund.",
+      "errorClosed": "This payment is already closed.",
+      "errorAlreadyReleased": "This payment has already been claimed.",
+      "errorPayeeNotActive": "This payee is not active right now, so payments can't be claimed. Contact your attester.",
+      "errorTx": "The transaction didn't go through (it may have been declined in your wallet, or your account can't receive this asset yet). Nothing was paid; you can try again.",
+      "errorGeneric": "Something went wrong. Nothing was paid; you can try again.",
+      "otherAsset": "Asset contract (not the configured USDC — check before claiming)"
     },
     "payee": {
       "title": "Payee dashboard"
