@@ -19,3 +19,13 @@ export function t(key: MessageKey): string {
   }
   return node as string;
 }
+
+/** True if `key` names a string in the message file (for keys that arrive at runtime). */
+export function hasMessage(key: string): boolean {
+  let node: unknown = en;
+  for (const part of key.split(".")) {
+    if (node === null || typeof node !== "object") return false;
+    node = (node as Record<string, unknown>)[part];
+  }
+  return typeof node === "string";
+}

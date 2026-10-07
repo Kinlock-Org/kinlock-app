@@ -33,7 +33,11 @@ function configs() {
         rpcUrl: publicConfig.NEXT_PUBLIC_RPC_URLS[0] as string,
         networkPassphrase: publicConfig.networkPassphrase,
         contractId: publicConfig.NEXT_PUBLIC_CONTRACT_ID,
-        indexerUrl: publicConfig.NEXT_PUBLIC_INDEXER_URL,
+        // In the browser the indexer is reached through our own origin (next.config rewrites).
+        indexerUrl:
+          typeof window === "undefined"
+            ? publicConfig.NEXT_PUBLIC_INDEXER_URL
+            : window.location.origin,
         allowHttp: publicConfig.NEXT_PUBLIC_STELLAR_NETWORK === "local",
       },
     };
