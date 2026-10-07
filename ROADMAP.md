@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-07 |
+| **Last updated** | 2026-10-07 (README status banner) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-07 | `docs/readme-status-banner` | app | no row changes | README said "scaffold... features are not built," which is stale (send, claim, decline, and lock-detail flows work end to end on testnet). Corrected the status banner to match current progress; supports org-level `W-01` Wave-readiness |
 | 2026-10-07 | kinlock-app feat/app-send-flow | app | M3-06 IN PROGRESS, M3-05 DONE | `/send`: verified payees (indexer list, server-side), prefill from a request link (M3-05 now pre-fills the form), schedule and take-back date checked like `create_lock`, USD with the USD-only rate note (DEC-10 open), wallet, preflight review (blocking failures stop; warnings need acknowledgement), lock via the wallet, claim link built and saved in this browser. Indexer list API served same-origin via rewrites (no CORS). Creating a lock through a real wallet still to verify |
 | 2026-10-07 | kinlock-app feat/app-lock-page | app | M3-08 IN PROGRESS | `/locks/[id]`: lock and payee read from chain (`@kinlock/sdk` 0.3.0 `getPayee`); Refund shown only when the contract allows it (expired, payee Revoked, or Suspended past 14 days), otherwise when it becomes possible; only the sender's wallet can refund; receipt link after. Verified on testnet locks 4, 9, 10; refund through a real wallet pending (lock 10 expires 16:08 UTC). Docs synced (ADR-0030, AGENTS.md) |
 | 2026-10-07 | kinlock-app feat/app-decline (owner test) | app | M3-09 DONE, M3-10 DONE | Owner tested with Freighter on testnet as the payout account of lock 9: claimed payment 1 (tx 84e3a768…, 0.50 USDC to the payout) and declined the rest (tx 49bccbaf…, 0.50 USDC back to the sender); both receipts verify on chain and the indexer shows lock 9 Declined |

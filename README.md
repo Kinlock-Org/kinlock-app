@@ -2,7 +2,7 @@
 
 Next.js web app: payee requests, sender flow, claim, attester checks, receipts.
 
-> **Status: scaffold.** Structure and data models are drafted; features are not built. Testnet only.
+> **Status: active development, testnet only.** Send, claim, decline, and lock-detail flows work end to end against testnet; the payee dashboard and attester tooling are still open. See `ROADMAP.md`.
 
 ## Quick start
 ```
