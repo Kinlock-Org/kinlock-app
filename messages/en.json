@@ -19,7 +19,30 @@
       "title": "Kinlock"
     },
     "request": {
-      "title": "Create a payment request"
+      "title": "Create a payment request",
+      "intro": "Create a link that fills in the sender's form with your details, the amount and the payment schedule.",
+      "noAuthority": "The link only fills in the form. It can't move money: the sender still reviews and signs everything.",
+      "payeeLabel": "Who is being paid",
+      "payeeNone": "No verified payees are available right now.",
+      "indexerDown": "The list of payees can't be loaded right now. Try again in a minute.",
+      "referenceLabel": "Payment reference",
+      "referenceHint": "For example an invoice or student number. Anyone with this link can see it; on chain it is stored only as a hash.",
+      "scheduleHeading": "Payment schedule",
+      "amountLabel": "Amount (USDC)",
+      "unlockLabel": "Can be claimed from (UTC date)",
+      "addTranche": "Add a payment",
+      "removeTranche": "Remove this payment",
+      "trancheLabel": "Payment",
+      "total": "Total",
+      "create": "Create link",
+      "linkLabel": "Your payment-request link",
+      "copy": "Copy link",
+      "copied": "Copied",
+      "errorAmount": "Check the amounts: use numbers like 150 or 150.25, with at most 7 decimals.",
+      "errorReference": "Enter a reference.",
+      "errorDate": "Choose a date for every payment.",
+      "errorOrder": "Payments must be in date order.",
+      "errorGeneric": "The link couldn't be created. Check the details and try again."
     },
     "send": {
       "title": "Send a locked payment"
