@@ -1,13 +1,46 @@
-/** Sender flow: request-link prefill, preflight, USD + indicative local currency. Roadmap M3-06. */
+/** Sender flow: request-link prefill, preflight, USD (indicative local currency once DEC-10). Roadmap M3-06. */
 import { SavedClaimLinks } from "@/components/claim-links/SavedClaimLinks";
-import { t } from "@/lib/i18n/messages";
+import { type MessageKey, t } from "@/lib/i18n/messages";
+import { type IndexedPayee, listPayees, payable } from "@/lib/indexer";
+import { publicConfig } from "@/lib/sdk";
+import { SendForm } from "./SendForm";
 
-export default function Page() {
+export const dynamic = "force-dynamic";
+
+export default async function Page() {
+  let payees: IndexedPayee[] | null = null;
+  try {
+    payees = payable(await listPayees());
+  } catch {
+    payees = null;
+  }
   return (
     <main className="mx-auto max-w-xl p-4">
       <h1 className="text-2xl font-semibold">{t("pages.send.title")}</h1>
-      <p className="mt-2">{t("common.notImplemented")}</p>
+      <p className="mt-2">{t("pages.send.intro")}</p>
+      <Body payees={payees} />
       <SavedClaimLinks />
     </main>
+  );
+}
+
+function Body({ payees }: { payees: IndexedPayee[] | null }) {
+  const notice: MessageKey | null =
+    payees === null
+      ? "pages.send.indexerDown"
+      : payees.length === 0
+        ? "pages.send.payeeNone"
+        : null;
+  const options = (payees ?? []).map((p) => ({
+    payeeId: p.payeeId,
+    label: [p.displayName, p.city, p.country].filter(Boolean).join(" · "),
+    localCurrency: p.localCurrency,
+  }));
+  return notice ? (
+    <p role={payees === null ? "alert" : undefined} className="mt-4">
+      {t(notice)}
+    </p>
+  ) : (
+    <SendForm payees={options} issuer={publicConfig().NEXT_PUBLIC_USDC_ISSUER} />
   );
 }

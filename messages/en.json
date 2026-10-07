@@ -45,10 +45,88 @@
       "errorGeneric": "The link couldn't be created. Check the details and try again."
     },
     "send": {
-      "title": "Send a locked payment"
+      "title": "Send a locked payment",
+      "intro": "Lock USDC for a verified school or landlord. It can only be paid to them, or come back to you.",
+      "prefilled": "Filled in from a payment request. Check everything before sending: the request can't move money.",
+      "prefillUnknownPayee": "The payee in this request isn't available right now (not verified or not active). Don't send until you've checked with them.",
+      "payeeLabel": "Who you're paying",
+      "payeeNone": "No verified payees are available right now.",
+      "indexerDown": "The list of payees can't be loaded right now. Try again in a minute.",
+      "referenceLabel": "Payment reference",
+      "referenceHint": "For example an invoice or student number. Only you and whoever you give the claim link to can see it; on chain it is stored as a hash.",
+      "scheduleHeading": "When the payee can claim",
+      "amountLabel": "Amount (USDC)",
+      "unlockLabel": "Can be claimed from (UTC date)",
+      "addTranche": "Add a payment",
+      "removeTranche": "Remove this payment",
+      "trancheLabel": "Payment",
+      "expiryLabel": "If unclaimed, you can take it back from (UTC date)",
+      "expiryHint": "Must be at least an hour from now and at most 149 days.",
+      "total": "Total",
+      "walletLabel": "Your wallet",
+      "connect": "Connect wallet",
+      "review": "Check and review",
+      "checking": "Checking…",
+      "preflightHeading": "Checks before you send",
+      "blocked": "This payment can't be sent until the problem above is fixed.",
+      "acknowledge": "I've read the warnings above and want to send anyway.",
+      "edit": "Change details",
+      "send": "Lock and send",
+      "sending": "Waiting for your wallet…",
+      "doneHeading": "Payment locked",
+      "doneLock": "Lock number",
+      "doneClaimLink": "Claim link for the payee",
+      "doneShare": "Send this link to the payee so they can claim. It's saved only in this browser (below); export it so you don't lose it.",
+      "doneNotSaved": "This browser couldn't save the link. Copy it now and keep it yourself: Kinlock has no copy.",
+      "copy": "Copy claim link",
+      "copied": "Copied",
+      "viewLock": "View this lock",
+      "sendAnother": "Send another payment",
+      "errorPayee": "Choose who you're paying.",
+      "errorReference": "Enter a payment reference.",
+      "errorDate": "Choose a date for every payment and for when it can be taken back.",
+      "errorAmount": "Check the amounts: use numbers like 150 or 150.25, with at most 7 decimals.",
+      "errorMinimum": "The total must be at least 1 USDC.",
+      "errorOrder": "Payments must be in date order.",
+      "errorUnlockAfterExpiry": "Every payment must be claimable before the date you can take it back.",
+      "errorExpirySoon": "The take-back date must be at least an hour from now.",
+      "errorExpiryFar": "The take-back date can be at most 149 days from now.",
+      "errorWallet": "Connect your wallet first.",
+      "errorTx": "The transaction didn't go through (it may have been declined in your wallet). Nothing was sent; you can try again.",
+      "errorContract": "The blockchain refused this payment. Nothing was sent.",
+      "errorGeneric": "Something went wrong. Nothing was sent; you can try again."
     },
     "lock": {
-      "title": "Lock details"
+      "title": "Lock details",
+      "intro": "Read directly from the blockchain.",
+      "invalidId": "This lock number isn't valid.",
+      "payeeLabel": "Payee",
+      "payeeStatus": {
+        "Active": "Active",
+        "Suspended": "Suspended",
+        "Revoked": "Revoked"
+      },
+      "payeeUnknown": "Not registered",
+      "releasedLabel": "Paid to the payee",
+      "returnedLabel": "Returned to the sender",
+      "refundHeading": "Refund",
+      "refundAvailable": {
+        "Expired": "The claim period has ended. You can take back the money that wasn't claimed.",
+        "Revoked": "This payee's verification was revoked. You can take back the money that wasn't claimed.",
+        "SuspendedTimeout": "This payee has been suspended for more than 14 days. You can take back the money that wasn't claimed."
+      },
+      "refundAmount": "Amount you would get back",
+      "refundFrom": "A refund becomes possible from",
+      "refundNever": "This lock is closed; there is nothing to refund.",
+      "refundSenderOnly": "Only the sender's wallet can refund. Connect the wallet that created this lock.",
+      "refund": "Refund to my wallet",
+      "refunding": "Waiting for your wallet…",
+      "refunded": "The money was returned to your wallet.",
+      "receiptLink": "View receipt",
+      "errorNotAllowed": "The blockchain doesn't allow a refund yet. Nothing was moved.",
+      "errorClosed": "This lock is already closed.",
+      "errorTx": "The transaction didn't go through (it may have been declined in your wallet). Nothing was moved; you can try again.",
+      "errorGeneric": "Something went wrong. Nothing was moved; you can try again."
     },
     "claim": {
       "title": "Claim a payment",
@@ -139,5 +217,50 @@
     "remove": "Remove",
     "confirmRemove": "Remove this claim link from this browser? If you haven't sent it to the payee or exported it, it can't be recovered.",
     "export": "Export all to a file"
+  },
+  "preflight": {
+    "status": {
+      "pass": "OK",
+      "fail": "Problem",
+      "unknown": "Couldn't check"
+    },
+    "sender_balance": {
+      "pass": "You have enough USDC.",
+      "fail": "Your wallet doesn't have enough USDC for this payment.",
+      "unknown": "Your USDC balance couldn't be checked."
+    },
+    "payee_active": {
+      "pass": "The payee is verified and active.",
+      "not_found": "This payee isn't registered.",
+      "suspended": "This payee is suspended right now.",
+      "revoked": "This payee's verification was revoked.",
+      "fail": "This payee isn't active.",
+      "unknown": "The payee's status couldn't be checked."
+    },
+    "payout_trustline_authorized": {
+      "pass": "The payee's account can receive USDC.",
+      "contract_account": "The payee's account can receive USDC.",
+      "native_asset": "The payee's account can receive this asset.",
+      "issuer_account": "The payee's account can receive USDC.",
+      "missing": "The payee's account can't receive USDC yet (no trustline). They wouldn't be able to claim.",
+      "not_authorized": "The payee's account isn't authorized for USDC yet. They wouldn't be able to claim.",
+      "limit": "The payee's account can't hold this much USDC. They wouldn't be able to claim.",
+      "unknown": "Whether the payee's account can receive USDC couldn't be checked.",
+      "no_payee": "Skipped: the payee couldn't be read."
+    },
+    "recent_payout_change": {
+      "pass": "The payee's receiving account hasn't changed recently.",
+      "fail": "Warning: the payee changed their receiving account in the last 7 days. If you didn't expect that, check with them first.",
+      "unknown": "Recent changes to the payee's receiving account couldn't be checked.",
+      "no_indexer": "Recent changes to the payee's receiving account couldn't be checked.",
+      "not_indexed": "Recent changes to the payee's receiving account couldn't be checked yet.",
+      "no_payee": "Skipped: the payee couldn't be read."
+    },
+    "duplicate_ref_hash": {
+      "pass": "You haven't used this reference for this payee before.",
+      "fail": "Warning: a payment to this payee with this exact reference already exists. Make sure you aren't paying twice.",
+      "unknown": "Earlier payments with this reference couldn't be checked.",
+      "no_indexer": "Earlier payments with this reference couldn't be checked."
+    }
   }
 }

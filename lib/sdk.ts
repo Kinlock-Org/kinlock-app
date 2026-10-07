@@ -10,6 +10,7 @@ import type {
   CreateLockParams,
   KinlockConfig,
   Lock,
+  Payee,
   PreflightParams,
   PreflightResult,
   ReceiptRef,
@@ -32,7 +33,11 @@ function configs() {
         rpcUrl: publicConfig.NEXT_PUBLIC_RPC_URLS[0] as string,
         networkPassphrase: publicConfig.networkPassphrase,
         contractId: publicConfig.NEXT_PUBLIC_CONTRACT_ID,
-        indexerUrl: publicConfig.NEXT_PUBLIC_INDEXER_URL,
+        // In the browser the indexer is reached through our own origin (next.config rewrites).
+        indexerUrl:
+          typeof window === "undefined"
+            ? publicConfig.NEXT_PUBLIC_INDEXER_URL
+            : window.location.origin,
         allowHttp: publicConfig.NEXT_PUBLIC_STELLAR_NETWORK === "local",
       },
     };
@@ -69,6 +74,9 @@ export const decline = (lockId: bigint, signer: Signer) =>
 /** Chain read. The only lock read money-moving pages may use. */
 export const getLock = (lockId: bigint): Promise<Lock | null> =>
   sdk.getLock(kinlockConfig(), lockId);
+/** Chain read of a payee (status for the refund rule). */
+export const getPayee = (payeeId: string): Promise<Payee | null> =>
+  sdk.getPayee(kinlockConfig(), payeeId);
 export const preflight = (params: PreflightParams): Promise<PreflightResult[]> =>
   sdk.preflight(kinlockConfig(), params);
 export const verifyReceipt = (ref: ReceiptRef): Promise<VerifyReceiptResult> =>

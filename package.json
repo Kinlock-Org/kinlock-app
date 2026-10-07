@@ -15,7 +15,7 @@
   },
   "dependencies": {
     "@creit.tech/stellar-wallets-kit": "2.7.0",
-    "@kinlock/sdk": "https://github.com/Kinlock-Org/kinlock-sdk/releases/download/sdk-v0.2.0/kinlock-sdk-0.2.0.tgz",
+    "@kinlock/sdk": "https://github.com/Kinlock-Org/kinlock-sdk/releases/download/sdk-v0.3.0/kinlock-sdk-0.3.0.tgz",
     "next": "16.3.8",
     "react": "19.3.0",
     "react-dom": "19.3.0",
