@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 4 | 5 | 15 | 0 | 0 | 0 | 17% |
+| 4 App | 24 | 4 | 6 | 14 | 0 | 0 | 0 | 17% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **34** | **14** | **126** | **0** | **25** | **0** | **20%** |
+| **All** | **199** | **34** | **15** | **125** | **0** | **25** | **0** | **20%** |
 
 ---
 
@@ -299,7 +299,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-07 | Claim-link generation, browser-only storage, export option | app | P0 | DONE | M2-03 | Nothing stored or sent server-side |
 | M3-08 | `/locks/[id]`: sender detail from chain and refund action | app | P0 | TODO | M2-02 | Refund shown only when allowed |
 | M3-09 | `/claim/[id]`: payee claim page; verify reference against `ref_hash`; release | app | P0 | IN PROGRESS | M2-03 | Release works; wrong reference flagged |
-| M3-10 | Payee `decline` action | app | P0 | TODO | M3-09 | Returns remainder; confirmation step |
+| M3-10 | Payee `decline` action | app | P0 | IN PROGRESS | M3-09 | Returns remainder; confirmation step |
 | M3-11 | `/payee` dashboard (lists via indexer) | app | P0 | TODO | M2-12 | Filter by status and reference |
 | M3-12 | `/attester` tooling: read-only account checks (trustline, authorization, XLM float) | app | P1 | TODO | M1-26 | Checks match the checklist script |
 | M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | TODO | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-07 | kinlock-app feat/app-decline | app | M3-10 IN PROGRESS | Claim page: payout account can return the unclaimed remainder to the sender, behind a confirmation step showing the exact amount and that it can't be undone; receipt link after. Logic unit-tested; the wallet-driven click-through needs a real wallet |
 | 2026-10-07 | kinlock-app feat/app-claim-page | app | M3-09 IN PROGRESS | `/claim/[id]`: lock read from chain, reference checked against `ref_hash` in the browser (match, mismatch flagged, missing), tranche states mirroring the contract rule, wallet connect, release only for the payout account, receipt link after release. Verified on testnet lock 9 in a browser (no request carried the reference or salt); release through a real wallet still to verify |
 | 2026-10-07 | kinlock-app feat/app-claim-links | app | M3-07 DONE | Claim links: generation (reference and salt only in the fragment), browser-only storage (localStorage, versioned key, corrupt data ignored), copy, remove with confirmation, export to a local file; listed on `/send`. Test checks the module has no network code; browser run: 20 requests, none carried the reference or salt |
 | 2026-10-07 | kinlock-app feat/app-request-page | app | M3-05 IN PROGRESS | `/request`: payee picks a verified payee (list from the indexer, server-side), reference and up to 12 dated payments; the SDK builds the link in the browser. Says the link carries no authority and that the reference is visible to link holders. Done once `/send` pre-fills from it (M3-06) |

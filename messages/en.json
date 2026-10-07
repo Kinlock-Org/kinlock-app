@@ -95,7 +95,17 @@
       "errorPayeeNotActive": "This payee is not active right now, so payments can't be claimed. Contact your attester.",
       "errorTx": "The transaction didn't go through (it may have been declined in your wallet, or your account can't receive this asset yet). Nothing was paid; you can try again.",
       "errorGeneric": "Something went wrong. Nothing was paid; you can try again.",
-      "otherAsset": "Asset contract (not the configured USDC — check before claiming)"
+      "otherAsset": "Asset contract (not the configured USDC — check before claiming)",
+      "declineHeading": "Don't want this payment?",
+      "declineIntro": "You can return the money that hasn't been claimed yet to the sender.",
+      "decline": "Return the remaining money to the sender",
+      "declineConfirmTitle": "Return the remaining money?",
+      "declineConfirmAmount": "Amount going back to the sender",
+      "declineConfirmNote": "This can't be undone. Payments you've already claimed stay with you. The remaining payments will no longer be claimable.",
+      "declineConfirm": "Yes, return it",
+      "declineCancel": "Cancel",
+      "declining": "Waiting for your wallet…",
+      "declined": "The remaining money was returned to the sender."
     },
     "payee": {
       "title": "Payee dashboard"

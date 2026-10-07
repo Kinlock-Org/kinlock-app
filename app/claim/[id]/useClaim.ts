@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MessageKey } from "@/lib/i18n/messages";
 import {
   computeRefHash,
+  decline,
   getLock,
   parseClaimLink,
   publicConfig,
@@ -46,9 +47,13 @@ export function useClaim(lockIdText: string) {
   const [address, setAddress] = useState<string | null>(null);
   const [busyIndex, setBusyIndex] = useState<number | null>(null);
   const [error, setError] = useState<MessageKey | null>(null);
-  const [receipt, setReceipt] = useState<{ txHash: string; eventIndex: number | null } | null>(
-    null,
-  );
+  const [receipt, setReceipt] = useState<{
+    kind: "Released" | "Declined";
+    txHash: string;
+    eventIndex: number | null;
+  } | null>(null);
+  const [confirmingDecline, setConfirmingDecline] = useState(false);
+  const [declining, setDeclining] = useState(false);
 
   const load = useCallback(async () => {
     try {
@@ -95,13 +100,40 @@ export function useClaim(lockIdText: string) {
     setBusyIndex(trancheIndex);
     try {
       const { txHash } = await release(lockId, trancheIndex, walletSigner(wallet.current, address));
-      setReceipt({ txHash, eventIndex: null });
+      setReceipt({ kind: "Released", txHash, eventIndex: null });
       await load();
-      setReceipt({ txHash, eventIndex: await findReceiptIndex(txHash, verifyReceipt) });
+      setReceipt({
+        kind: "Released",
+        txHash,
+        eventIndex: await findReceiptIndex(txHash, verifyReceipt),
+      });
     } catch (e) {
       setError(releaseErrorKey(e));
     } finally {
       setBusyIndex(null);
+    }
+  }
+
+  /** Returns the whole unclaimed remainder to the sender; only after the explicit confirmation. */
+  async function confirmDecline() {
+    if (!wallet.current || !address) return;
+    setError(null);
+    setReceipt(null);
+    setDeclining(true);
+    try {
+      const { txHash } = await decline(lockId, walletSigner(wallet.current, address));
+      setConfirmingDecline(false);
+      setReceipt({ kind: "Declined", txHash, eventIndex: null });
+      await load();
+      setReceipt({
+        kind: "Declined",
+        txHash,
+        eventIndex: await findReceiptIndex(txHash, verifyReceipt, "Declined"),
+      });
+    } catch (e) {
+      setError(releaseErrorKey(e));
+    } finally {
+      setDeclining(false);
     }
   }
 
@@ -123,6 +155,11 @@ export function useClaim(lockIdText: string) {
     },
     connect,
     claim,
+    confirmingDecline,
+    declining,
+    askDecline: () => setConfirmingDecline(true),
+    cancelDecline: () => setConfirmingDecline(false),
+    confirmDecline,
   };
 }
 

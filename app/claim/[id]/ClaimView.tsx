@@ -6,7 +6,7 @@ import { ASSET_CODE } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { t } from "@/lib/i18n/messages";
 import { fromBaseUnits } from "@/lib/sdk";
-import { trancheStatus } from "./claim-logic";
+import { canDecline, remainder, trancheStatus } from "./claim-logic";
 import { phaseMessage, referenceMessage, statusMessage } from "./claim-view-text";
 import { type Claim, useClaim } from "./useClaim";
 
@@ -113,6 +113,8 @@ function LockDetails({ c }: { c: Claim }) {
         </ol>
       </section>
 
+      {canDecline(lock, c.isPayout) ? <DeclinePanel c={c} /> : null}
+
       {c.error ? (
         <p role="alert" className="font-medium">
           {t(c.error)}
@@ -120,7 +122,7 @@ function LockDetails({ c }: { c: Claim }) {
       ) : null}
       {c.receipt ? (
         <p role="status">
-          {t("pages.claim.released")}{" "}
+          {c.receipt.kind === "Declined" ? t("pages.claim.declined") : t("pages.claim.released")}{" "}
           {c.receipt.eventIndex === null ? null : (
             <a href={`/r/${c.receipt.txHash}/${c.receipt.eventIndex}`} className="underline">
               {t("pages.claim.receiptLink")}
@@ -148,5 +150,55 @@ function WalletBar({ c }: { c: Claim }) {
     >
       {t("pages.claim.connect")}
     </button>
+  );
+}
+
+/** Decline with an explicit confirmation step showing exactly what goes back. Roadmap M3-10. */
+function DeclinePanel({ c }: { c: Claim }) {
+  return (
+    <section aria-labelledby="decline-heading" className="flex flex-col gap-2 rounded border p-3">
+      <h2 id="decline-heading" className="font-medium">
+        {t("pages.claim.declineHeading")}
+      </h2>
+      <p>{t("pages.claim.declineIntro")}</p>
+      {c.confirmingDecline ? (
+        <div
+          role="alertdialog"
+          aria-labelledby="decline-confirm-title"
+          className="flex flex-col gap-2"
+        >
+          <p id="decline-confirm-title" className="font-semibold">
+            {t("pages.claim.declineConfirmTitle")}
+          </p>
+          <p>
+            {t("pages.claim.declineConfirmAmount")}:{" "}
+            <Amount c={c} baseUnits={c.lock ? remainder(c.lock) : 0n} />
+          </p>
+          <p>{t("pages.claim.declineConfirmNote")}</p>
+          <span className="flex gap-3">
+            <button
+              type="button"
+              onClick={c.confirmDecline}
+              disabled={c.declining}
+              className="rounded border px-4 py-2 font-medium"
+            >
+              {c.declining ? t("pages.claim.declining") : t("pages.claim.declineConfirm")}
+            </button>
+            <button
+              type="button"
+              onClick={c.cancelDecline}
+              disabled={c.declining}
+              className="underline"
+            >
+              {t("pages.claim.declineCancel")}
+            </button>
+          </span>
+        </div>
+      ) : (
+        <button type="button" onClick={c.askDecline} className="self-start underline">
+          {t("pages.claim.decline")}
+        </button>
+      )}
+    </section>
   );
 }
