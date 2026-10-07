@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 2 | 3 | 19 | 0 | 0 | 0 | 8% |
+| 4 App | 24 | 3 | 3 | 18 | 0 | 0 | 0 | 13% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **32** | **12** | **130** | **0** | **25** | **0** | **18%** |
+| **All** | **199** | **33** | **12** | **129** | **0** | **25** | **0** | **19%** |
 
 ---
 
@@ -292,7 +292,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 |---|---|---|---|---|---|---|
 | M3-01 | Scaffold `kinlock-app`: Next.js, Tailwind, lint, CI | app | P0 | DONE | G1 | CI green |
 | M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | IN PROGRESS | M3-01 | Wallets swappable; signing flow tested |
-| M3-03 | `lib/sdk.ts` and Zod-validated public config | app | P0 | TODO | M2-02 | Single SDK instance; env validation |
+| M3-03 | `lib/sdk.ts` and Zod-validated public config | app | P0 | DONE | M2-02 | Single SDK instance; env validation |
 | M3-04 | Landing page and plain-language explainer | app | P1 | TODO | M3-01 | Content reviewed against wording rules |
 | M3-05 | `/request`: payee creates a payment-request link | app | P0 | TODO | M2-03 | Link pre-fills the sender form; carries no authority |
 | M3-06 | `/send`: sender flow with preflight results, USD amount, indicative local-currency equivalent (USD-only fallback), rate-risk note | app | P0 | TODO | M2-05, M3-16 | Creates a lock on testnet end to end |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-07 | kinlock-app feat/app-sdk-config | app | M3-03 DONE | `lib/sdk.ts` is the single SDK entry point over `@kinlock/sdk` 0.2.0 (GitHub Release): config bound once, wallet adapter bridged to the SDK signer. `lib/config.ts` validates the public env (adds the USDC token contract ID; mainnet refused). Started while M2-02 is IN PROGRESS (local-network run pending), as with M2-06. Docs synced (ADR-0026..0029) |
 | 2026-10-07 | kinlock-app docs/sync-adr-0026 | app | DEC-03 amended (no row changes) | Sync docs from .github: ADR-0026 (packages as GitHub Release tarballs) and ADR-0023 marked superseded |
 | 2026-10-06 | `feat/app-foundations` | app | DONE: M3-23. IN PROGRESS: M3-02, M3-14, M3-15 | Wallet adapter on Stellar Wallets Kit (browser-only); AssetLabel (code + issuer, full issuer for screen readers), AmountDisplay and DateTimeDisplay (UTC + local) on Intl with exact decimal strings; inline-string check and formatting tests across en/de/hi/ar/ja and USD/JPY/KWD. Claim pages get a per-request nonce CSP via proxy.ts (verified on a production build: all 8 Next.js scripts carry the nonce; the old static `script-src 'self'` would have blocked them). Fixed a date formatter that would have thrown |
 | 2026-10-06 | `chore/license-and-publishing` | org | DONE: F-10. IN PROGRESS: F-11. DEC-02, DEC-03 resolved | Apache-2.0 for every repo (ADR-0022, `LICENSE` + template); TypeScript packages publish to npm under `@kinlock` from CI on tag (ADR-0023). F-11 waits on an owner creating the npm org and the `NPM_TOKEN` secret. Canonical roadmap re-merged from all repos (picks up M2-01, M3-01). `sync-docs.sh --check` now also fails on ADRs a repo has that the canonical copy lacks (it missed that drift before) |
