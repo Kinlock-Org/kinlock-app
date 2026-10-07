@@ -72,5 +72,18 @@
   "time": {
     "utc": "UTC",
     "local": "Your time"
+  },
+  "claimLinks": {
+    "heading": "Your saved claim links",
+    "intro": "Claim links are kept only in this browser. Kinlock has no copy, so export them and keep the file somewhere safe.",
+    "empty": "No claim links are saved in this browser.",
+    "unavailable": "This browser isn't letting Kinlock save anything (for example in a private window). Copy each claim link and keep it yourself.",
+    "lock": "Lock",
+    "savedAt": "Saved",
+    "copy": "Copy link",
+    "copied": "Copied",
+    "remove": "Remove",
+    "confirmRemove": "Remove this claim link from this browser? If you haven't sent it to the payee or exported it, it can't be recovered.",
+    "export": "Export all to a file"
   }
 }

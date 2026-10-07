@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 3 | 4 | 17 | 0 | 0 | 0 | 13% |
+| 4 App | 24 | 4 | 4 | 16 | 0 | 0 | 0 | 17% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **33** | **13** | **128** | **0** | **25** | **0** | **19%** |
+| **All** | **199** | **34** | **13** | **127** | **0** | **25** | **0** | **20%** |
 
 ---
 
@@ -296,7 +296,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-04 | Landing page and plain-language explainer | app | P1 | TODO | M3-01 | Content reviewed against wording rules |
 | M3-05 | `/request`: payee creates a payment-request link | app | P0 | IN PROGRESS | M2-03 | Link pre-fills the sender form; carries no authority |
 | M3-06 | `/send`: sender flow with preflight results, USD amount, indicative local-currency equivalent (USD-only fallback), rate-risk note | app | P0 | TODO | M2-05, M3-16 | Creates a lock on testnet end to end |
-| M3-07 | Claim-link generation, browser-only storage, export option | app | P0 | TODO | M2-03 | Nothing stored or sent server-side |
+| M3-07 | Claim-link generation, browser-only storage, export option | app | P0 | DONE | M2-03 | Nothing stored or sent server-side |
 | M3-08 | `/locks/[id]`: sender detail from chain and refund action | app | P0 | TODO | M2-02 | Refund shown only when allowed |
 | M3-09 | `/claim/[id]`: payee claim page; verify reference against `ref_hash`; release | app | P0 | TODO | M2-03 | Release works; wrong reference flagged |
 | M3-10 | Payee `decline` action | app | P0 | TODO | M3-09 | Returns remainder; confirmation step |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-07 | kinlock-app feat/app-claim-links | app | M3-07 DONE | Claim links: generation (reference and salt only in the fragment), browser-only storage (localStorage, versioned key, corrupt data ignored), copy, remove with confirmation, export to a local file; listed on `/send`. Test checks the module has no network code; browser run: 20 requests, none carried the reference or salt |
 | 2026-10-07 | kinlock-app feat/app-request-page | app | M3-05 IN PROGRESS | `/request`: payee picks a verified payee (list from the indexer, server-side), reference and up to 12 dated payments; the SDK builds the link in the browser. Says the link carries no authority and that the reference is visible to link holders. Done once `/send` pre-fills from it (M3-06) |
 | 2026-10-07 | kinlock-app feat/app-sdk-config | app | M3-03 DONE | `lib/sdk.ts` is the single SDK entry point over `@kinlock/sdk` 0.2.0 (GitHub Release): config bound once, wallet adapter bridged to the SDK signer. `lib/config.ts` validates the public env (adds the USDC token contract ID; mainnet refused). Started while M2-02 is IN PROGRESS (local-network run pending), as with M2-06. Docs synced (ADR-0026..0029) |
 | 2026-10-07 | kinlock-app docs/sync-adr-0026 | app | DEC-03 amended (no row changes) | Sync docs from .github: ADR-0026 (packages as GitHub Release tarballs) and ADR-0023 marked superseded |
