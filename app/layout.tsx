@@ -1,5 +1,6 @@
 import { Outfit } from "next/font/google";
 import type { ReactNode } from "react";
+import { SiteHeader } from "@/components/nav/SiteHeader";
 import { t } from "@/lib/i18n/messages";
 import "./globals.css";
 
@@ -17,6 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
         <div className="bg-ink px-4 py-2 text-center text-sm text-paper">
           {t("common.testnetBanner")}
         </div>
+        <SiteHeader />
         {children}
       </body>
     </html>

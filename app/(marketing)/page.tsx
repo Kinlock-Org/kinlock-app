@@ -19,13 +19,15 @@ function Hero() {
     <section className="mx-auto max-w-5xl px-4 pt-16 pb-12 md:pt-20">
       <div className="grid gap-10 md:grid-cols-2 md:items-center md:gap-16">
         <div>
-          <h1 className="text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
+          <h1 className="reveal text-4xl leading-tight font-semibold tracking-tight md:text-5xl">
             {t("pages.home.heroHeadline")}
           </h1>
-          <p className="mt-4 max-w-[36ch] text-lg text-ink/70">{t("pages.home.heroSubtext")}</p>
+          <p className="reveal reveal-1 mt-4 max-w-[36ch] text-lg text-ink/70">
+            {t("pages.home.heroSubtext")}
+          </p>
           <a
             href="/send"
-            className="mt-8 inline-flex items-center rounded-full bg-accent px-6 py-3 font-medium text-accent-ink transition-transform active:scale-[0.98]"
+            className="reveal reveal-2 mt-8 inline-flex items-center rounded-full bg-accent px-6 py-3 font-medium text-accent-ink transition-transform active:scale-[0.98]"
           >
             {t("pages.home.heroCta")}
           </a>
@@ -120,10 +122,7 @@ function Footer() {
           <a href="https://github.com/Kinlock-Org" className="underline underline-offset-4">
             {t("pages.home.footerSource")}
           </a>
-          <a
-            href="https://github.com/Kinlock-Org/.github/blob/main/docs/ARCHITECTURE_ESSENTIALS.md"
-            className="underline underline-offset-4"
-          >
+          <a href="https://kinlock-org.github.io" className="underline underline-offset-4">
             {t("pages.home.footerDocs")}
           </a>
         </nav>

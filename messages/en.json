@@ -1,7 +1,7 @@
 {
   "app": {
     "name": "Kinlock",
-    "tagline": "Money that can only reach the school or landlord it was meant for."
+    "tagline": "Money that can only reach the verified payee it was meant for."
   },
   "common": {
     "testnetBanner": "Testnet only. No real money moves here.",
@@ -10,26 +10,52 @@
     "usdOnlyNote": "No reliable exchange rate is available for this currency, so only the USD amount is shown.",
     "rateRiskNote": "Exchange rates change. The local-currency amount is an estimate and is not guaranteed."
   },
+  "nav": {
+    "send": "Send",
+    "request": "Request",
+    "verify": "Verify",
+    "docs": "Documentation",
+    "github": "GitHub",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
   "receipt": {
     "headline": "Payment to verified payee",
     "valid": "Valid",
-    "notValid": "Not valid"
+    "notValid": "Not valid",
+    "kind": {
+      "Released": "Released to the payee",
+      "Refunded": "Refunded to the sender",
+      "Declined": "Returned to the sender"
+    },
+    "reason": {
+      "not_found": "No payment with this transaction and event number exists on the blockchain.",
+      "mismatch": "What this receipt claims doesn't match what's on the blockchain.",
+      "unverifiable": "This payment is too old to verify automatically right now."
+    },
+    "amountLabel": "Amount",
+    "payoutLabel": "Paid out to",
+    "trancheLabel": "Payment number",
+    "refundReasonLabel": "Refund reason",
+    "ledgerTimeLabel": "When this happened (UTC)",
+    "txHashLabel": "Transaction",
+    "eventIndexLabel": "Event number"
   },
   "pages": {
     "home": {
       "title": "Kinlock",
-      "heroHeadline": "Money that can only reach the school or landlord it was meant for.",
-      "heroSubtext": "Lock USDC on Stellar for a verified school or landlord, anywhere in the world. Nothing else can reach it.",
+      "heroHeadline": "Money that can only reach the verified payee it was meant for.",
+      "heroSubtext": "Lock USDC on Stellar for a verified payee, anywhere in the world. Nothing else can reach it.",
       "heroCta": "Send a payment",
       "howItWorksHeading": "How it works",
       "lockTitle": "Lock",
-      "lockBody": "You lock USDC for a verified school or landlord. The payout address is fixed at that moment. Nobody can redirect it later.",
+      "lockBody": "You lock USDC for a verified payee. The payout address is fixed at that moment. Nobody can redirect it later.",
       "claimTitle": "Claim",
       "claimBody": "The payee claims it directly, on the schedule you set. No one else, including Kinlock, can touch it.",
       "verifyTitle": "Verify",
       "verifyBody": "Anyone can check the payment on chain. The receipt says exactly one thing: payment to verified payee.",
       "sendersHeading": "For senders",
-      "sendersBody": "Pay a school or landlord for someone else, anywhere. Set a schedule instead of one lump sum, and get a receipt you can check yourself.",
+      "sendersBody": "Pay a verified payee for someone else, anywhere. Set a schedule instead of one lump sum, and get a receipt you can check yourself.",
       "sendersCta": "Send a payment",
       "payeesHeading": "For payees",
       "payeesBody": "Get verified once, then receive payments directly, without a bank account in the sender's country. Decline any payment before you claim it.",
@@ -75,7 +101,7 @@
     },
     "send": {
       "title": "Send a locked payment",
-      "intro": "Lock USDC for a verified school or landlord. It can only be paid to them, or come back to you.",
+      "intro": "Lock USDC for a verified payee. It can only be paid to them, or come back to you.",
       "prefilled": "Filled in from a payment request. Check everything before sending: the request can't move money.",
       "prefillUnknownPayee": "The payee in this request isn't available right now (not verified or not active). Don't send until you've checked with them.",
       "payeeLabel": "Who you're paying",
@@ -202,7 +228,7 @@
       "errorPayeeNotActive": "This payee is not active right now, so payments can't be claimed. Contact your attester.",
       "errorTx": "The transaction didn't go through (it may have been declined in your wallet, or your account can't receive this asset yet). Nothing was paid; you can try again.",
       "errorGeneric": "Something went wrong. Nothing was paid; you can try again.",
-      "otherAsset": "Asset contract (not the configured USDC — check before claiming)",
+      "otherAsset": "Asset contract (not the configured USDC. Check before claiming.)",
       "declineHeading": "Don't want this payment?",
       "declineIntro": "You can return the money that hasn't been claimed yet to the sender.",
       "decline": "Return the remaining money to the sender",
@@ -221,10 +247,23 @@
       "title": "Attester checks"
     },
     "receipt": {
-      "title": "Receipt"
+      "title": "Receipt",
+      "loading": "Reading this receipt from the blockchain…",
+      "invalidId": "This receipt link isn't valid.",
+      "readFailed": "This receipt couldn't be checked. Check your connection and try again."
     },
     "verify": {
-      "title": "Verify a receipt"
+      "title": "Verify a receipt",
+      "intro": "Paste a receipt link, or enter the transaction hash and event number, to check it directly against the blockchain.",
+      "linkLabel": "Receipt link or transaction hash",
+      "linkHint": "For example a link like /r/<transaction hash>/0, or just the transaction hash.",
+      "eventIndexLabel": "Event number",
+      "eventIndexHint": "Only needed if you entered a transaction hash instead of a full link.",
+      "check": "Check",
+      "checking": "Checking…",
+      "errorInput": "Enter a receipt link or a transaction hash.",
+      "errorEventIndex": "Enter the event number: 0 or a positive whole number.",
+      "errorGeneric": "This receipt couldn't be checked. Check your connection and try again."
     }
   },
   "money": {
@@ -271,7 +310,7 @@
       "contract_account": "The payee's account can receive USDC.",
       "native_asset": "The payee's account can receive this asset.",
       "issuer_account": "The payee's account can receive USDC.",
-      "missing": "The payee's account can't receive USDC yet (no trustline). They wouldn't be able to claim.",
+      "missing": "The payee's account can't receive USDC yet. They wouldn't be able to claim.",
       "not_authorized": "The payee's account isn't authorized for USDC yet. They wouldn't be able to claim.",
       "limit": "The payee's account can't hold this much USDC. They wouldn't be able to claim.",
       "unknown": "Whether the payee's account can receive USDC couldn't be checked.",
