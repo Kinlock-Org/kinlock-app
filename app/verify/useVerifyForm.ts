@@ -51,7 +51,20 @@ export function useVerifyForm() {
     }
   }
 
-  const config = publicConfig();
+  // publicConfig() validates the whole shared config (including the indexer URL, which this
+  // page never uses) and throws if any of it is missing; asset labeling is display-only, so a
+  // bad or incomplete config degrades to no label rather than failing the page.
+  let usdc: { contractId: string; issuer: string } | null = null;
+  try {
+    const config = publicConfig();
+    usdc = {
+      contractId: config.NEXT_PUBLIC_USDC_CONTRACT_ID,
+      issuer: config.NEXT_PUBLIC_USDC_ISSUER,
+    };
+  } catch {
+    usdc = null;
+  }
+
   return {
     link,
     setLink,
@@ -63,9 +76,6 @@ export function useVerifyForm() {
     lock,
     locale,
     check,
-    usdc: {
-      contractId: config.NEXT_PUBLIC_USDC_CONTRACT_ID,
-      issuer: config.NEXT_PUBLIC_USDC_ISSUER,
-    },
+    usdc,
   };
 }
