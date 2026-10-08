@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-08 (docs site link) |
+| **Last updated** | 2026-10-08 (M3-20 copy review) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 8 | 6 | 10 | 0 | 0 | 0 | 33% |
+| 4 App | 24 | 8 | 7 | 9 | 0 | 0 | 0 | 33% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **38** | **15** | **121** | **0** | **25** | **0** | **22%** |
+| **All** | **199** | **38** | **16** | **120** | **0** | **25** | **0** | **22%** |
 
 ---
 
@@ -309,7 +309,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | TODO | M3-13 | Audit checklist passed |
 | M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
 | M3-19 | Playwright happy-path: request → send → claim → verify | app | P0 | TODO | M3-13 | Green in CI against testnet |
-| M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | TODO | M3-13 | Reviewer sign-off |
+| M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | IN PROGRESS | M3-13 | Reviewer sign-off |
 | M3-21 | Error and empty states: trustline failure, expired, revoked, suspended, indexer lag | app | P0 | TODO | M3-09 | Each state has clear guidance |
 | M3-22 | Testnet hosting and environment config | app | P0 | IN PROGRESS | M3-19 | Public testnet URL live |
 | M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | DONE | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-08 | `docs/m3-20-copy-review` | app | IN PROGRESS: M3-20 | Reviewed every string in `messages/en.json` against hard rule 7 (no overclaiming) and plain-language rules. Found and fixed two real issues: an em-dash in `claim.otherAsset` (replaced with two sentences), and a `trustline` jargon leak in `preflight.payout_trustline_authorized.missing` (the practical consequence was already stated, so the technical term added nothing a non-technical sender needs). No overclaiming language found elsewhere; one stray em-dash in `AmountDisplay.tsx` is a code comment, not user-facing, left alone. Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (79/79) all green. Left `IN PROGRESS`, not `DONE`: `pages.receipt`/`pages.verify` are still stub titles (`M3-13` not built), so there's no receipt/verify copy to review yet. Partial progress on issue #16 (seeded under `W-02`), not a full close |
 | 2026-10-08 | `docs/docs-site-link` | app | no row changes (org row W-10 tracked in `.github`) | Linked the new hosted docs site (`kinlock-org.github.io`) from README |
 | 2026-10-08 | `docs/live-app-link` | app | no row changes | Linked the live testnet app from this repo's own README; also set org-wide (org website field, `.github` profile README) and on every repo's GitHub "Website" field |
 | 2026-10-08 | `feat/m3-04-landing-page` | app | IN PROGRESS: M3-22 | Deployed to Vercel via CLI: production URL `https://kinlock-app.vercel.app`, all pages verified `200` (`/`, `/send`, `/request`, `/verify`, `/payee`, `/attester`). Set the 5 public, non-secret `NEXT_PUBLIC_*` env vars from the real testnet deployment records (contract ID, USDC contract/issuer, RPC URL); left `NEXT_PUBLIC_INDEXER_URL` unset since no indexer is deployed yet (`M2-18`, separate task) - indexer-dependent pages (`/send`, `/request`, `/payee`) degrade gracefully to their existing "can't load the list right now" state rather than breaking. GitHub auto-deploy-on-push could not be connected: the Vercel account's GitHub identity lacks admin/write on `Kinlock-Org/kinlock-app`, so future deploys need a manual `vercel --prod` (or fixing that GitHub App authorization) until resolved. Left `IN PROGRESS`, not `DONE`: the row formally depends on `M3-19` (E2E happy-path against testnet), which is still `TODO` |
