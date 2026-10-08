@@ -8,3 +8,11 @@ playwright-report/
 .env
 .env.*
 !.env.example
+
+# Local agent-skill tooling (npx skills), not product code.
+.agents/
+.claude/
+skills-lock.json
+
+# Vercel CLI project link (machine/account-specific).
+.vercel

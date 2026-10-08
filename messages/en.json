@@ -4,6 +4,7 @@
     "tagline": "Money that can only reach the school or landlord it was meant for."
   },
   "common": {
+    "testnetBanner": "Testnet only. No real money moves here.",
     "notImplemented": "This page is not built yet.",
     "indicative": "Indicative",
     "usdOnlyNote": "No reliable exchange rate is available for this currency, so only the USD amount is shown.",
@@ -16,7 +17,35 @@
   },
   "pages": {
     "home": {
-      "title": "Kinlock"
+      "title": "Kinlock",
+      "heroHeadline": "Money that can only reach the school or landlord it was meant for.",
+      "heroSubtext": "Lock USDC on Stellar for a verified school or landlord, anywhere in the world. Nothing else can reach it.",
+      "heroCta": "Send a payment",
+      "howItWorksHeading": "How it works",
+      "lockTitle": "Lock",
+      "lockBody": "You lock USDC for a verified school or landlord. The payout address is fixed at that moment. Nobody can redirect it later.",
+      "claimTitle": "Claim",
+      "claimBody": "The payee claims it directly, on the schedule you set. No one else, including Kinlock, can touch it.",
+      "verifyTitle": "Verify",
+      "verifyBody": "Anyone can check the payment on chain. The receipt says exactly one thing: payment to verified payee.",
+      "sendersHeading": "For senders",
+      "sendersBody": "Pay a school or landlord for someone else, anywhere. Set a schedule instead of one lump sum, and get a receipt you can check yourself.",
+      "sendersCta": "Send a payment",
+      "payeesHeading": "For payees",
+      "payeesBody": "Get verified once, then receive payments directly, without a bank account in the sender's country. Decline any payment before you claim it.",
+      "payeesCta": "Create a request",
+      "principlesHeading": "What Kinlock won't do",
+      "nonCustodialTitle": "Hold your money",
+      "nonCustodialBody": "Kinlock never holds funds or keys. The contract does, and only the contract's rules decide where they go.",
+      "chainTruthTitle": "Hide behind a database",
+      "chainTruthBody": "Every claim, decline, and refund is a transaction you can look up yourself, not just a row in our database.",
+      "honestReceiptsTitle": "Overclaim a receipt",
+      "honestReceiptsBody": "A receipt proves a payment reached a verified payee. It isn't proof the money was spent the way anyone expected.",
+      "worldwideTitle": "Special-case a country",
+      "worldwideBody": "Built to work the same way everywhere. A country is data the system reads, not a special case in the code.",
+      "footerSource": "Source on GitHub",
+      "footerDocs": "How it works, in detail",
+      "footerDisclaimer": "Early, unaudited software on Stellar testnet. Don't rely on it for anything real yet."
     },
     "request": {
       "title": "Create a payment request",
