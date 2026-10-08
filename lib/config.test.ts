@@ -21,6 +21,12 @@ describe("loadPublicConfig", () => {
     expect(() => loadPublicConfig({ ...env, NEXT_PUBLIC_STELLAR_NETWORK: "mainnet" })).toThrow();
   });
 
+  it("allows a missing indexer URL (no indexer deployed yet, M2-18); chain-only features must still work", () => {
+    const c = loadPublicConfig({ ...env, NEXT_PUBLIC_INDEXER_URL: undefined });
+    expect(c.NEXT_PUBLIC_INDEXER_URL).toBeUndefined();
+    expect(c.NEXT_PUBLIC_CONTRACT_ID).toBe(env.NEXT_PUBLIC_CONTRACT_ID);
+  });
+
   it("refuses missing or malformed values", () => {
     for (const bad of [
       { NEXT_PUBLIC_CONTRACT_ID: "GABC" },

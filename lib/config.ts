@@ -21,8 +21,13 @@ const PublicConfigSchema = z.object({
     )
     .pipe(z.array(z.url()).min(1)),
   NEXT_PUBLIC_CONTRACT_ID: z.string().regex(/^C[A-Z2-7]{55}$/),
-  /** List API: lists, dashboards, preflight warnings, receipt lookups. Never money pages. */
-  NEXT_PUBLIC_INDEXER_URL: z.url(),
+  /**
+   * List API: lists, dashboards, preflight warnings, receipt lookups. Never money pages.
+   * Optional (matches the SDK's own `KinlockConfig.indexerUrl?: string`): until an indexer is
+   * deployed (M2-18), chain-only features (verify, lock reads, release/refund/decline) must keep
+   * working; only indexer-backed lists and preflight checks degrade, each with its own message.
+   */
+  NEXT_PUBLIC_INDEXER_URL: z.url().optional(),
   /** The USDC token contract (Stellar Asset Contract) passed to `createLock`. */
   NEXT_PUBLIC_USDC_CONTRACT_ID: z.string().regex(/^C[A-Z2-7]{55}$/),
   /** USDC issuer, shown with the asset code everywhere (AssetLabel). */
