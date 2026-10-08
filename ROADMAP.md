@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-08 (live app link) |
+| **Last updated** | 2026-10-08 (docs site link) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-08 | `docs/docs-site-link` | app | no row changes (org row W-10 tracked in `.github`) | Linked the new hosted docs site (`kinlock-org.github.io`) from README |
 | 2026-10-08 | `docs/live-app-link` | app | no row changes | Linked the live testnet app from this repo's own README; also set org-wide (org website field, `.github` profile README) and on every repo's GitHub "Website" field |
 | 2026-10-08 | `feat/m3-04-landing-page` | app | IN PROGRESS: M3-22 | Deployed to Vercel via CLI: production URL `https://kinlock-app.vercel.app`, all pages verified `200` (`/`, `/send`, `/request`, `/verify`, `/payee`, `/attester`). Set the 5 public, non-secret `NEXT_PUBLIC_*` env vars from the real testnet deployment records (contract ID, USDC contract/issuer, RPC URL); left `NEXT_PUBLIC_INDEXER_URL` unset since no indexer is deployed yet (`M2-18`, separate task) - indexer-dependent pages (`/send`, `/request`, `/payee`) degrade gracefully to their existing "can't load the list right now" state rather than breaking. GitHub auto-deploy-on-push could not be connected: the Vercel account's GitHub identity lacks admin/write on `Kinlock-Org/kinlock-app`, so future deploys need a manual `vercel --prod` (or fixing that GitHub App authorization) until resolved. Left `IN PROGRESS`, not `DONE`: the row formally depends on `M3-19` (E2E happy-path against testnet), which is still `TODO` |
 | 2026-10-08 | `feat/m3-04-landing-page` | app | DONE: M3-04 | Built the real landing page at `(marketing)/page.tsx` (hero, how-it-works, sender/payee split, principles, footer), replacing the `PageStub`. Added a site-wide testnet-safety banner (`common.testnetBanner`) to `layout.tsx` so it's visible on every page, not just the homepage. Added `Outfit` via `next/font/google` and a light/dark color-token system in `globals.css` (no new npm dependency). Content reviewed against hard rule 7 (honest receipt wording), no hard-coded country/currency, no fabricated traction/testimonials (none exist yet, so none are claimed), zero em-dashes. Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (79/79 passed), `pnpm build` all green. Confirms the app needs a Node runtime (dynamic routes + proxy middleware), ruling out GitHub Pages for `M3-22`. Also installed `anthropics/skills` frontend-design and `Leonxlnx/taste-skill` design-taste-frontend as local dev tooling (gitignored, not committed) |
