@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-08 (M3-13 receipt + verify pages; documentation-hub link) |
+| **Last updated** | 2026-10-08 (wording: "verified payee" replaces "school or landlord") |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-08 | `docs/verified-payee-wording` | app | no row changes | Synced `AGENTS.md`/`docs/PRD.md`/`docs/ARCHITECTURE_ESSENTIALS.md` from `Kinlock-Org/.github` (`scripts/sync-docs.sh`), and updated `messages/en.json` (`app.tagline`, `pages.home.heroHeadline`/`heroSubtext`/`lockBody`/`sendersBody`, `pages.send.intro`): "a verified school or landlord" replaced with "a verified payee" everywhere it was used as a generic stand-in for the product's reach, rather than naming the two current MVP categories factually. Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (92/92, including the inline-strings guard) all green. Canonical doc source edited in `.github` PR #23 |
 | 2026-10-08 | `feat/m3-13-receipt-verify` | app | DONE: M3-13 | Built `/r/[txHash]/[eventIndex]` and `/verify`, replacing their `PageStub`s. Both call the SDK's `verifyReceipt` (chain-authoritative tiered verification) and show "Valid"/"Not valid"; the "Payment to verified payee" headline (hard rule 7) renders only when `result.valid` is actually `true`. A separate `getLock` read is used purely to label the asset (code and issuer) since `VerifyReceiptResult.receipt` doesn't carry the token; falls back to an unlabeled amount rather than guessing when that lock is unavailable. New shared pieces: `lib/receipts/parse.ts` (pure link/hash parsing, unit-tested), `lib/receipts/receipt-text.ts` (message-key mapping), `components/receipts/ReceiptResult.tsx` (shared result view for both pages). Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (92/92 passed, including new `parse.test.ts`), `pnpm build` all green |
 | 2026-10-08 | `docs/link-doc-hub` | app | no row changes (org row W-10 tracked in `.github`) | Linked `Kinlock-Org.github.io` (the org's documentation-issue hub) from README, with `area:app` |
 | 2026-10-08 | `docs/docs-site-link` | app | no row changes (org row W-10 tracked in `.github`) | Linked the new hosted docs site (`kinlock-org.github.io`) from README |
