@@ -8,7 +8,8 @@
     "notImplemented": "This page is not built yet.",
     "indicative": "Indicative",
     "usdOnlyNote": "No reliable exchange rate is available for this currency, so only the USD amount is shown.",
-    "rateRiskNote": "Exchange rates change. The local-currency amount is an estimate and is not guaranteed."
+    "rateRiskNote": "Exchange rates change. The local-currency amount is an estimate and is not guaranteed.",
+    "indexerLagNotice": "This list may be a few minutes out of date. Payments and verification always check the blockchain directly, so this never affects what you can actually send or claim."
   },
   "nav": {
     "send": "Send",
