@@ -10,6 +10,15 @@
     "usdOnlyNote": "No reliable exchange rate is available for this currency, so only the USD amount is shown.",
     "rateRiskNote": "Exchange rates change. The local-currency amount is an estimate and is not guaranteed."
   },
+  "nav": {
+    "send": "Send",
+    "request": "Request",
+    "verify": "Verify",
+    "docs": "Documentation",
+    "github": "GitHub",
+    "openMenu": "Open menu",
+    "closeMenu": "Close menu"
+  },
   "receipt": {
     "headline": "Payment to verified payee",
     "valid": "Valid",

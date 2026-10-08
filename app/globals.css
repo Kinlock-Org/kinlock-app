@@ -7,6 +7,8 @@
   --color-accent-ink: var(--accent-ink);
   --color-line: var(--line);
   --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+  /* Strong ease-out for UI entrances/exits (animate skill); replaces Tailwind's weaker default. */
+  --ease-out: cubic-bezier(0.23, 1, 0.32, 1);
 }
 
 :root {
@@ -24,6 +26,59 @@
     --accent: #35a085;
     --accent-ink: #0f1512;
     --line: #1c2622;
+  }
+}
+
+/* Mobile nav disclosure panel: enters from the header, per the animate skill's menu recipe. */
+@keyframes menu-in {
+  from {
+    opacity: 0;
+    transform: translateY(-8px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.menu-panel {
+  animation: menu-in 200ms var(--ease-out) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .menu-panel {
+    animation-duration: 1ms;
+  }
+}
+
+/* Hero entrance stagger (animate skill: rare/first-tier content, purpose = explanation). */
+@keyframes reveal-up {
+  from {
+    opacity: 0;
+    transform: translateY(12px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.reveal {
+  animation: reveal-up 500ms var(--ease-out) both;
+}
+
+.reveal-1 {
+  animation-delay: 80ms;
+}
+
+.reveal-2 {
+  animation-delay: 160ms;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .reveal {
+    animation-duration: 1ms;
+    animation-delay: 0ms;
   }
 }
 
