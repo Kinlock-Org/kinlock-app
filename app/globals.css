@@ -1,5 +1,32 @@
 @import "tailwindcss";
 
+@theme {
+  --color-ink: var(--ink);
+  --color-paper: var(--paper);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-line: var(--line);
+  --font-sans: var(--font-outfit), ui-sans-serif, system-ui, sans-serif;
+}
+
+:root {
+  --ink: #141a17;
+  --paper: #f6f7f5;
+  --accent: #1c7c68;
+  --accent-ink: #f6f7f5;
+  --line: #dce3de;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --ink: #e8ede9;
+    --paper: #0f1512;
+    --accent: #35a085;
+    --accent-ink: #0f1512;
+    --line: #1c2622;
+  }
+}
+
 /* Visible to screen readers only (e.g. a full Stellar address next to its shortened form). */
 .sr-only {
   position: absolute;

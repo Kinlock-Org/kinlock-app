@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-07 (SCF open-source readiness fixes) |
+| **Last updated** | 2026-10-08 (M3-04 landing page) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 7 | 5 | 12 | 0 | 0 | 0 | 29% |
+| 4 App | 24 | 8 | 5 | 11 | 0 | 0 | 0 | 33% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **37** | **14** | **123** | **0** | **25** | **0** | **21%** |
+| **All** | **199** | **38** | **14** | **122** | **0** | **25** | **0** | **22%** |
 
 ---
 
@@ -293,7 +293,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-01 | Scaffold `kinlock-app`: Next.js, Tailwind, lint, CI | app | P0 | DONE | G1 | CI green |
 | M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | IN PROGRESS | M3-01 | Wallets swappable; signing flow tested |
 | M3-03 | `lib/sdk.ts` and Zod-validated public config | app | P0 | DONE | M2-02 | Single SDK instance; env validation |
-| M3-04 | Landing page and plain-language explainer | app | P1 | TODO | M3-01 | Content reviewed against wording rules |
+| M3-04 | Landing page and plain-language explainer | app | P1 | DONE | M3-01 | Content reviewed against wording rules |
 | M3-05 | `/request`: payee creates a payment-request link | app | P0 | DONE | M2-03 | Link pre-fills the sender form; carries no authority |
 | M3-06 | `/send`: sender flow with preflight results, USD amount, indicative local-currency equivalent (USD-only fallback), rate-risk note | app | P0 | IN PROGRESS | M2-05, M3-16 | Creates a lock on testnet end to end |
 | M3-07 | Claim-link generation, browser-only storage, export option | app | P0 | DONE | M2-03 | Nothing stored or sent server-side |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-08 | `feat/m3-04-landing-page` | app | DONE: M3-04 | Built the real landing page at `(marketing)/page.tsx` (hero, how-it-works, sender/payee split, principles, footer), replacing the `PageStub`. Added a site-wide testnet-safety banner (`common.testnetBanner`) to `layout.tsx` so it's visible on every page, not just the homepage. Added `Outfit` via `next/font/google` and a light/dark color-token system in `globals.css` (no new npm dependency). Content reviewed against hard rule 7 (honest receipt wording), no hard-coded country/currency, no fabricated traction/testimonials (none exist yet, so none are claimed), zero em-dashes. Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (79/79 passed), `pnpm build` all green. Confirms the app needs a Node runtime (dynamic routes + proxy middleware), ruling out GitHub Pages for `M3-22`. Also installed `anthropics/skills` frontend-design and `Leonxlnx/taste-skill` design-taste-frontend as local dev tooling (gitignored, not committed) |
 | 2026-10-07 | `docs/scf-readiness-fixes` | app | no row changes (org rows W-09/F-12 tracked in `.github`) | Part of an org-wide SCF open-source readiness audit (see `.github` `docs/scf-readiness.md`): filled the unfilled `Copyright [yyyy] [name of copyright owner]` placeholder in `LICENSE` and added `ISSUE_TEMPLATE/config.yml` (GitHub's community-profile check was reporting `issue_template: false` despite templates existing) |
 | 2026-10-07 | `docs/readme-status-banner` | app | no row changes | README said "scaffold... features are not built," which is stale (send, claim, decline, and lock-detail flows work end to end on testnet). Corrected the status banner to match current progress; supports org-level `W-01` Wave-readiness |
 | 2026-10-07 | kinlock-app feat/app-send-flow | app | M3-06 IN PROGRESS, M3-05 DONE | `/send`: verified payees (indexer list, server-side), prefill from a request link (M3-05 now pre-fills the form), schedule and take-back date checked like `create_lock`, USD with the USD-only rate note (DEC-10 open), wallet, preflight review (blocking failures stop; warnings need acknowledgement), lock via the wallet, claim link built and saved in this browser. Indexer list API served same-origin via rewrites (no CORS). Creating a lock through a real wallet still to verify |
