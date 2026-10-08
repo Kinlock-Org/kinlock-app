@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useRef } from "react";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
 import { ASSET_CODE } from "@/lib/constants";
@@ -153,8 +154,16 @@ function WalletBar({ c }: { c: Claim }) {
   );
 }
 
-/** Decline with an explicit confirmation step showing exactly what goes back. Roadmap M3-10. */
+/**
+ * Decline with an explicit confirmation step showing exactly what goes back. Roadmap M3-10.
+ * Focus moves into the alertdialog on open: without this, a screen-reader user who triggers it
+ * has no way to know the confirmation appeared, since nothing else on the page changes.
+ */
 function DeclinePanel({ c }: { c: Claim }) {
+  const confirmTitleRef = useRef<HTMLParagraphElement>(null);
+  useEffect(() => {
+    if (c.confirmingDecline) confirmTitleRef.current?.focus();
+  }, [c.confirmingDecline]);
   return (
     <section aria-labelledby="decline-heading" className="flex flex-col gap-2 rounded border p-3">
       <h2 id="decline-heading" className="font-medium">
@@ -167,7 +176,12 @@ function DeclinePanel({ c }: { c: Claim }) {
           aria-labelledby="decline-confirm-title"
           className="flex flex-col gap-2"
         >
-          <p id="decline-confirm-title" className="font-semibold">
+          <p
+            id="decline-confirm-title"
+            ref={confirmTitleRef}
+            tabIndex={-1}
+            className="font-semibold"
+          >
             {t("pages.claim.declineConfirmTitle")}
           </p>
           <p>
