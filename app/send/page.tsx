@@ -1,7 +1,8 @@
 /** Sender flow: request-link prefill, preflight, USD (indicative local currency once DEC-10). Roadmap M3-06. */
 import { SavedClaimLinks } from "@/components/claim-links/SavedClaimLinks";
 import { type MessageKey, t } from "@/lib/i18n/messages";
-import { type IndexedPayee, listPayees, payable } from "@/lib/indexer";
+import { type IndexedPayee, payable } from "@/lib/indexer";
+import { listKnownPayees } from "@/lib/payees/registry";
 import { publicConfig } from "@/lib/sdk";
 import { SendForm } from "./SendForm";
 
@@ -10,7 +11,7 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   let payees: IndexedPayee[] | null = null;
   try {
-    payees = payable(await listPayees());
+    payees = payable(await listKnownPayees());
   } catch {
     payees = null;
   }

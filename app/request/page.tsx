@@ -1,6 +1,7 @@
 /** Payee creates a payment-request link. Roadmap M3-05. */
 import { type MessageKey, t } from "@/lib/i18n/messages";
-import { type IndexedPayee, listPayees, payable } from "@/lib/indexer";
+import { type IndexedPayee, payable } from "@/lib/indexer";
+import { listKnownPayees } from "@/lib/payees/registry";
 import { RequestForm } from "./RequestForm";
 
 export const dynamic = "force-dynamic";
@@ -8,7 +9,7 @@ export const dynamic = "force-dynamic";
 export default async function Page() {
   let payees: IndexedPayee[] | null = null;
   try {
-    payees = payable(await listPayees());
+    payees = payable(await listKnownPayees());
   } catch {
     payees = null;
   }
