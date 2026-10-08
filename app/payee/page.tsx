@@ -1,15 +1,17 @@
 /** Payee dashboard: every lock sent to the connected wallet. Roadmap M3-11. */
 
+import { LagNotice } from "@/components/indexer/LagNotice";
 import { t } from "@/lib/i18n/messages";
-import { type IndexedPayee, listPayees } from "@/lib/indexer";
+import { type IndexedPayee, indexerLagging, listPayees } from "@/lib/indexer";
 import { PayeeView } from "./PayeeView";
 
 export const dynamic = "force-dynamic";
 
 export default async function Page() {
   let payees: IndexedPayee[] | null = null;
+  let lagging = false;
   try {
-    payees = await listPayees();
+    [payees, lagging] = await Promise.all([listPayees(), indexerLagging()]);
   } catch {
     payees = null;
   }
@@ -22,7 +24,10 @@ export default async function Page() {
           {t("pages.payee.indexerDown")}
         </p>
       ) : (
-        <PayeeView payees={payees} />
+        <>
+          <LagNotice lagging={lagging} />
+          <PayeeView payees={payees} />
+        </>
       )}
     </main>
   );

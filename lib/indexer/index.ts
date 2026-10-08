@@ -105,3 +105,28 @@ export async function listLocks(
   } while (before);
   return all;
 }
+
+const HealthResponse = z.object({
+  status: z.enum(["ok", "lagging", "unknown"]),
+  indexedLedger: z.number().nullable(),
+  latestLedger: z.number().nullable(),
+  lagLedgers: z.number().nullable(),
+  lastBatchAt: z.string().nullable(),
+});
+
+/**
+ * Whether indexer-backed lists (payee/lock displays, never money-moving decisions) might be
+ * stale. Never blocks anything: `preflight`'s blocking checks and every claim/release/refund read
+ * chain state directly (hard rule 3), so a lagging indexer only means a list looks a little old,
+ * never that an unsafe action is allowed through. Defaults to "yes, treat as possibly stale" on
+ * any failure, so a broken health check never silently hides a real lag.
+ */
+export async function indexerLagging(): Promise<boolean> {
+  try {
+    const response = await fetch(new URL("/health", publicConfig().NEXT_PUBLIC_INDEXER_URL));
+    if (!response.ok) return true;
+    return HealthResponse.parse(await response.json()).status !== "ok";
+  } catch {
+    return true;
+  }
+}
