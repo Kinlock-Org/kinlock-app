@@ -2,6 +2,8 @@
 import { t } from "@/lib/i18n/messages";
 import { VerifyForm } from "./VerifyForm";
 
+export const dynamic = "force-dynamic";
+
 export default function Page() {
   return (
     <main className="mx-auto max-w-xl p-4">
