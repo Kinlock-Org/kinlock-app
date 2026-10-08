@@ -241,7 +241,27 @@
       "declined": "The remaining money was returned to the sender."
     },
     "payee": {
-      "title": "Payee dashboard"
+      "title": "Payee dashboard",
+      "intro": "Connect the wallet that receives your payments to see every lock sent to you, filter by status, or find one specific payment.",
+      "indexerDown": "The list of payees can't be loaded right now. Try again in a minute.",
+      "connect": "Connect wallet",
+      "connectError": "Couldn't connect your wallet. Try again.",
+      "connectedAs": "Connected wallet",
+      "notAPayee": "This wallet isn't the payout address for any registered payee.",
+      "loading": "Reading your payments from the blockchain…",
+      "readFailed": "Your payments couldn't be read. Check your connection and try again.",
+      "empty": "No payments found for this wallet yet.",
+      "stateLabel": "Status",
+      "stateAll": "All",
+      "referenceLabel": "Find a specific payment",
+      "referenceHint": "Paste the claim link you were sent to find and verify it among the payments below.",
+      "referenceNotFound": "No matching payment was found among the ones shown below.",
+      "referenceInvalid": "That doesn't look like a claim link.",
+      "clearFilter": "Clear",
+      "lockLabel": "Payment",
+      "totalLabel": "Total",
+      "createdLabel": "Created",
+      "viewLink": "View and claim"
     },
     "attester": {
       "title": "Attester checks"
