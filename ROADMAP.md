@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-08 (documentation-hub link) |
+| **Last updated** | 2026-10-08 (M3-13 receipt + verify pages; documentation-hub link) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 8 | 6 | 10 | 0 | 0 | 0 | 33% |
+| 4 App | 24 | 9 | 6 | 9 | 0 | 0 | 0 | 38% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **38** | **15** | **121** | **0** | **25** | **0** | **22%** |
+| **All** | **199** | **39** | **15** | **120** | **0** | **25** | **0** | **22%** |
 
 ---
 
@@ -302,7 +302,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-10 | Payee `decline` action | app | P0 | DONE | M3-09 | Returns remainder; confirmation step |
 | M3-11 | `/payee` dashboard (lists via indexer) | app | P0 | TODO | M2-12 | Filter by status and reference |
 | M3-12 | `/attester` tooling: read-only account checks (trustline, authorization, XLM float) | app | P1 | TODO | M1-26 | Checks match the checklist script |
-| M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | TODO | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
+| M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | DONE | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
 | M3-14 | Security headers, strict CSP, `Referrer-Policy`, no third-party scripts on `/claim/*` | app | P0 | IN PROGRESS | M3-09 | Automated test confirms fragment never appears in any network request |
 | M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | IN PROGRESS | M3-01 | Used everywhere money or time is shown |
 | M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
@@ -523,6 +523,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-08 | `feat/m3-13-receipt-verify` | app | DONE: M3-13 | Built `/r/[txHash]/[eventIndex]` and `/verify`, replacing their `PageStub`s. Both call the SDK's `verifyReceipt` (chain-authoritative tiered verification) and show "Valid"/"Not valid"; the "Payment to verified payee" headline (hard rule 7) renders only when `result.valid` is actually `true`. A separate `getLock` read is used purely to label the asset (code and issuer) since `VerifyReceiptResult.receipt` doesn't carry the token; falls back to an unlabeled amount rather than guessing when that lock is unavailable. New shared pieces: `lib/receipts/parse.ts` (pure link/hash parsing, unit-tested), `lib/receipts/receipt-text.ts` (message-key mapping), `components/receipts/ReceiptResult.tsx` (shared result view for both pages). Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (92/92 passed, including new `parse.test.ts`), `pnpm build` all green |
 | 2026-10-08 | `docs/link-doc-hub` | app | no row changes (org row W-10 tracked in `.github`) | Linked `Kinlock-Org.github.io` (the org's documentation-issue hub) from README, with `area:app` |
 | 2026-10-08 | `docs/docs-site-link` | app | no row changes (org row W-10 tracked in `.github`) | Linked the new hosted docs site (`kinlock-org.github.io`) from README |
 | 2026-10-08 | `docs/live-app-link` | app | no row changes | Linked the live testnet app from this repo's own README; also set org-wide (org website field, `.github` profile README) and on every repo's GitHub "Website" field |

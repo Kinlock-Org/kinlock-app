@@ -13,7 +13,24 @@
   "receipt": {
     "headline": "Payment to verified payee",
     "valid": "Valid",
-    "notValid": "Not valid"
+    "notValid": "Not valid",
+    "kind": {
+      "Released": "Released to the payee",
+      "Refunded": "Refunded to the sender",
+      "Declined": "Returned to the sender"
+    },
+    "reason": {
+      "not_found": "No payment with this transaction and event number exists on the blockchain.",
+      "mismatch": "What this receipt claims doesn't match what's on the blockchain.",
+      "unverifiable": "This payment is too old to verify automatically right now."
+    },
+    "amountLabel": "Amount",
+    "payoutLabel": "Paid out to",
+    "trancheLabel": "Payment number",
+    "refundReasonLabel": "Refund reason",
+    "ledgerTimeLabel": "When this happened (UTC)",
+    "txHashLabel": "Transaction",
+    "eventIndexLabel": "Event number"
   },
   "pages": {
     "home": {
@@ -221,10 +238,23 @@
       "title": "Attester checks"
     },
     "receipt": {
-      "title": "Receipt"
+      "title": "Receipt",
+      "loading": "Reading this receipt from the blockchain…",
+      "invalidId": "This receipt link isn't valid.",
+      "readFailed": "This receipt couldn't be checked. Check your connection and try again."
     },
     "verify": {
-      "title": "Verify a receipt"
+      "title": "Verify a receipt",
+      "intro": "Paste a receipt link, or enter the transaction hash and event number, to check it directly against the blockchain.",
+      "linkLabel": "Receipt link or transaction hash",
+      "linkHint": "For example a link like /r/<transaction hash>/0, or just the transaction hash.",
+      "eventIndexLabel": "Event number",
+      "eventIndexHint": "Only needed if you entered a transaction hash instead of a full link.",
+      "check": "Check",
+      "checking": "Checking…",
+      "errorInput": "Enter a receipt link or a transaction hash.",
+      "errorEventIndex": "Enter the event number: 0 or a positive whole number.",
+      "errorGeneric": "This receipt couldn't be checked. Check your connection and try again."
     }
   },
   "money": {
