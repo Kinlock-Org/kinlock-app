@@ -309,7 +309,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | TODO | M3-13 | Audit checklist passed |
 | M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
 | M3-19 | Playwright happy-path: request → send → claim → verify | app | P0 | TODO | M3-13 | Green in CI against testnet |
-| M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | TODO | M3-13 | Reviewer sign-off |
+| M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | IN PROGRESS | M3-13 | Reviewer sign-off |
 | M3-21 | Error and empty states: trustline failure, expired, revoked, suspended, indexer lag | app | P0 | TODO | M3-09 | Each state has clear guidance |
 | M3-22 | Testnet hosting and environment config | app | P0 | IN PROGRESS | M3-19 | Public testnet URL live |
 | M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | DONE | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
