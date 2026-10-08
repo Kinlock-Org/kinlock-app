@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-08 (wording: "verified payee" replaces "school or landlord") |
+| **Last updated** | 2026-10-08 (M3-25 favicon, site header, mobile nav, motion) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 0 | 1 | 16 | 0 | 0 | 0 | 0% |
 | 2 Contract + registry | 36 | 16 | 5 | 15 | 0 | 0 | 0 | 44% |
 | 3 SDK + indexer | 19 | 1 | 1 | 17 | 0 | 0 | 0 | 5% |
-| 4 App | 24 | 9 | 6 | 9 | 0 | 0 | 0 | 38% |
+| 4 App | 25 | 10 | 6 | 9 | 0 | 0 | 0 | 40% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 8 | 1 | 0 | 7 | 0 | 0 | 0 | 13% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **199** | **39** | **15** | **120** | **0** | **25** | **0** | **22%** |
+| **All** | **200** | **40** | **15** | **120** | **0** | **25** | **0** | **23%** |
 
 ---
 
@@ -314,6 +314,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-22 | Testnet hosting and environment config | app | P0 | IN PROGRESS | M3-19 | Public testnet URL live |
 | M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | DONE | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
 | M3-24 | CI guard: fail on hard-coded country, currency, anchor, or locale literals outside registry data, tests, and fixtures | all | P1 | TODO | M3-01, M2-01 | Guard runs in app and sdk CI; passing and failing examples tested |
+| M3-25 | Favicon/app icon, persistent site header (nav, docs and GitHub links), mobile hamburger menu, reduced-motion-safe entrance motion | app | P2 | DONE | M3-01, M3-04 | Favicon set in every browser; nav usable one-handed on a narrow viewport; `prefers-reduced-motion` honored |
 
 ---
 
@@ -523,6 +524,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-08 | `feat/site-polish` | app | DONE: M3-25 (new row) | Added `app/icon.svg`/`app/apple-icon.png` (favicon and iOS icon, from the org's new lock mark in `kinlock-icon/`). Built `components/nav/SiteHeader.tsx`: a persistent header on every page, desktop nav (Send/Request/Verify) plus two separately-styled, separately-destined buttons (outline "Documentation" to `kinlock-org.github.io`, filled-neutral "GitHub" to `github.com/Kinlock-Org`), collapsing to a hamburger disclosure menu below `md` (closes on route change and Escape). Fixed the landing footer's stale docs link, which pointed at a raw GitHub markdown file instead of the real docs site. Installed the `emilkowalski/skills` `animate` skill and used it for the menu's entrance and a staggered hero fade/slide-up on the landing page (CSS-only, no new dependency, both gated under `prefers-reduced-motion`). Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (93/93), `pnpm build` all green; visually checked desktop, mobile closed/open, and dark mode with Playwright screenshots. Not done here: the GitHub org avatar itself (no API/CLI command sets it; recommended `kinlock-icon/icon-light-1024.png`, needs a human to upload via org settings) |
 | 2026-10-08 | `docs/verified-payee-wording` | app | no row changes | Synced `AGENTS.md`/`docs/PRD.md`/`docs/ARCHITECTURE_ESSENTIALS.md` from `Kinlock-Org/.github` (`scripts/sync-docs.sh`), and updated `messages/en.json` (`app.tagline`, `pages.home.heroHeadline`/`heroSubtext`/`lockBody`/`sendersBody`, `pages.send.intro`): "a verified school or landlord" replaced with "a verified payee" everywhere it was used as a generic stand-in for the product's reach, rather than naming the two current MVP categories factually. Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (92/92, including the inline-strings guard) all green. Canonical doc source edited in `.github` PR #23 |
 | 2026-10-08 | `feat/m3-13-receipt-verify` | app | DONE: M3-13 | Built `/r/[txHash]/[eventIndex]` and `/verify`, replacing their `PageStub`s. Both call the SDK's `verifyReceipt` (chain-authoritative tiered verification) and show "Valid"/"Not valid"; the "Payment to verified payee" headline (hard rule 7) renders only when `result.valid` is actually `true`. A separate `getLock` read is used purely to label the asset (code and issuer) since `VerifyReceiptResult.receipt` doesn't carry the token; falls back to an unlabeled amount rather than guessing when that lock is unavailable. New shared pieces: `lib/receipts/parse.ts` (pure link/hash parsing, unit-tested), `lib/receipts/receipt-text.ts` (message-key mapping), `components/receipts/ReceiptResult.tsx` (shared result view for both pages). Verified: `pnpm lint`, `pnpm typecheck`, `pnpm test` (92/92 passed, including new `parse.test.ts`), `pnpm build` all green |
 | 2026-10-08 | `docs/link-doc-hub` | app | no row changes (org row W-10 tracked in `.github`) | Linked `Kinlock-Org.github.io` (the org's documentation-issue hub) from README, with `area:app` |
