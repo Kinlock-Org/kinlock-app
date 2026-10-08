@@ -11,8 +11,9 @@ import { fromBaseUnits } from "@/lib/sdk";
  * The verification result, shared by `/r/[txHash]/[eventIndex]` and `/verify`. Shows "Payment to
  * verified payee" only when `result.valid` is actually true (hard rule 7: never claim it
  * otherwise). `lock` is a separate chain read for asset labeling only, not part of verification
- * itself; it's `null` whenever the lock entry is unavailable (expired from chain state), in which
- * case the amount is shown without an asset label rather than guessing one.
+ * itself; it's `null` whenever the lock entry is unavailable (expired from chain state), or
+ * whenever `usdc` is `null` (the shared app config failed to load), in which case the amount is
+ * shown without an asset label rather than guessing one.
  */
 export function ReceiptResult({
   result,
@@ -23,7 +24,7 @@ export function ReceiptResult({
   result: VerifyReceiptResult;
   locale: string;
   lock: Lock | null;
-  usdc: { contractId: string; issuer: string };
+  usdc: { contractId: string; issuer: string } | null;
 }) {
   const reasonKey = reasonMessageKey(result.reason);
   return (
@@ -47,7 +48,7 @@ function Details({
   result: VerifyReceiptResult;
   locale: string;
   lock: Lock | null;
-  usdc: { contractId: string; issuer: string };
+  usdc: { contractId: string; issuer: string } | null;
 }) {
   const receipt = result.receipt;
   if (!receipt) return null;
@@ -64,7 +65,7 @@ function Details({
       ) : null}
       <dt className="font-medium">{t("receipt.amountLabel")}</dt>
       <dd>
-        {lock ? (
+        {lock && usdc ? (
           <AmountDisplay
             decimal={fromBaseUnits(receipt.amount)}
             assetCode={ASSET_CODE}
