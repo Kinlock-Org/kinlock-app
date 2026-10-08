@@ -8,7 +8,7 @@ Next.js web app: payee requests, sender flow, claim, attester checks, receipts.
 
 > **Status: active development, testnet only.** Send, claim, decline, and lock-detail flows work end to end against testnet; the payee dashboard and attester tooling are still open. See `ROADMAP.md`.
 
-**Live app (testnet):** [kinlock-app.vercel.app](https://kinlock-app.vercel.app)
+**Live app (testnet):** [kinlock-app.vercel.app](https://kinlock-app.vercel.app) · **Docs:** [kinlock-org.github.io](https://kinlock-org.github.io)
 
 ## Quick start
 ```
