@@ -50,7 +50,7 @@ function HowItWorks() {
       <ol className="mt-8 grid gap-8 md:grid-cols-3 md:gap-6">
         {steps.map((step, i) => (
           <li key={step.title} className="border-t border-line pt-4">
-            <span className="text-sm text-ink/50">{i + 1}</span>
+            <span className="text-sm text-muted">{i + 1}</span>
             <h3 className="mt-1 text-lg font-medium">{step.title}</h3>
             <p className="mt-2 text-ink/70">{step.body}</p>
           </li>
@@ -116,7 +116,7 @@ function Principles() {
 function Footer() {
   return (
     <footer className="mx-auto max-w-5xl px-4 py-12">
-      <div className="flex flex-col gap-4 border-t border-line pt-8 text-sm text-ink/60 md:flex-row md:items-center md:justify-between">
+      <div className="flex flex-col gap-4 border-t border-line pt-8 text-sm text-muted md:flex-row md:items-center md:justify-between">
         <p className="max-w-[48ch]">{t("pages.home.footerDisclaimer")}</p>
         <nav className="flex gap-6">
           <a href="https://github.com/Kinlock-Org" className="underline underline-offset-4">
