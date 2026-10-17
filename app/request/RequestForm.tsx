@@ -1,10 +1,11 @@
 "use client";
 
 import { useId } from "react";
+import { AmountDisplay } from "@/components/money/AmountDisplay";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
-import { MAX_TRANCHES } from "@/lib/constants";
-import { formatTokenAmount } from "@/lib/i18n/format";
+import { ASSET_CODE, MAX_TRANCHES } from "@/lib/constants";
 import { t } from "@/lib/i18n/messages";
+import { publicConfig } from "@/lib/sdk";
 import { unixSecondsOf } from "./schedule";
 import { useRequestForm } from "./useRequestForm";
 
@@ -12,6 +13,7 @@ import { useRequestForm } from "./useRequestForm";
 export function RequestForm({ payees }: { payees: { payeeId: string; label: string }[] }) {
   const ids = { payee: useId(), reference: useId(), referenceHint: useId() };
   const f = useRequestForm(payees[0]?.payeeId ?? "");
+  const usdc = publicConfig();
   return (
     <form onSubmit={f.create} className="mt-6 flex flex-col gap-4" noValidate>
       <label htmlFor={ids.payee} className="flex flex-col gap-1">
@@ -93,7 +95,13 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
 
       {f.total ? (
         <p>
-          {t("pages.request.total")}: {formatTokenAmount(f.total, f.locale)}
+          {t("pages.request.total")}:{" "}
+          <AmountDisplay
+            decimal={f.total}
+            assetCode={ASSET_CODE}
+            issuer={usdc.NEXT_PUBLIC_USDC_ISSUER}
+            locale={f.locale}
+          />
         </p>
       ) : null}
 
