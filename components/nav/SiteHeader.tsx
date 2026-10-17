@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useId, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 import { t } from "@/lib/i18n/messages";
 
 const LINKS = [
@@ -11,7 +11,7 @@ const LINKS = [
 ];
 
 const navLinkClass = (active: boolean) =>
-  `text-sm font-medium transition-colors motion-reduce:transition-none ${
+  `rounded-md text-sm font-medium transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent ${
     active ? "text-accent" : "text-ink/70 hover:text-accent"
   }`;
 
@@ -24,6 +24,7 @@ const navLinkClass = (active: boolean) =>
 export function SiteHeader() {
   const pathname = usePathname();
   const [open, setOpen] = useState(false);
+  const toggleRef = useRef<HTMLButtonElement>(null);
   const menuId = useId();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: closes the menu on route change
@@ -32,7 +33,10 @@ export function SiteHeader() {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        toggleRef.current?.focus();
+      }
     };
     document.addEventListener("keydown", onKeyDown);
     return () => document.removeEventListener("keydown", onKeyDown);
@@ -41,7 +45,10 @@ export function SiteHeader() {
   return (
     <header className="relative border-b border-line">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <a href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <a
+          href="/"
+          className="flex items-center gap-2 rounded-md font-semibold tracking-tight focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
+        >
           <svg viewBox="0 0 1024 1024" className="h-6 w-6 fill-accent" aria-hidden="true">
             <mask id="header-lock-mask">
               <rect width="1024" height="1024" fill="white" />
@@ -76,25 +83,26 @@ export function SiteHeader() {
           <span className="h-4 w-px bg-line" aria-hidden="true" />
           <a
             href="https://kinlock-org.github.io"
-            className="rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition-colors motion-reduce:transition-none hover:border-accent hover:text-accent"
+            className="rounded-full border border-line px-4 py-1.5 text-sm font-medium text-ink transition-colors motion-reduce:transition-none hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {t("nav.docs")}
           </a>
           <a
             href="https://github.com/Kinlock-Org"
-            className="rounded-full bg-ink/5 px-4 py-1.5 text-sm font-medium text-ink transition-colors motion-reduce:transition-none hover:bg-ink/10"
+            className="rounded-full bg-ink/5 px-4 py-1.5 text-sm font-medium text-ink transition-colors motion-reduce:transition-none hover:bg-ink/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
           >
             {t("nav.github")}
           </a>
         </nav>
 
         <button
+          ref={toggleRef}
           type="button"
           onClick={() => setOpen((v) => !v)}
           aria-expanded={open}
           aria-controls={menuId}
           aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
-          className="flex h-10 w-10 items-center justify-center md:hidden"
+          className="flex h-10 w-10 items-center justify-center rounded-lg transition-colors motion-reduce:transition-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent md:hidden"
         >
           <span className="relative block h-3.5 w-5" aria-hidden="true">
             <span
@@ -135,13 +143,13 @@ export function SiteHeader() {
           <div className="mt-2 flex flex-col gap-2 border-t border-line pt-3">
             <a
               href="https://kinlock-org.github.io"
-              className="rounded-full border border-line px-4 py-2 text-center text-sm font-medium text-ink"
+              className="rounded-full border border-line px-4 py-2 text-center text-sm font-medium text-ink transition-colors motion-reduce:transition-none hover:border-accent hover:text-accent focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {t("nav.docs")}
             </a>
             <a
               href="https://github.com/Kinlock-Org"
-              className="rounded-full bg-ink/5 px-4 py-2 text-center text-sm font-medium text-ink"
+              className="rounded-full bg-ink/5 px-4 py-2 text-center text-sm font-medium text-ink transition-colors motion-reduce:transition-none hover:bg-ink/10 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-accent"
             >
               {t("nav.github")}
             </a>
