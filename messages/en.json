@@ -351,5 +351,24 @@
       "unknown": "Earlier payments with this reference couldn't be checked.",
       "no_indexer": "Earlier payments with this reference couldn't be checked."
     }
+  },
+  "states": {
+    "loading": {
+      "title": "Loading",
+      "generic": "Reading data from the network…",
+      "locks": "Reading the lock from the network…",
+      "payee": "Checking verified payees…",
+      "verify": "Checking payment status on chain…"
+    },
+    "error": {
+      "title": "Something went wrong",
+      "description": "We couldn't load this page. Your funds, locks, and payments are safe on the blockchain.",
+      "retry": "Try again"
+    },
+    "notFound": {
+      "title": "Page not found",
+      "description": "This page doesn't exist in this app yet. If you are looking for a recent lock, note that indexer updates may take a few minutes to appear.",
+      "home": "Back to home"
+    }
   }
 }
