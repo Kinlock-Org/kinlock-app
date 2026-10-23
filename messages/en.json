@@ -9,7 +9,7 @@
     "indicative": "Indicative",
     "usdOnlyNote": "No reliable exchange rate is available for this currency, so only the USD amount is shown.",
     "rateRiskNote": "Exchange rates change. The local-currency amount is an estimate and is not guaranteed.",
-    "indexerLagNotice": "This list may be a few minutes out of date. Payments and verification always check the blockchain directly, so this never affects what you can actually send or claim."
+    "indexerLagNotice": "This list may be a few minutes out of date. Payments and verification always check the Stellar network directly, so this never affects what you can actually send or claim."
   },
   "nav": {
     "send": "Send",
@@ -30,8 +30,8 @@
       "Declined": "Returned to the sender"
     },
     "reason": {
-      "not_found": "No payment with this transaction and event number exists on the blockchain.",
-      "mismatch": "What this receipt claims doesn't match what's on the blockchain.",
+      "not_found": "No payment with this transaction and event number exists on chain.",
+      "mismatch": "What this receipt claims doesn't match what's on chain.",
       "unverifiable": "This payment is too old to verify automatically right now."
     },
     "amountLabel": "Amount",
@@ -149,12 +149,12 @@
       "errorExpiryFar": "The take-back date can be at most 149 days from now.",
       "errorWallet": "Connect your wallet first.",
       "errorTx": "The transaction didn't go through (it may have been declined in your wallet). Nothing was sent; you can try again.",
-      "errorContract": "The blockchain refused this payment. Nothing was sent.",
+      "errorContract": "Contract rules prevented this payment. Nothing was sent.",
       "errorGeneric": "Something went wrong. Nothing was sent; you can try again."
     },
     "lock": {
       "title": "Lock details",
-      "intro": "Read directly from the blockchain.",
+      "intro": "Read directly from the Stellar network.",
       "invalidId": "This lock number isn't valid.",
       "payeeLabel": "Payee",
       "payeeStatus": {
@@ -179,7 +179,7 @@
       "refunding": "Waiting for your wallet…",
       "refunded": "The money was returned to your wallet.",
       "receiptLink": "View receipt",
-      "errorNotAllowed": "The blockchain doesn't allow a refund yet. Nothing was moved.",
+      "errorNotAllowed": "Contract rules do not allow a refund yet. Nothing was moved.",
       "errorClosed": "This lock is already closed.",
       "errorTx": "The transaction didn't go through (it may have been declined in your wallet). Nothing was moved; you can try again.",
       "errorGeneric": "Something went wrong. Nothing was moved; you can try again."
@@ -249,7 +249,7 @@
       "connectError": "Couldn't connect your wallet. Try again.",
       "connectedAs": "Connected wallet",
       "notAPayee": "This wallet isn't the payout address for any registered payee.",
-      "loading": "Reading your payments from the blockchain…",
+      "loading": "Reading your payments from the Stellar network…",
       "readFailed": "Your payments couldn't be read. Check your connection and try again.",
       "empty": "No payments found for this wallet yet.",
       "stateLabel": "Status",
@@ -269,13 +269,13 @@
     },
     "receipt": {
       "title": "Receipt",
-      "loading": "Reading this receipt from the blockchain…",
+      "loading": "Reading this receipt from the Stellar network…",
       "invalidId": "This receipt link isn't valid.",
       "readFailed": "This receipt couldn't be checked. Check your connection and try again."
     },
     "verify": {
       "title": "Verify a receipt",
-      "intro": "Paste a receipt link, or enter the transaction hash and event number, to check it directly against the blockchain.",
+      "intro": "Paste a receipt link, or enter the transaction hash and event number, to check it directly against the Stellar network.",
       "linkLabel": "Receipt link or transaction hash",
       "linkHint": "For example a link like /r/<transaction hash>/0, or just the transaction hash.",
       "eventIndexLabel": "Event number",
