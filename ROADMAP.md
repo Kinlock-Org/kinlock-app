@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-08 (W-05 resolved; 17 Wave issues seeded with seven new rows; issue format proofed against Drips' maintainer guide; the three pre-format issues triaged — app #16 re-emitted, app #15 and registry #7 closed as superseded; repo-side Changelog lines unioned back into canonical by `scripts/roadmap-merge`; that merge's ADR-link normalization anchored so quoted prose cannot be rewritten) |
+| **Last updated** | 2026-10-23 (added `M3-28`: anti-malware CI job for this repo; found and fixed a Semgrep false-positive flag in `lib/i18n/messages.ts`; found two unrelated critical `next` RCE advisories via `pnpm audit`, flagged separately, not fixed in this PR) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 27 | 15 | 7 | 5 | 0 | 0 | 0 | 56% |
+| 4 App | 28 | 15 | 8 | 5 | 0 | 0 | 0 | 54% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **211** | **75** | **21** | **90** | **0** | **25** | **0** | **40%** |
+| **All** | **212** | **75** | **22** | **90** | **0** | **25** | **0** | **40%** |
 
 ---
 
@@ -324,6 +324,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-25 | Favicon/app icon, persistent site header (nav, docs and GitHub links), mobile hamburger menu, reduced-motion-safe entrance motion | app | P2 | DONE | M3-01, M3-04 | Favicon set in every browser; nav usable one-handed on a narrow viewport; `prefers-reduced-motion` honored |
 | M3-26 | Interim chain-verified payee source for `/send` and `/request`, since no indexer is deployed (`M2-18`) | app | P1 | DONE | M3-05, M3-06 | `/send` and `/request` list real, on-chain `Active` payees and complete their flow up to wallet connect; **retired 2026-10-08**, superseded now that `M2-18`'s indexer is live (code removed, pages point at the real indexer again) |
 | M3-27 | Route-level `loading.tsx`, `error.tsx` and `not-found.tsx` for the user-facing routes | app | P1 | TODO | M3-01 | Every in-scope route has a designed pending/error/404 state; no stack trace or file path reaches the UI; `/claim/*` untouched |
+| M3-28 | CI `malware-scan` job: `pnpm audit` against the npm advisory database plus a Semgrep source scan on every PR | app | P1 | IN PROGRESS | — | Job runs on every PR; a known-vulnerable dependency or an injected malicious-pattern test case trips it; verified green on a real PR |
 
 ---
 
@@ -535,6 +536,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-23 | `ci/malware-scan` | app | M3-28 IN PROGRESS | Added `.github/workflows/malware-scan.yml`: `pnpm audit --audit-level=high` (npm advisory DB) plus a Semgrep source scan (`--config auto --error`) on every PR. Running it surfaced two real, pre-existing findings, both out of this PR's scope and flagged rather than silently fixed: (1) `pnpm audit` found 2 critical + 1 high Next.js advisories (GHSA-2464-fhr4-w9xw, GHSA-673q-mjm6-r5xr, GHSA-p3m5-59mp-jv5r; unauthenticated RCE via Image Optimization API and `use cache`, DoS via Server Actions; fixed in `next@16.4.1+`, current pin is within `>=16.0.0 <=16.4.0`) — recommend bumping `next` as a follow-up; (2) Semgrep's `prototype-pollution-loop` rule flagged `lib/i18n/messages.ts`'s dotted-key lookup in `t()`/`hasMessage()`. Reviewed: both are read-only traversals of the bundled build-time `en.json` with no assignment through `node`, so no pollution write path exists — a genuine false positive, suppressed with a one-line `nosemgrep` comment and rationale on each site (matched the full rule id: `javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop`). Re-ran `pnpm lint`, `pnpm typecheck`, and `pnpm vitest run lib/i18n` (43/43) after the suppression — all green. Left `M3-28` `IN PROGRESS` pending the first real PR run confirming the job executes (and currently fails, correctly, on the `next` advisories until that's bumped). |
 | 2026-10-08 | `chore/roadmap-copy-back` (#44) | app | no row changes | Copy-back run: `ROADMAP.md` replaced with the merged canonical (`.github` main as of #31) in repo-root link form, and §3 recomputed with `scripts/roadmap-progress`. This is the step `roadmap-merge`'s header requires after every merge and that was skipped between 2026-10-06 and 2026-10-08, which is how the seven copies reached 92 divergent statuses. Verified in this checkout: the file equals canonical byte for byte apart from this entry and the ADR link prefix, `W-05` reads `DONE`, the seven Wave rows are present, duplicate row-ID scan is 0. No row, status, priority, dependency or **Done when** was authored in this repo. |
 | 2026-10-08 | `fix/roadmap-merge-link-anchor` | org | no row changes | Found while preparing the copy-back. `roadmap-merge`'s read normalization rewrote the docs-rooted ADR link form into the root-relative one on every copy so the two depths compare equal — correct for links, wrong for prose: the union entry above quotes both forms, so reading that line collapsed its own quote and emitted a Changelog entry contradicting itself, in a copy that no longer matched canonical line for line. Fixed by anchoring the replace on the numeric ADR filename that always follows the slash, so only real links are rewritten, and by re-wording the union entry to name the two forms as `docs/adr/` and `adr/` rather than spelling them as link text: **an entry that describes this rewrite must not itself be a string the rewrite can act on.** Verified: the anchored read leaves a quoted form byte-identical where the blanket replace corrupted it; a full `roadmap-merge` over all five copies against `b12d290` exits 0 with **0 lines** differing from canonical, which also confirms the union is complete; the one real link (`ADR-0026`) still normalizes both ways. No row, status, priority, dependency or **Done when** in this diff. |
 | 2026-10-08 | `chore/roadmap-changelog-union` | org | no row changes | Second `scripts/roadmap-merge` run now that the Wave-format PRs have merged (`.github` #26 and #27, contracts #31, sdk #38, app #43, registry #18). Three-way against `b12d290`, the revision where all five copies were last identical. The merge's **entire** output is four lines: the repo-side `docs/wave-issue-format` Changelog rows that each repo wrote into its own copy and canonical never saw. No row ID, status, priority, dependency or **Done when** moved — the seven new rows went in byte-identically, and `W-05`'s `TODO` → `DONE` stayed on the `org` row in canonical as §12 requires, so the repo copies' deliberately-untouched `TODO` was not merged back over it. §3 verified unchanged by `roadmap-progress`: 211 rows, 75 `DONE`, 40%. **Not in this PR:** the copy-back. Each repo's `ROADMAP.md` must be rewritten from the merged canonical, with the ADR links rewritten for the repo-root location, so all five copies are byte-identical again — that invariant is what makes `--ancestor` meaningful next time, and it needs four repo PRs that can only be cut after this lands. |
