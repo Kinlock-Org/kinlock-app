@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-23 (`M3-29` DONE: bumped `next` off its critical-RCE-vulnerable pin) |
+| **Last updated** | 2026-10-26 (added `M3-30`: OpenSSF Scorecard CI for this repo) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 28 | 16 | 7 | 5 | 0 | 0 | 0 | 57% |
+| 4 App | 29 | 16 | 8 | 5 | 0 | 0 | 0 | 55% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **212** | **76** | **21** | **90** | **0** | **25** | **0** | **41%** |
+| **All** | **213** | **76** | **22** | **90** | **0** | **25** | **0** | **40%** |
 
 ---
 
@@ -325,6 +325,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-26 | Interim chain-verified payee source for `/send` and `/request`, since no indexer is deployed (`M2-18`) | app | P1 | DONE | M3-05, M3-06 | `/send` and `/request` list real, on-chain `Active` payees and complete their flow up to wallet connect; **retired 2026-10-08**, superseded now that `M2-18`'s indexer is live (code removed, pages point at the real indexer again) |
 | M3-27 | Route-level `loading.tsx`, `error.tsx` and `not-found.tsx` for the user-facing routes | app | P1 | TODO | M3-01 | Every in-scope route has a designed pending/error/404 state; no stack trace or file path reaches the UI; `/claim/*` untouched |
 | M3-29 | Bump `next` off the vulnerable `16.3.8` pin: 2 critical unauthenticated-RCE advisories (Image Optimization API, `use cache`) plus a high-severity Server Actions DoS | app | P0 | DONE | — | `pnpm audit --audit-level=high` clean of the three advisories; lint, typecheck, full test suite, build, and e2e all still pass |
+| M3-30 | Add OpenSSF Scorecard CI (`ossf/scorecard-action`): weekly supply-chain security posture scan published to the public Scorecard API/badge | app | P2 | IN PROGRESS | — | `.github/workflows/scorecard.yml` runs on push to `main` and weekly; results visible on the Security tab and via `https://api.scorecard.dev/projects/github.com/Kinlock-Org/kinlock-app/badge`; verified on a real run |
 
 ---
 
@@ -536,6 +537,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-26 | `ci/scorecard` | app | M3-30 IN PROGRESS | Added `.github/workflows/scorecard.yml` (OpenSSF Scorecard), copied from the current canonical `ossf/scorecard/.github/workflows/scorecard-analysis.yml`, pinned to the same commit SHAs upstream uses. `push`-to-`main` and weekly schedule only (`pull_request` is documented upstream as experimental). `publish_results: true` since this repo is public. **Update 2026-10-26:** added the Scorecard badge to `README.md`'s badge row, per request. Left `IN PROGRESS` pending the first real run confirming the job executes and publishes successfully. |
 | 2026-10-23 | `fix/next-critical-rce` | app | M3-29 DONE | Found while adding the malware-scan CI job (PR #51): `pnpm audit` flagged 2 critical + 1 high Next.js advisories on the `16.3.8` pin (`GHSA-2464-fhr4-w9xw` unauthenticated RCE via Image Optimization API; `GHSA-673q-mjm6-r5xr` unauthenticated RCE via `use cache`; `GHSA-p3m5-59mp-jv5r` Server Actions DoS). Bumped to `next@16.4.3` (latest stable patch in the 16.x line). Verified: `pnpm audit --audit-level=high` clean of all three (5 unrelated low/moderate advisories remain, pre-existing, below the gate); `pnpm lint`, `pnpm typecheck`, `pnpm test` (166/166), `pnpm build`, and `pnpm e2e` (1 passed, 1 skipped — same skip as before the bump) all green. |
 | 2026-10-08 | `chore/roadmap-copy-back` (#44) | app | no row changes | Copy-back run: `ROADMAP.md` replaced with the merged canonical (`.github` main as of #31) in repo-root link form, and §3 recomputed with `scripts/roadmap-progress`. This is the step `roadmap-merge`'s header requires after every merge and that was skipped between 2026-10-06 and 2026-10-08, which is how the seven copies reached 92 divergent statuses. Verified in this checkout: the file equals canonical byte for byte apart from this entry and the ADR link prefix, `W-05` reads `DONE`, the seven Wave rows are present, duplicate row-ID scan is 0. No row, status, priority, dependency or **Done when** was authored in this repo. |
 | 2026-10-08 | `fix/roadmap-merge-link-anchor` | org | no row changes | Found while preparing the copy-back. `roadmap-merge`'s read normalization rewrote the docs-rooted ADR link form into the root-relative one on every copy so the two depths compare equal — correct for links, wrong for prose: the union entry above quotes both forms, so reading that line collapsed its own quote and emitted a Changelog entry contradicting itself, in a copy that no longer matched canonical line for line. Fixed by anchoring the replace on the numeric ADR filename that always follows the slash, so only real links are rewritten, and by re-wording the union entry to name the two forms as `docs/adr/` and `adr/` rather than spelling them as link text: **an entry that describes this rewrite must not itself be a string the rewrite can act on.** Verified: the anchored read leaves a quoted form byte-identical where the blanket replace corrupted it; a full `roadmap-merge` over all five copies against `b12d290` exits 0 with **0 lines** differing from canonical, which also confirms the union is complete; the one real link (`ADR-0026`) still normalizes both ways. No row, status, priority, dependency or **Done when** in this diff. |
