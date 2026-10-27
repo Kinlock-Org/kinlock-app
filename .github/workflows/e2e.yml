@@ -1,18 +1,78 @@
-# DRAFT (ask-first: CI). Playwright happy path against testnet (M3-19).
+# Playwright happy path (request -> send -> claim -> verify) against a dedicated, throwaway
+# testnet contract (roadmap M3-19). Signing uses a test-only keypair adapter
+# (lib/wallet/test-adapter.ts), active only when NEXT_PUBLIC_E2E_TEST_MODE=1 -- never in a real
+# deployment. The indexer is built from kinlock-sdk's own Dockerfile and run against a
+# throwaway Postgres container, mirroring the pattern already proven in kinlock-sdk's own CI
+# (ci.yml's indexer-image job).
 name: e2e
 on:
   pull_request:
 permissions:
   contents: read
+env:
+  E2E_CONTRACT_ID: CAGUETPFJGRFLTKEITT2TMFKD6BNXNCMW7ZTG4ZAU4MORGTDQSEAEVOQ
+  E2E_START_LEDGER: "5421502"
+  E2E_TOKEN_ID: CD22WCDXZ5KITQHLC54YQNV3JVMC6T4GZ55EIBZW3UZFW4SMJ6YFI3NW
+  E2E_TOKEN_ISSUER: GBJLTOM4QCYNMLI3473IMQQIBTM6BP3STOZPATHZW2YSFA3HKAOLNNKX
+  E2E_RPC_URL: https://soroban-testnet.stellar.org
+  E2E_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Kinlock-Org/kinlock-sdk
+          path: kinlock-sdk-src
+
+      - name: Start Postgres and build the indexer image
+        run: |
+          docker network create ci
+          docker run -d --name pg --network ci -e POSTGRES_PASSWORD=ci postgres:17
+          until docker exec pg pg_isready -U postgres; do sleep 1; done
+          docker build -f kinlock-sdk-src/services/indexer/Dockerfile -t kinlock-indexer:e2e kinlock-sdk-src
+
+      - name: Migrate and start the indexer against the fixture contract
+        run: |
+          docker run --rm --network ci -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
+            --entrypoint node kinlock-indexer:e2e dist/db/migrate.js
+          docker run -d --name indexer --network ci -p 3001:3001 \
+            -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
+            -e STELLAR_RPC_URLS="$E2E_RPC_URL" \
+            -e STELLAR_NETWORK_PASSPHRASE="$E2E_NETWORK_PASSPHRASE" \
+            -e KINLOCK_CONTRACT_ID="$E2E_CONTRACT_ID" \
+            -e KINLOCK_START_LEDGER="$E2E_START_LEDGER" \
+            -e PORT=3001 \
+            kinlock-indexer:e2e
+
+      - name: Wait for the indexer to ingest the fixture payee
+        run: |
+          for i in $(seq 1 30); do
+            count=$(curl -sf http://localhost:3001/payees | node -e \
+              "process.stdin.once('data', d => console.log(JSON.parse(d).length))" 2>/dev/null || echo 0)
+            if [ "$count" -gt 0 ] 2>/dev/null; then echo "indexer ready: $count payee(s)"; exit 0; fi
+            sleep 2
+          done
+          echo "::error::indexer never ingested the fixture payee"
+          docker logs indexer
+          exit 1
+
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: echo 'E2E not configured yet (M3-19)'
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+        env:
+          NEXT_PUBLIC_E2E_TEST_MODE: "1"
+          NEXT_PUBLIC_STELLAR_NETWORK: testnet
+          NEXT_PUBLIC_RPC_URLS: ${{ env.E2E_RPC_URL }}
+          NEXT_PUBLIC_CONTRACT_ID: ${{ env.E2E_CONTRACT_ID }}
+          NEXT_PUBLIC_INDEXER_URL: http://localhost:3001
+          NEXT_PUBLIC_USDC_CONTRACT_ID: ${{ env.E2E_TOKEN_ID }}
+          NEXT_PUBLIC_USDC_ISSUER: ${{ env.E2E_TOKEN_ISSUER }}
+          E2E_SENDER_SECRET: ${{ secrets.E2E_SENDER_SECRET }}
+          E2E_PAYEE_SECRET: ${{ secrets.E2E_PAYEE_SECRET }}

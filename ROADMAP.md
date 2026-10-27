@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-27 (added `M3-33`: Scorecard Tier 2, CodeQL advanced setup) |
+| **Last updated** | 2026-10-27 (`M3-19` IN PROGRESS: e2e happy-path test + CI built, pending owner-provisioned signing secrets) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 32 | 19 | 8 | 5 | 0 | 0 | 0 | 59% |
+| 4 App | 32 | 19 | 9 | 4 | 0 | 0 | 0 | 59% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **216** | **79** | **22** | **90** | **0** | **25** | **0** | **41%** |
+| **All** | **216** | **79** | **23** | **89** | **0** | **25** | **0** | **41%** |
 
 ---
 
@@ -315,7 +315,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | IN PROGRESS | M3-13 | Audit checklist passed |
 | M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
-| M3-19 | Playwright happy-path: request → send → claim → verify | app | P0 | TODO | M3-13 | Green in CI against testnet |
+| M3-19 | Playwright happy-path: request → send → claim → verify | app | P0 | IN PROGRESS | M3-13 | Green in CI against testnet — test, wallet-signing bridge, and CI workflow all written and locally verified (lint/typecheck/unit tests/build all green); left `IN PROGRESS` because the actual signing secrets are owner-only by design (`AGENTS.md` §2) and the suite hasn't run green in real CI yet without them — see the changelog entry for exactly what's needed to close it |
 | M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | IN PROGRESS | M3-13 | Reviewer sign-off |
 | M3-21 | Error and empty states: trustline failure, expired, revoked, suspended, indexer lag | app | P0 | DONE | M3-09 | Each state has clear guidance |
 | M3-22 | Testnet hosting and environment config | app | P0 | IN PROGRESS | M3-19 | Public testnet URL live |
@@ -540,6 +540,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-27 | `feat/e2e-happy-path` | app | M3-19 IN PROGRESS | Built the full request→send→claim→verify Playwright test and its CI infrastructure, with the owner's explicit go-ahead on each ask-first piece (signing, secrets, cross-repo CI). **Fixture**: a dedicated, throwaway testnet deployment (contract `CAGUETPFJGRFLTKEITT2TMFKD6BNXNCMW7ZTG4ZAU4MORGTDQSEAEVOQ`, deployed at ledger 5421502) with its own admin, one attester, one allowlisted test SAC token, and one registered `Active` test payee (`payee_id` `000...0001`) — separate from the standing multisig testnet contract in `DEPLOYMENTS.md`, which this never touches. **Signing**: `/request` and `/send` both call the indexer's `listPayees()` server-side and refuse to render without at least one payee, so the test can't bypass the UI with a direct link — it has to really drive the wallet-connect flow. Added `createDefaultWalletAdapter` (`lib/wallet/index.ts`) and a test-only `createTestKeypairAdapter` (`lib/wallet/test-adapter.ts`, new `@stellar/stellar-sdk` dependency), switched in only when `NEXT_PUBLIC_E2E_TEST_MODE=1` *and* the page sets `window.__KINLOCK_E2E_TEST_SECRET__` (via Playwright's `addInitScript`, one secret per browser context so sender and payee sign independently). Verified empirically, not assumed, that this is a dynamic `import()` inside the conditional, not a top-level one — a top-level import would ship into every real build regardless of the flag (confirmed by inspecting a real `pnpm build` output before this fix, then again after: `Keypair.fromSecret`/`TransactionBuilder.fromXDR`/anything from `@stellar/stellar-sdk` is absent from every chunk in `.next/static/chunks` with the flag unset). **CI** (`.github/workflows/e2e.yml`): checks out `kinlock-sdk` alongside this repo, builds its indexer image from `services/indexer/Dockerfile`, runs it against a throwaway Postgres container pointed at the fixture contract — mirroring the pattern already proven in `kinlock-sdk`'s own `ci.yml` (`indexer-image` job) rather than inventing a new one — waits for it to ingest the fixture payee, then runs `pnpm e2e` against a real production build with `E2E_SENDER_SECRET`/`E2E_PAYEE_SECRET` from GitHub secrets. **What's verified**: `pnpm lint`, `pnpm typecheck`, `pnpm test` (167/167), `pnpm build`, and `pnpm exec playwright test --list` (discovers the new spec) all actually run and green. **What isn't**: the actual signing secrets are two throwaway testnet keypairs I generated locally (`e2e-sender`, `e2e-payee`) but deliberately never extracted myself — the owner needs to run `stellar keys show e2e-sender \| gh secret set E2E_SENDER_SECRET --repo Kinlock-Org/kinlock-app` (and the same for `e2e-payee`/`E2E_PAYEE_SECRET`) themselves before this can run green in real CI. Row stays `IN PROGRESS` until that happens and a real CI run confirms it. |
 | 2026-10-27 | Dependabot PR #61 (`dependabot/npm_and_yarn/creit.tech/stellar-wallets-kit-2.7.1`) | app | no row changes | Updated this branch with `main` (GitHub's branch-update API, no conflicts) so `roadmap-check` runs against current `main` instead of a stale pre-fix snapshot. That update's own commit is attributed to a maintainer account, not Dependabot, so the job's `dependabot[bot]` exemption correctly does not apply to it — this entry satisfies the same check for real. |
 | 2026-10-27 | `ci/codeql-advanced-setup` | app | M3-33 IN PROGRESS | Investigated the live Scorecard report (`SAST` 0/10, "not run on all commits") at the owner's request to find what's self-fixable. CodeQL's default setup only runs `weekly`, not configurable to run on every commit via the Code Scanning API (confirmed against GitHub's own REST docs). Added an advanced `codeql.yml` (push/PR/weekly schedule, matching `kinlock-contracts`), disabled default setup, and grouped `github/codeql-action*` in `dependabot.yml` to prevent the init/analyze version-drift bug found in `kinlock-contracts` PR #47. Left `IN PROGRESS` pending a real post-merge Scorecard re-run. |
 | 2026-10-26 | `ci/exempt-dependabot-roadmap-check` | app | M3-31 DONE, M3-32 DONE | `M3-31` merged; Dependabot and CodeQL both confirmed working for real. All Dependabot PRs opened since were failing `roadmap-check` for the same reason as the other repos: it can't know AGENTS.md §12's convention and can't edit `ROADMAP.md`. Added `if: github.actor != 'dependabot[bot]'` to the job. Verified against GitHub's own status-checks docs that a job skipped this way reports "Success" and does not block a required check. |
