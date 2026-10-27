@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-26 (`M3-31` DONE; added `M3-32`: exempt Dependabot from `roadmap-check`) |
+| **Last updated** | 2026-10-27 (`M3-02` corrected to `DONE`: already met, status was stale) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 31 | 19 | 7 | 5 | 0 | 0 | 0 | 61% |
+| 4 App | 31 | 20 | 6 | 5 | 0 | 0 | 0 | 65% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **215** | **79** | **21** | **90** | **0** | **25** | **0** | **42%** |
+| **All** | **215** | **80** | **20** | **90** | **0** | **25** | **0** | **42%** |
 
 ---
 
@@ -298,7 +298,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | ID | Task | Repo | Pri | Status | Depends on | Done when |
 |---|---|---|---|---|---|---|
 | M3-01 | Scaffold `kinlock-app`: Next.js, Tailwind, lint, CI | app | P0 | DONE | G1 | CI green |
-| M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | IN PROGRESS | M3-01 | Wallets swappable; signing flow tested |
+| M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | DONE | M3-01 | Wallets swappable; signing flow tested — `lib/wallet/` defines the `WalletAdapter` interface with one implementation (`createStellarWalletsKitAdapter`, Stellar Wallets Kit) exposing Freighter, xBull, Albedo, and Lobstr behind it; wired into all 4 money-moving flows (`/send`, `/claim/[id]`, `/locks/[id]`, `/payee`); signing flow tested in `lib/sdk.test.ts` (`walletSigner` bridges the adapter to the SDK `Signer`, asserts the adapter's `signTransaction` is called with the right XDR/passphrase/address, and the resulting signer round-trips through a real SDK call) — verified 2026-10-27 via `pnpm test` (166/166 passing) |
 | M3-03 | `lib/sdk.ts` and Zod-validated public config | app | P0 | DONE | M2-02 | Single SDK instance; env validation |
 | M3-04 | Landing page and plain-language explainer | app | P1 | DONE | M3-01 | Content reviewed against wording rules |
 | M3-05 | `/request`: payee creates a payment-request link | app | P0 | DONE | M2-03 | Link pre-fills the sender form; carries no authority |
@@ -539,6 +539,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-27 | `docs/m3-02-already-done` | app | M3-02 DONE | Found while resuming app work: `M3-02`'s Done-when ("wallets swappable; signing flow tested") was already fully met on `main` and the row was stale at `IN PROGRESS`. `lib/wallet/` already had the `WalletAdapter` interface and its Stellar Wallets Kit implementation (Freighter, xBull, Albedo, Lobstr behind one interface), already wired into all 4 money-moving flows, and `lib/sdk.test.ts` already had a dedicated signing-flow test bridging the adapter to the SDK signer. No code changed; corrected the status after running `pnpm test` (166/166 passing) to confirm. |
 | 2026-10-26 | `ci/exempt-dependabot-roadmap-check` | app | M3-31 DONE, M3-32 DONE | `M3-31` merged; Dependabot and CodeQL both confirmed working for real. All Dependabot PRs opened since were failing `roadmap-check` for the same reason as the other repos: it can't know AGENTS.md §12's convention and can't edit `ROADMAP.md`. Added `if: github.actor != 'dependabot[bot]'` to the job. Verified against GitHub's own status-checks docs that a job skipped this way reports "Success" and does not block a required check. |
 | 2026-10-26 | `ci/pin-action-shas` | app | M3-30 DONE, M3-31 IN PROGRESS | Confirmed `M3-30` live: fetched `api.scorecard.dev/projects/github.com/Kinlock-Org/kinlock-app`, score 4.9/10 — marked `DONE`. Started Tier 1 remediation (`M3-31`): pinned `actions/checkout@v4`, `pnpm/action-setup@v4`, `actions/setup-node@v4` to commit SHAs across `ci.yml`, `e2e.yml`, `docs-in-sync.yml`, `roadmap-check.yml` (resolved via `gh api .../git/refs/tags/{tag}`); added `.github/dependabot.yml`; enabled CodeQL default setup for `actions`+`javascript-typescript` via the Code Scanning API. Left `IN PROGRESS` pending a real Scorecard re-run. |
 | 2026-10-26 | `ci/scorecard` | app | M3-30 IN PROGRESS | Added `.github/workflows/scorecard.yml` (OpenSSF Scorecard), copied from the current canonical `ossf/scorecard/.github/workflows/scorecard-analysis.yml`, pinned to the same commit SHAs upstream uses. `push`-to-`main` and weekly schedule only (`pull_request` is documented upstream as experimental). `publish_results: true` since this repo is public. **Update 2026-10-26:** added the Scorecard badge to `README.md`'s badge row, per request. Left `IN PROGRESS` pending the first real run confirming the job executes and publishes successfully. |
