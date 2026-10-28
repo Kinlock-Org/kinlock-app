@@ -38,6 +38,11 @@ async function withTestWallet(page: Page, secret: string) {
   }, secret);
 }
 
+// Several real testnet round trips in sequence (create_lock, release, then verifyReceipt's
+// own sequential event-index probe over up to 8 indices -- app/claim/[id]/claim-logic.ts's
+// findReceiptIndex) comfortably exceed Playwright's 30s default against real RPC latency.
+test.setTimeout(120_000);
+
 test("request -> send -> claim -> verify", async ({ browser }) => {
   const senderContext = await browser.newContext();
   const payeeContext = await browser.newContext();
@@ -82,8 +87,12 @@ test("request -> send -> claim -> verify", async ({ browser }) => {
   await payee.getByRole("button", { name: "Claim this payment" }).click();
   await expect(payee.getByText("Payment claimed.")).toBeVisible({ timeout: 30_000 });
 
-  // 4. Anyone can verify the receipt from chain data.
-  const receiptHref = await payee.getByRole("link", { name: "View receipt" }).getAttribute("href");
+  // 4. Anyone can verify the receipt from chain data. findReceiptIndex (claim-logic.ts) probes
+  // up to 8 event indices sequentially against real chain data after the "claimed" text above
+  // already renders, so the link itself can take a while longer to appear.
+  const receiptLink = payee.getByRole("link", { name: "View receipt" });
+  await expect(receiptLink).toBeVisible({ timeout: 60_000 });
+  const receiptHref = await receiptLink.getAttribute("href");
   expect(receiptHref).toBeTruthy();
   await payee.goto(receiptHref as string);
   await expect(payee.getByText("Valid", { exact: true })).toBeVisible();
