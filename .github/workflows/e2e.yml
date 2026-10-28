@@ -16,6 +16,9 @@ env:
   E2E_TOKEN_ISSUER: GBJLTOM4QCYNMLI3473IMQQIBTM6BP3STOZPATHZW2YSFA3HKAOLNNKX
   E2E_RPC_URL: https://soroban-testnet.stellar.org
   E2E_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+  # sha256("ng-kinlock-e2e-test"), matching happy-path.spec.ts's PAYEE_ID and the registry
+  # fixture in kinlock-registry/fixtures/payees/ng/ng-kinlock-e2e-test.json.
+  E2E_FIXTURE_PAYEE_ID: d7b0001ebab9392f569b5cfc868803f517120926c8903fa9089c2e0d3f87f206
 jobs:
   e2e:
     runs-on: ubuntu-latest
@@ -28,6 +31,10 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: Kinlock-Org/kinlock-registry
+          # TEMPORARY: the fixture payee this job needs is still on an unmerged branch
+          # (kinlock-registry PR #38, self-authored, needs the owner's own review/merge --
+          # AGENTS.md's self-approval rule). Revert to the default (main) once it merges.
+          ref: feat/e2e-fixture-payee
           path: kinlock-registry-src
 
       - name: Start Postgres and build the indexer image
@@ -60,16 +67,24 @@ jobs:
             -e PORT=3001 \
             kinlock-indexer:e2e
 
-      - name: Wait for the indexer to ingest the fixture payee
+      - name: Wait for the indexer to ingest and registry-join the fixture payee
         run: |
-          for i in $(seq 1 30); do
-            count=$(curl -sf http://localhost:3001/payees | node -e \
+          # Event ingestion and the registry join run on separate schedules (the join re-runs
+          # every REGISTRY_SYNC_MS, 60s by default, not on every new row) -- checking for "any
+          # payee" isn't enough, since the pre-existing payee from earlier manual setup already
+          # satisfies that while this one's displayName is still null. Wait for this specific
+          # payee to actually show joined display data.
+          for i in $(seq 1 45); do
+            joined=$(curl -sf "http://localhost:3001/payees?payee_id=$E2E_FIXTURE_PAYEE_ID" | node -e \
               "let c=''; process.stdin.on('data', d => c+=d); \
-               process.stdin.on('end', () => console.log(JSON.parse(c).payees.length))" 2>/dev/null || echo 0)
-            if [ "$count" -gt 0 ] 2>/dev/null; then echo "indexer ready: $count payee(s)"; exit 0; fi
+               process.stdin.on('end', () => { \
+                 const p = JSON.parse(c).payees[0]; \
+                 console.log(p && p.displayName ? 1 : 0); \
+               })" 2>/dev/null || echo 0)
+            if [ "$joined" = "1" ]; then echo "indexer ready: fixture payee joined"; exit 0; fi
             sleep 2
           done
-          echo "::error::indexer never ingested the fixture payee"
+          echo "::error::indexer never registry-joined the fixture payee"
           docker logs indexer
           exit 1
 
