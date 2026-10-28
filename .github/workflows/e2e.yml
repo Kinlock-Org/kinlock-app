@@ -50,7 +50,8 @@ jobs:
         run: |
           for i in $(seq 1 30); do
             count=$(curl -sf http://localhost:3001/payees | node -e \
-              "process.stdin.once('data', d => console.log(JSON.parse(d).length))" 2>/dev/null || echo 0)
+              "let c=''; process.stdin.on('data', d => c+=d); \
+               process.stdin.on('end', () => console.log(JSON.parse(c).payees.length))" 2>/dev/null || echo 0)
             if [ "$count" -gt 0 ] 2>/dev/null; then echo "indexer ready: $count payee(s)"; exit 0; fi
             sleep 2
           done
