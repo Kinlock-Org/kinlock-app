@@ -32,6 +32,11 @@ jobs:
           docker run -d --name pg --network ci -e POSTGRES_PASSWORD=ci postgres:17
           until docker exec pg pg_isready -U postgres; do sleep 1; done
           docker build -f kinlock-sdk-src/services/indexer/Dockerfile -t kinlock-indexer:e2e kinlock-sdk-src
+          # actions/checkout's `path` is relative to this repo's own checkout, so
+          # kinlock-sdk-src/ sits *inside* it -- only needed as the Docker build context
+          # above. Remove it now: this repo's tsconfig.json includes "**/*.ts", so leaving
+          # it would pull kinlock-sdk's own TS files into the Next.js build's type check.
+          rm -rf kinlock-sdk-src
 
       - name: Migrate and start the indexer against the fixture contract
         run: |
