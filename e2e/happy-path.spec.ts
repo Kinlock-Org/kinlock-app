@@ -8,13 +8,17 @@
  * sender and payee sign with different throwaway testnet keys without any real wallet UI.
  *
  * `E2E_SENDER_SECRET` and `E2E_PAYEE_SECRET` are read from the environment; they're never
- * written to a file or logged. `PAYEE_ID` is a fixture payee registered once on a dedicated
- * e2e-only testnet contract (not the standing one in `DEPLOYMENTS.md`) -- see the roadmap
- * changelog entry for this row for how it was set up.
+ * written to a file or logged. `PAYEE_ID` is `sha256("ng-kinlock-e2e-test")` -- `/request` and
+ * `/send` only list payees with registry-joined display data (`lib/indexer/index.ts`'s
+ * `payable()`), so the fixture payee also needed a matching, hash-bound entry in
+ * `kinlock-registry/fixtures/payees/ng/ng-kinlock-e2e-test.json` (and its attester in
+ * `fixtures/attesters/kinlock-e2e-attester.json`), registered on the dedicated e2e-only
+ * testnet contract (not the standing one in `DEPLOYMENTS.md`) -- see the roadmap changelog
+ * entry for this row for how it was set up.
  */
 import { expect, type Page, test } from "@playwright/test";
 
-const PAYEE_ID = "0000000000000000000000000000000000000000000000000000000000000001";
+const PAYEE_ID = "d7b0001ebab9392f569b5cfc868803f517120926c8903fa9089c2e0d3f87f206";
 
 function senderSecret(): string {
   const v = process.env.E2E_SENDER_SECRET;

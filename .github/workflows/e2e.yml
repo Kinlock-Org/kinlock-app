@@ -25,6 +25,10 @@ jobs:
         with:
           repository: Kinlock-Org/kinlock-sdk
           path: kinlock-sdk-src
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Kinlock-Org/kinlock-registry
+          path: kinlock-registry-src
 
       - name: Start Postgres and build the indexer image
         run: |
@@ -32,10 +36,13 @@ jobs:
           docker run -d --name pg --network ci -e POSTGRES_PASSWORD=ci postgres:17
           until docker exec pg pg_isready -U postgres; do sleep 1; done
           docker build -f kinlock-sdk-src/services/indexer/Dockerfile -t kinlock-indexer:e2e kinlock-sdk-src
-          # actions/checkout's `path` is relative to this repo's own checkout, so
-          # kinlock-sdk-src/ sits *inside* it -- only needed as the Docker build context
-          # above. Remove it now: this repo's tsconfig.json includes "**/*.ts", so leaving
-          # it would pull kinlock-sdk's own TS files into the Next.js build's type check.
+          # actions/checkout's `path` is relative to this repo's own checkout, so both
+          # kinlock-sdk-src/ and kinlock-registry-src/ sit *inside* it. kinlock-sdk-src/ was
+          # only needed as the Docker build context above, so it's removed now: this repo's
+          # tsconfig.json includes "**/*.ts", so leaving it would pull kinlock-sdk's own TS
+          # files into the Next.js build's type check. kinlock-registry-src/ stays -- the
+          # indexer container bind-mounts it below for REGISTRY_DIR -- but it's excluded in
+          # tsconfig.json directly, the same reason.
           rm -rf kinlock-sdk-src
 
       - name: Migrate and start the indexer against the fixture contract
@@ -43,11 +50,13 @@ jobs:
           docker run --rm --network ci -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
             --entrypoint node kinlock-indexer:e2e dist/db/migrate.js
           docker run -d --name indexer --network ci -p 3001:3001 \
+            -v "$(pwd)/kinlock-registry-src:/registry:ro" \
             -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
             -e STELLAR_RPC_URLS="$E2E_RPC_URL" \
             -e STELLAR_NETWORK_PASSPHRASE="$E2E_NETWORK_PASSPHRASE" \
             -e KINLOCK_CONTRACT_ID="$E2E_CONTRACT_ID" \
             -e KINLOCK_START_LEDGER="$E2E_START_LEDGER" \
+            -e REGISTRY_DIR=/registry/fixtures \
             -e PORT=3001 \
             kinlock-indexer:e2e
 
@@ -82,3 +91,14 @@ jobs:
           NEXT_PUBLIC_USDC_ISSUER: ${{ env.E2E_TOKEN_ISSUER }}
           E2E_SENDER_SECRET: ${{ secrets.E2E_SENDER_SECRET }}
           E2E_PAYEE_SECRET: ${{ secrets.E2E_PAYEE_SECRET }}
+          # claim-fragment-privacy.spec.ts's default (lock 11) is on the standing testnet
+          # contract, not this job's dedicated fixture one -- lock 1 there is the equivalent.
+          E2E_PRIVACY_TEST_LOCK_ID: "1"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
