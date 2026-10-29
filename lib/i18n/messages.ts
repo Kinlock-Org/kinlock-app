@@ -15,7 +15,9 @@ export type MessageKey = Leaves<Messages>;
 export function t(key: MessageKey): string {
   let node: unknown = en;
   for (const part of key.split(".")) {
-    node = (node as Record<string, unknown>)[part];
+    // Read-only traversal of the bundled, build-time `en.json`; nothing is ever assigned
+    // through `node`, so there's no write path for a `__proto__`/`constructor` key to pollute.
+    node = (node as Record<string, unknown>)[part]; // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop
   }
   return node as string;
 }
@@ -25,7 +27,8 @@ export function hasMessage(key: string): boolean {
   let node: unknown = en;
   for (const part of key.split(".")) {
     if (node === null || typeof node !== "object") return false;
-    node = (node as Record<string, unknown>)[part];
+    // Same read-only traversal as `t()` above; see that comment.
+    node = (node as Record<string, unknown>)[part]; // nosemgrep: javascript.lang.security.audit.prototype-pollution.prototype-pollution-loop.prototype-pollution-loop
   }
   return typeof node === "string";
 }
