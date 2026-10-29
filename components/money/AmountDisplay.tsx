@@ -10,16 +10,21 @@ import { RateNotice } from "./RateNotice";
 export function AmountDisplay(props: {
   /** Exact decimal string from the SDK's fromBaseUnits. */
   decimal: string;
-  assetCode: string;
-  issuer: string;
+  assetCode?: string;
+  issuer?: string;
   locale: string;
   /** The payee's ISO 4217 currency from registry data, if any. */
   localCurrency?: string;
 }) {
   return (
     <span className="amount">
-      <span className="amount-value">{formatTokenAmount(props.decimal, props.locale)}</span>{" "}
-      <AssetLabel code={props.assetCode} issuer={props.issuer} />
+      <span className="amount-value">{formatTokenAmount(props.decimal, props.locale)}</span>
+      {props.assetCode && props.issuer ? (
+        <>
+          {" "}
+          <AssetLabel code={props.assetCode} issuer={props.issuer} />
+        </>
+      ) : null}
       {props.localCurrency ? <RateNotice hasRate={false} /> : null}
     </span>
   );

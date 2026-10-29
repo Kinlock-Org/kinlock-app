@@ -73,7 +73,7 @@ function Details({
             locale={locale}
           />
         ) : (
-          fromBaseUnits(receipt.amount)
+          <AmountDisplay decimal={fromBaseUnits(receipt.amount)} locale={locale} />
         )}
       </dd>
       {receipt.trancheIndex !== undefined ? (

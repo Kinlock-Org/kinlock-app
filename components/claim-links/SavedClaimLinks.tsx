@@ -1,5 +1,6 @@
 "use client";
 
+import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
 import { t } from "@/lib/i18n/messages";
 import { useSavedClaimLinks } from "./useSavedClaimLinks";
 
@@ -22,9 +23,10 @@ export function SavedClaimLinks() {
             </span>
             <span className="text-sm">
               {t("claimLinks.savedAt")}:{" "}
-              <time dateTime={link.savedAt}>
-                {link.savedAt.replace("T", " ").slice(0, 16)} {t("time.utc")}
-              </time>
+              <DateTimeDisplay
+                unixSeconds={BigInt(Math.floor(Date.parse(link.savedAt) / 1000))}
+                locale={s.locale}
+              />
             </span>
             <span className="flex gap-3">
               <button type="button" onClick={() => s.copy(link)} className="underline">
