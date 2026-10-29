@@ -1,18 +1,119 @@
-# DRAFT (ask-first: CI). Playwright happy path against testnet (M3-19).
+# Playwright happy path (request -> send -> claim -> verify) against a dedicated, throwaway
+# testnet contract (roadmap M3-19). Signing uses a test-only keypair adapter
+# (lib/wallet/test-adapter.ts), active only when NEXT_PUBLIC_E2E_TEST_MODE=1 -- never in a real
+# deployment. The indexer is built from kinlock-sdk's own Dockerfile and run against a
+# throwaway Postgres container, mirroring the pattern already proven in kinlock-sdk's own CI
+# (ci.yml's indexer-image job).
 name: e2e
 on:
   pull_request:
 permissions:
   contents: read
+env:
+  E2E_CONTRACT_ID: CAGUETPFJGRFLTKEITT2TMFKD6BNXNCMW7ZTG4ZAU4MORGTDQSEAEVOQ
+  E2E_START_LEDGER: "5421502"
+  E2E_TOKEN_ID: CD22WCDXZ5KITQHLC54YQNV3JVMC6T4GZ55EIBZW3UZFW4SMJ6YFI3NW
+  E2E_TOKEN_ISSUER: GBJLTOM4QCYNMLI3473IMQQIBTM6BP3STOZPATHZW2YSFA3HKAOLNNKX
+  E2E_RPC_URL: https://soroban-testnet.stellar.org
+  E2E_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
+  # sha256("ng-kinlock-e2e-test"), matching happy-path.spec.ts's PAYEE_ID and the registry
+  # fixture in kinlock-registry/fixtures/payees/ng/ng-kinlock-e2e-test.json.
+  E2E_FIXTURE_PAYEE_ID: d7b0001ebab9392f569b5cfc868803f517120926c8903fa9089c2e0d3f87f206
 jobs:
   e2e:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Kinlock-Org/kinlock-sdk
+          path: kinlock-sdk-src
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          repository: Kinlock-Org/kinlock-registry
+          # TEMPORARY: the fixture payee this job needs is still on an unmerged branch
+          # (kinlock-registry PR #38, self-authored, needs the owner's own review/merge --
+          # AGENTS.md's self-approval rule). Revert to the default (main) once it merges.
+          ref: feat/e2e-fixture-payee
+          path: kinlock-registry-src
+
+      - name: Start Postgres and build the indexer image
+        run: |
+          docker network create ci
+          docker run -d --name pg --network ci -e POSTGRES_PASSWORD=ci postgres:17
+          until docker exec pg pg_isready -U postgres; do sleep 1; done
+          docker build -f kinlock-sdk-src/services/indexer/Dockerfile -t kinlock-indexer:e2e kinlock-sdk-src
+          # actions/checkout's `path` is relative to this repo's own checkout, so both
+          # kinlock-sdk-src/ and kinlock-registry-src/ sit *inside* it. kinlock-sdk-src/ was
+          # only needed as the Docker build context above, so it's removed now: this repo's
+          # tsconfig.json includes "**/*.ts", so leaving it would pull kinlock-sdk's own TS
+          # files into the Next.js build's type check. kinlock-registry-src/ stays -- the
+          # indexer container bind-mounts it below for REGISTRY_DIR -- but it's excluded in
+          # tsconfig.json directly, the same reason.
+          rm -rf kinlock-sdk-src
+
+      - name: Migrate and start the indexer against the fixture contract
+        run: |
+          docker run --rm --network ci -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
+            --entrypoint node kinlock-indexer:e2e dist/db/migrate.js
+          docker run -d --name indexer --network ci -p 3001:3001 \
+            -v "$(pwd)/kinlock-registry-src:/registry:ro" \
+            -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
+            -e STELLAR_RPC_URLS="$E2E_RPC_URL" \
+            -e STELLAR_NETWORK_PASSPHRASE="$E2E_NETWORK_PASSPHRASE" \
+            -e KINLOCK_CONTRACT_ID="$E2E_CONTRACT_ID" \
+            -e KINLOCK_START_LEDGER="$E2E_START_LEDGER" \
+            -e REGISTRY_DIR=/registry/fixtures \
+            -e PORT=3001 \
+            kinlock-indexer:e2e
+
+      - name: Wait for the indexer to ingest and registry-join the fixture payee
+        run: |
+          # Event ingestion and the registry join run on separate schedules (the join re-runs
+          # every REGISTRY_SYNC_MS, 60s by default, not on every new row) -- checking for "any
+          # payee" isn't enough, since the pre-existing payee from earlier manual setup already
+          # satisfies that while this one's displayName is still null. Wait for this specific
+          # payee to actually show joined display data.
+          for i in $(seq 1 45); do
+            joined=$(curl -sf "http://localhost:3001/payees?payee_id=$E2E_FIXTURE_PAYEE_ID" | node -e \
+              "let c=''; process.stdin.on('data', d => c+=d); \
+               process.stdin.on('end', () => { \
+                 const p = JSON.parse(c).payees[0]; \
+                 console.log(p && p.displayName ? 1 : 0); \
+               })" 2>/dev/null || echo 0)
+            if [ "$joined" = "1" ]; then echo "indexer ready: fixture payee joined"; exit 0; fi
+            sleep 2
+          done
+          echo "::error::indexer never registry-joined the fixture payee"
+          docker logs indexer
+          exit 1
+
       - uses: pnpm/action-setup@b906affcce14559ad1aafd4ab0e942779e9f58b1 # v4
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: 20
           cache: pnpm
       - run: pnpm install --frozen-lockfile
-      - run: echo 'E2E not configured yet (M3-19)'
+      - run: pnpm exec playwright install --with-deps chromium
+      - run: pnpm e2e
+        env:
+          NEXT_PUBLIC_E2E_TEST_MODE: "1"
+          NEXT_PUBLIC_STELLAR_NETWORK: testnet
+          NEXT_PUBLIC_RPC_URLS: ${{ env.E2E_RPC_URL }}
+          NEXT_PUBLIC_CONTRACT_ID: ${{ env.E2E_CONTRACT_ID }}
+          NEXT_PUBLIC_INDEXER_URL: http://localhost:3001
+          NEXT_PUBLIC_USDC_CONTRACT_ID: ${{ env.E2E_TOKEN_ID }}
+          NEXT_PUBLIC_USDC_ISSUER: ${{ env.E2E_TOKEN_ISSUER }}
+          E2E_SENDER_SECRET: ${{ secrets.E2E_SENDER_SECRET }}
+          E2E_PAYEE_SECRET: ${{ secrets.E2E_PAYEE_SECRET }}
+          # claim-fragment-privacy.spec.ts's default (lock 11) is on the standing testnet
+          # contract, not this job's dedicated fixture one -- lock 1 there is the equivalent.
+          E2E_PRIVACY_TEST_LOCK_ID: "1"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: ${{ !cancelled() }}
+        with:
+          name: playwright-report
+          path: |
+            test-results/
+            playwright-report/
+          retention-days: 7
