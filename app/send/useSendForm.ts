@@ -18,7 +18,7 @@ import {
   toBaseUnits,
   walletSigner,
 } from "@/lib/sdk";
-import { createStellarWalletsKitAdapter, type WalletAdapter } from "@/lib/wallet";
+import { createDefaultWalletAdapter, type WalletAdapter } from "@/lib/wallet";
 import { defaultExpiryDate, draftProblem, prefillFrom, verdict } from "./send-logic";
 
 type Stage = "edit" | "review" | "sending" | "done";
@@ -81,7 +81,7 @@ export function useSendForm(payeeIds: string[]) {
 
   async function connect() {
     setError(null);
-    wallet.current ??= createStellarWalletsKitAdapter(publicConfig().networkPassphrase);
+    wallet.current ??= await createDefaultWalletAdapter(publicConfig().networkPassphrase);
     try {
       setAddress(await wallet.current.connect());
     } catch {
