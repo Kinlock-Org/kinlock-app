@@ -16,7 +16,7 @@ import {
   verifyReceipt,
   walletSigner,
 } from "@/lib/sdk";
-import { createStellarWalletsKitAdapter, type WalletAdapter } from "@/lib/wallet";
+import { createDefaultWalletAdapter, type WalletAdapter } from "@/lib/wallet";
 import {
   checkReference,
   findReceiptIndex,
@@ -85,7 +85,7 @@ export function useClaim(lockIdText: string) {
 
   async function connect() {
     setError(null);
-    wallet.current ??= createStellarWalletsKitAdapter(publicConfig().networkPassphrase);
+    wallet.current ??= await createDefaultWalletAdapter(publicConfig().networkPassphrase);
     try {
       setAddress(await wallet.current.connect());
     } catch {
