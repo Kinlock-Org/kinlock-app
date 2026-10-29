@@ -65,7 +65,7 @@ The audit resolved inconsistent mentions of ledger and network interactions acro
 
 ## 4. Automated Regression Guards
 
-The test suite in [`lib/i18n/messages.test.ts`](file:///G:/明星图片/kinlock-app/lib/i18n/messages.test.ts) has been expanded to enforce these invariants on every CI run:
+The test suite in [`lib/i18n/messages.test.ts`](../lib/i18n/messages.test.ts) has been expanded to enforce these invariants on every CI run:
 
 1. **Exact Receipt Headline**: Asserts `t("receipt.headline") === "Payment to verified payee"`.
 2. **Non-Empty String Resolution**: Confirms all 293 keys resolve to non-empty strings.
