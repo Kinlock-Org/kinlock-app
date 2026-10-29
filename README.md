@@ -1,6 +1,7 @@
 # kinlock-app
 
 [![CI](https://github.com/Kinlock-Org/kinlock-app/actions/workflows/ci.yml/badge.svg)](https://github.com/Kinlock-Org/kinlock-app/actions/workflows/ci.yml)
+[![OpenSSF Scorecard](https://api.scorecard.dev/projects/github.com/Kinlock-Org/kinlock-app/badge)](https://scorecard.dev/viewer/?uri=github.com/Kinlock-Org/kinlock-app)
 [![License: Apache-2.0](https://img.shields.io/badge/license-Apache--2.0-blue.svg)](LICENSE)
 [![Live demo](https://img.shields.io/badge/demo-live-brightgreen)](https://kinlock-app.vercel.app)
 

@@ -10,8 +10,11 @@
  * script, an error-tracker payload) echoing `window.location.href` or similar. The request
  * listener below is attached before navigation, so it also covers the initial request.
  *
- * Lock 11 is a real lock on the testnet contract (created 2026-10-08, verifying roadmap M3-06);
- * any Open lock id would do, since this test never checks whether the reference is valid.
+ * Any Open lock id on whichever contract `NEXT_PUBLIC_CONTRACT_ID` points at will do, since this
+ * test never checks whether the reference is valid -- set `E2E_PRIVACY_TEST_LOCK_ID` to match
+ * when that's not the standing testnet contract's lock 11 (created 2026-10-08, verifying roadmap
+ * M3-06), e.g. the dedicated e2e-only contract CI points at for M3-19's happy path (lock 1
+ * there, created alongside that work).
  */
 import { buildClaimLink, generateSalt } from "@kinlock/sdk";
 import { expect, test } from "@playwright/test";
@@ -20,7 +23,7 @@ const SECRET_REFERENCE = "e2e-fragment-privacy-check-reference";
 // Must be a real generateSalt()-shaped value: parseClaimLink (and so the app's own fragment
 // handling) rejects anything else before ever reaching the code this test is trying to exercise.
 const SECRET_SALT = generateSalt();
-const LOCK_ID = "11";
+const LOCK_ID = process.env.E2E_PRIVACY_TEST_LOCK_ID ?? "11";
 
 test("the claim-link fragment never appears in any network request", async ({ page }) => {
   const leaks: string[] = [];
