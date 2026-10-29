@@ -18,8 +18,8 @@ The Next.js front end: payee payment requests, the sender's lock flow, the payee
 | `/send` | Sender picks a payee, sets a schedule, sees preflight results, funds a lock, gets a claim link |
 | `/claim/[id]` | Payee verifies the reference against the on-chain `ref_hash`, then releases or declines |
 | `/locks/[id]` | Lock detail with refund, shown only when the contract allows it |
-| `/r/[txHash]/[eventIndex]`, `/verify` | Receipts rebuilt from chain data. "Payment to verified payee" — nothing more |
-| `/payee`, `/attester` | **Stubs** (`M3-11`, `M3-12`) |
+| `/payee` | **Stub** (`M3-11`) |
+| `/attester` | Read-only payout account checks (`M3-12`): verifies account existence, native XLM float vs reserve requirement, and USDC trustline status (missing vs unauthorized vs room) against Stellar Horizon with zero keys or signing |
 
 > **Status: the core money flows are real; the dashboard isn't.** Claim, decline, refund, receipts and verify read the **chain** through the SDK, never the indexer. `/send` is `M3-06` in progress, the Playwright happy path (`M3-19`) is still a `test.fixme` stub, and there is no live FX rate yet, so amounts show **USD only with a note**. Full state in `ROADMAP.md` (Phase 4: 11 `DONE`, 6 `IN PROGRESS`, 9 `TODO`).
 
