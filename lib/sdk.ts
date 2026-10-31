@@ -48,6 +48,26 @@ function configs() {
 export const publicConfig = (): PublicConfig => configs().publicConfig;
 export const kinlockConfig = (): KinlockConfig => configs().kinlock;
 
+/** The one asset locks are made in: its code, issuer and token contract, always read together. */
+export interface ConfiguredAsset {
+  code: string;
+  issuer: string;
+  contractId: string;
+}
+
+/**
+ * Code, issuer and contract come from the same validated config so a label can never pair the
+ * code the app assumed with the token actually configured (AGENTS.md §8.3). Roadmap M3-15.
+ */
+export const configuredAsset = (): ConfiguredAsset => {
+  const c = publicConfig();
+  return {
+    code: c.NEXT_PUBLIC_USDC_ASSET_CODE,
+    issuer: c.NEXT_PUBLIC_USDC_ISSUER,
+    contractId: c.NEXT_PUBLIC_USDC_CONTRACT_ID,
+  };
+};
+
 /** Turn the connected wallet into the SDK's signer for `address`. */
 export function walletSigner(wallet: WalletAdapter, address: string): Signer {
   return {

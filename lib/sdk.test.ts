@@ -20,6 +20,7 @@ const ENV = {
   NEXT_PUBLIC_INDEXER_URL: "https://indexer.example",
   NEXT_PUBLIC_USDC_CONTRACT_ID: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
   NEXT_PUBLIC_USDC_ISSUER: "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+  NEXT_PUBLIC_USDC_ASSET_CODE: "USDC",
 };
 for (const [k, v] of Object.entries(ENV)) process.env[k] = v;
 
@@ -40,6 +41,14 @@ describe("lib/sdk", () => {
       allowHttp: false,
     });
     expect(lib.kinlockConfig()).toBe(lib.kinlockConfig());
+  });
+
+  it("hands a label the code, issuer and contract of the one configured asset", () => {
+    expect(lib.configuredAsset()).toEqual({
+      code: ENV.NEXT_PUBLIC_USDC_ASSET_CODE,
+      issuer: ENV.NEXT_PUBLIC_USDC_ISSUER,
+      contractId: ENV.NEXT_PUBLIC_USDC_CONTRACT_ID,
+    });
   });
 
   it("passes the bound config to every SDK call", async () => {

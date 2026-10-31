@@ -40,7 +40,8 @@
     "refundReasonLabel": "Refund reason",
     "ledgerTimeLabel": "When this happened (UTC)",
     "txHashLabel": "Transaction",
-    "eventIndexLabel": "Event number"
+    "eventIndexLabel": "Event number",
+    "assetUnknown": "The asset could not be confirmed."
   },
   "pages": {
     "home": {
@@ -84,7 +85,7 @@
       "referenceLabel": "Payment reference",
       "referenceHint": "For example an invoice or student number. Anyone with this link can see it; on chain it is stored only as a hash.",
       "scheduleHeading": "Payment schedule",
-      "amountLabel": "Amount (USDC)",
+      "amountLabel": "Amount",
       "unlockLabel": "Can be claimed from (UTC date)",
       "addTranche": "Add a payment",
       "removeTranche": "Remove this payment",
@@ -111,7 +112,7 @@
       "referenceLabel": "Payment reference",
       "referenceHint": "For example an invoice or student number. Only you and whoever you give the claim link to can see it; on chain it is stored as a hash.",
       "scheduleHeading": "When the payee can claim",
-      "amountLabel": "Amount (USDC)",
+      "amountLabel": "Amount",
       "unlockLabel": "Can be claimed from (UTC date)",
       "addTranche": "Add a payment",
       "removeTranche": "Remove this payment",

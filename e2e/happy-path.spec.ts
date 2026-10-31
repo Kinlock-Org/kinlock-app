@@ -58,7 +58,8 @@ test("request -> send -> claim -> verify", async ({ browser }) => {
   await payee.goto("/request");
   await payee.getByLabel("Who is being paid").selectOption({ value: PAYEE_ID });
   await payee.getByLabel("Payment reference").fill(reference);
-  await payee.getByLabel("Amount (USDC)").fill("1");
+  // The label is "Amount" plus AssetLabel (configured code and issuer), so match the prefix.
+  await payee.getByLabel(/^Amount/).fill("1");
   await payee.getByLabel("Can be claimed from (UTC date)").fill(today);
   await payee.getByRole("button", { name: "Create link" }).click();
   const requestLink = await payee.locator("output").textContent();

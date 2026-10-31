@@ -32,6 +32,12 @@ const PublicConfigSchema = z.object({
   NEXT_PUBLIC_USDC_CONTRACT_ID: z.string().regex(/^C[A-Z2-7]{55}$/),
   /** USDC issuer, shown with the asset code everywhere (AssetLabel). */
   NEXT_PUBLIC_USDC_ISSUER: z.string().regex(/^G[A-Z2-7]{55}$/),
+  /**
+   * The code of that token, from its issuer's own registration (Stellar asset codes are 1-12
+   * characters). Displayed with the issuer, so a look-alike asset can never be labelled by the
+   * code the app assumed. Never a literal in a component: read all three through `configuredAsset()`.
+   */
+  NEXT_PUBLIC_USDC_ASSET_CODE: z.string().regex(/^[A-Z0-9:_-]{1,12}$/),
 });
 
 export type PublicConfig = z.infer<typeof PublicConfigSchema> & { networkPassphrase: string };
@@ -45,6 +51,7 @@ export function loadPublicConfig(
     NEXT_PUBLIC_INDEXER_URL: process.env.NEXT_PUBLIC_INDEXER_URL,
     NEXT_PUBLIC_USDC_CONTRACT_ID: process.env.NEXT_PUBLIC_USDC_CONTRACT_ID,
     NEXT_PUBLIC_USDC_ISSUER: process.env.NEXT_PUBLIC_USDC_ISSUER,
+    NEXT_PUBLIC_USDC_ASSET_CODE: process.env.NEXT_PUBLIC_USDC_ASSET_CODE,
   },
 ): PublicConfig {
   const parsed = PublicConfigSchema.parse(env);

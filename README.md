@@ -27,7 +27,7 @@ The Next.js front end: payee payment requests, the sender's lock flow, the payee
 
 - **Chain is truth.** Every page that can move money calls `getLock` / `getPayee` / `verifyReceipt`. Postgres-backed lists are for dashboards, and the dashboard doesn't read them for actions.
 - **The claim-link fragment stays in the browser.** `#r=…&s=…` is never sent to a server, logged, or handed to a third party. `/claim/*` gets a nonce-only CSP from `proxy.ts`, `Referrer-Policy: no-referrer` site-wide, and **zero third-party scripts or analytics**. Saved claim links live in `localStorage` with an export option.
-- **Money is shown honestly.** `AssetLabel` always prints code *and* issuer; `AmountDisplay` formats from `bigint`; `DateTimeDisplay` shows UTC and local time. `RateProvider` is an interface with no implementation yet — the rate path fails closed to USD-only rather than inventing a number (`M3-16`, `DEC-10`).
+- **Money is shown honestly.** `AssetLabel` always prints code *and* issuer, and both come from the configured asset (`NEXT_PUBLIC_USDC_ASSET_CODE` with `_ISSUER`, read together through `configuredAsset()`) so no amount can be labelled by a code the app assumed — `lib/asset-labeling.test.ts` enforces that; `AmountDisplay` formats from `bigint`; `DateTimeDisplay` shows UTC and local time. `RateProvider` is an interface with no implementation yet — the rate path fails closed to USD-only rather than inventing a number (`M3-16`, `DEC-10`).
 - **Nothing is hard-coded to a country.** Country and `local_currency` come from registry data. Every user-visible string lives in `messages/en.json`, keys are type-checked, and a test fails the build on an inline string; `Intl` handles numbers, currencies and dates (`M3-23` done — other locales are deferred, not missing by accident).
 - **Only `lib/sdk.ts` talks to the contract.** Wallets go through `lib/wallet/` using the Stellar Wallets Kit, so Freighter, xBull, Albedo and Lobstr are swappable.
 
@@ -44,7 +44,7 @@ pnpm e2e                                    # placeholder until M3-19
 
 Next.js 16 (App Router), React 19, TypeScript 7, Tailwind 4. Node 20 in CI.
 
-Configuration is Zod-validated in `lib/config.ts`. Required: `NEXT_PUBLIC_STELLAR_NETWORK`, `NEXT_PUBLIC_RPC_URLS`, `NEXT_PUBLIC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_ISSUER`. `NEXT_PUBLIC_INDEXER_URL` is optional — only list views need it, and the deployed testnet app currently runs without it. Copy `.env.example` to `.env.local`; never commit values.
+Configuration is Zod-validated in `lib/config.ts`. Required: `NEXT_PUBLIC_STELLAR_NETWORK`, `NEXT_PUBLIC_RPC_URLS`, `NEXT_PUBLIC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_ISSUER`, `NEXT_PUBLIC_USDC_ASSET_CODE`. `NEXT_PUBLIC_INDEXER_URL` is optional — only list views need it, and the deployed testnet app currently runs without it. Copy `.env.example` to `.env.local`; never commit values.
 
 Deploys to Vercel are currently **manual** (`vercel --prod`) — there's no deploy workflow, so a merged PR does not go live by itself.
 

@@ -11,6 +11,7 @@ import { browserStore, newClaimLink, saveClaimLink } from "@/lib/claim-links";
 import type { MessageKey } from "@/lib/i18n/messages";
 import {
   computeRefHash,
+  configuredAsset,
   createLock,
   generateSalt,
   preflight,
@@ -103,7 +104,7 @@ export function useSendForm(payeeIds: string[]) {
       setResults(
         await preflight({
           sender: address,
-          token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
+          token: configuredAsset().contractId,
           payeeId,
           total: total(),
           refHash,
@@ -126,7 +127,7 @@ export function useSendForm(payeeIds: string[]) {
       const { lockId } = await createLock(
         {
           sender: address,
-          token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
+          token: configuredAsset().contractId,
           payeeId,
           tranches: rows.map((r) => ({
             amount: toBaseUnits(r.amount.trim()),

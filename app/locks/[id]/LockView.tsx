@@ -4,7 +4,6 @@ import { trancheStatus } from "@/app/claim/[id]/claim-logic";
 import { phaseMessage, statusMessage } from "@/app/claim/[id]/claim-view-text";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
-import { ASSET_CODE } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { t } from "@/lib/i18n/messages";
 import { fromBaseUnits } from "@/lib/sdk";
@@ -28,7 +27,7 @@ function Amount({ p, baseUnits }: { p: LockPage; baseUnits: bigint }) {
   return p.lock?.token === p.usdc.contractId ? (
     <AmountDisplay
       decimal={fromBaseUnits(baseUnits)}
-      assetCode={ASSET_CODE}
+      assetCode={p.usdc.code}
       issuer={p.usdc.issuer}
       locale={p.locale}
     />

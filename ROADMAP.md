@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-10-29 (`docs/sync-canonical-contract-surface`: doc copies regenerated from canonical so `docs-in-sync` matches `.github`#34) |
+| **Last updated** | 2026-10-31 (`feat/asset-code-and-issuer`: M3-15 DONE, M3-34 added). Previous: 2026-10-29 (`docs/sync-canonical-contract-surface`: doc copies regenerated from canonical so `docs-in-sync` matches `.github`#34) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate) |
 | **Readiness** | See [§3](#3-progress-snapshot) |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 33 | 21 | 8 | 4 | 0 | 0 | 0 | 64% |
+| 4 App | 34 | 22 | 7 | 5 | 0 | 0 | 0 | 65% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **217** | **81** | **22** | **89** | **0** | **25** | **0** | **42%** |
+| **All** | **218** | **82** | **21** | **90** | **0** | **25** | **0** | **42%** |
 
 ---
 
@@ -311,7 +311,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-12 | `/attester` tooling: read-only account checks (trustline, authorization, XLM float) | app | P1 | TODO | M1-26 | Checks match the checklist script |
 | M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | DONE | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
 | M3-14 | Security headers, strict CSP, `Referrer-Policy`, no third-party scripts on `/claim/*` | app | P0 | DONE | M3-09 | Automated test confirms fragment never appears in any network request |
-| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | IN PROGRESS | M3-01 | Used everywhere money or time is shown |
+| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | DONE | M3-01 | Used everywhere money or time is shown — met 2026-10-31 on `feat/asset-code-and-issuer`: every amount render goes through `AmountDisplay`, and its code *and* issuer both come from config (`NEXT_PUBLIC_USDC_ASSET_CODE` + `_ISSUER`, read together via `configuredAsset()`); `lib/asset-labeling.test.ts` fails any amount shown by code alone, any quoted asset code in source, and any component that reads half the asset config |
 | M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | IN PROGRESS | M3-13 | Audit checklist passed |
 | M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
@@ -330,6 +330,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-31 | Scorecard remediation, Tier 1: pin every `uses:` in every workflow file to a commit SHA (`Pinned-Dependencies` was 3/10); add `.github/dependabot.yml` for `npm` + `github-actions` (`Dependency-Update-Tool` was 0/10); enable CodeQL default setup for `actions`+`javascript-typescript` via the Code Scanning API (`SAST` was 0/10) | app | P2 | DONE | M3-30 | Next scheduled Scorecard run shows `Pinned-Dependencies` at 10/10 and `Dependency-Update-Tool`/`SAST` both non-zero; verified against a real re-run, not assumed — merged; Dependabot and CodeQL both confirmed working for real |
 | M3-32 | `roadmap-check.yml` exempts Dependabot (`if: github.actor != 'dependabot[bot]'`): Dependabot has no way to know AGENTS.md §12's ROADMAP.md convention and can't be configured to edit it, so every Dependabot PR opened after `M3-31` was failing this required check for a reason unrelated to the dependency bump itself | app | P1 | DONE | M3-31 | `roadmap-check` reports success (skipped) on a real Dependabot PR; confirmed via GitHub's own status-checks docs that a job skipped by a job-level `if` reports "Success" and does not block a required check, not assumed |
 | M3-33 | Scorecard remediation, Tier 2: switch CodeQL from GitHub's default setup (`weekly` schedule only — not configurable via the Code Scanning API, confirmed against GitHub's own REST docs) to an advanced `codeql.yml` running on every push and PR, matching `kinlock-contracts`'s pattern (`SAST` was 0/10, "not run on all commits"); group `github/codeql-action*` in `dependabot.yml` so `init`/`analyze` can't drift apart the way they did in `kinlock-contracts` PR #47 | app | P2 | IN PROGRESS | M3-31 | Next scheduled Scorecard run shows `SAST` above 0; not yet verified against a real re-run (pending merge) |
+| M3-34 | Asset naming in prose copy: preflight statuses, `/send` and `/request` intros say "USDC" by name while the displayed *amounts* now follow the configured asset. Needs parameterised messages (`t()` takes no arguments today) so the code shown in copy cannot drift from `NEXT_PUBLIC_USDC_ASSET_CODE` | app | P1 | TODO | M3-15, M3-23 | No message names an asset code that config does not set; copy reviewed against hard rule 7 |
 
 ---
 
@@ -541,6 +542,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-31 | `feat/asset-code-and-issuer` | app | DONE: M3-15. Added: M3-34 | The asset code next to every amount was a literal (`lib/constants.ts` `ASSET_CODE = "USDC"`) while the token contract and issuer came from env, so pointing the app at a different allowed token would have printed a code nobody configured — the exact look-alike risk §8.3 exists for. `NEXT_PUBLIC_USDC_ASSET_CODE` is now Zod-validated beside the other two and all three are read as one value through `configuredAsset()`; `lib/sdk.ts` exports it, and 12 call sites use it (5 `AmountDisplay` renders, the 4 chain-read hooks, `/send` + `/request` amount labels, `createLock`'s token). The two amount inputs and `/request`'s total previously showed `Amount (USDC)` and an unlabelled number; all three now show code *and* issuer. `/r/[txHash]/[eventIndex]` + `/verify` print "The asset could not be confirmed." when the lock read fails instead of a bare number. New guard `lib/asset-labeling.test.ts` (165 checks) fails an amount shown by code alone, a quoted asset code in source, or a component reading half the asset config; each of the three was proven to fail by injecting it and reverting. `pnpm build` green without env (as CI runs it). Verified in a browser against the live fixture contract: `/send` and `/request` labels and `/locks/1` amounts all read `E2E · Issuer GBJL…NNKX` from config (a11y snapshots; the app's in-app browser surface could not screenshot). CI note: `.github/workflows/e2e.yml` gains `NEXT_PUBLIC_USDC_ASSET_CODE` (E2E token code, confirmed from Horizon: that issuer has exactly one asset) and `happy-path.spec.ts`'s label selector widens to `/^Amount/` — §2 needs a human OK on workflow changes. Residual found and parked as M3-34: prose copy (preflight statuses, page intros) still names USDC by hand
 | 2026-10-29 | `#64` | kinlock-app | no row changes | chore(deps-dev): bump vitest from 5.0.3 to 5.0.5 Dependabot PR landed by a maintainer. `roadmap-check.yml:14` only exempts runs whose actor is dependabot[bot], and a maintainer has already pushed to this branch, so the job runs here and needs a real ROADMAP.md diff: this row is that diff. No source, config or lockfile change is introduced by this commit and no row status moves. |
 | 2026-10-29 | `#62` | kinlock-app | no row changes | chore(deps): bump zod from 4.6.5 to 4.6.7 Dependabot PR landed by a maintainer. `roadmap-check.yml:14` only exempts runs whose actor is dependabot[bot], and a maintainer has already pushed to this branch, so the job runs here and needs a real ROADMAP.md diff: this row is that diff. No source, config or lockfile change is introduced by this commit and no row status moves. |
 | 2026-10-29 | `#57` | kinlock-app | no row changes | chore(deps-dev): bump @types/node from 26.6.4 to 26.6.5 Dependabot PR landed by a maintainer. `roadmap-check.yml:14` only exempts runs whose actor is dependabot[bot], and a maintainer has already pushed to this branch, so the job runs here and needs a real ROADMAP.md diff: this row is that diff. No source, config or lockfile change is introduced by this commit and no row status moves. |
