@@ -1,16 +1,19 @@
 "use client";
 
 import { useId } from "react";
+import { AmountDisplay } from "@/components/money/AmountDisplay";
+import { AssetLabel } from "@/components/money/AssetLabel";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
 import { MAX_TRANCHES } from "@/lib/constants";
-import { formatTokenAmount } from "@/lib/i18n/format";
 import { t } from "@/lib/i18n/messages";
+import { configuredAsset } from "@/lib/sdk";
 import { unixSecondsOf } from "./schedule";
 import { useRequestForm } from "./useRequestForm";
 
 /** The payee's request form. Markup only; state lives in useRequestForm. */
 export function RequestForm({ payees }: { payees: { payeeId: string; label: string }[] }) {
   const ids = { payee: useId(), reference: useId(), referenceHint: useId() };
+  const asset = configuredAsset();
   const f = useRequestForm(payees[0]?.payeeId ?? "");
   return (
     <form onSubmit={f.create} className="mt-6 flex flex-col gap-4" noValidate>
@@ -53,7 +56,10 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
               {t("pages.request.trancheLabel")} {i + 1}
             </span>
             <label className="flex flex-col gap-1">
-              <span>{t("pages.request.amountLabel")}</span>
+              <span className="flex items-baseline gap-2">
+                {t("pages.request.amountLabel")}{" "}
+                <AssetLabel code={asset.code} issuer={asset.issuer} />
+              </span>
               <input
                 inputMode="decimal"
                 value={row.amount}
@@ -93,7 +99,13 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
 
       {f.total ? (
         <p>
-          {t("pages.request.total")}: {formatTokenAmount(f.total, f.locale)}
+          {t("pages.request.total")}:
+          <AmountDisplay
+            decimal={f.total}
+            assetCode={asset.code}
+            issuer={asset.issuer}
+            locale={f.locale}
+          />
         </p>
       ) : null}
 

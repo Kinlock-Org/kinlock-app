@@ -5,7 +5,7 @@
  */
 import type { Lock, VerifyReceiptResult } from "@kinlock/sdk";
 import { useEffect, useState } from "react";
-import { getLock, publicConfig, verifyReceipt } from "@/lib/sdk";
+import { type ConfiguredAsset, configuredAsset, getLock, verifyReceipt } from "@/lib/sdk";
 
 type Phase = "loading" | "readFailed" | "ready";
 
@@ -37,16 +37,12 @@ export function useReceiptPage(txHash: string, eventIndex: number) {
     };
   }, [txHash, eventIndex]);
 
-  // publicConfig() validates the whole shared config (including the indexer URL, which this
+  // configuredAsset() reads the whole shared config (including the indexer URL, which this
   // page never uses) and throws if any of it is missing; asset labeling is display-only, so a
   // bad or incomplete config degrades to no label rather than failing the page.
-  let usdc: { contractId: string; issuer: string } | null = null;
+  let usdc: ConfiguredAsset | null = null;
   try {
-    const config = publicConfig();
-    usdc = {
-      contractId: config.NEXT_PUBLIC_USDC_CONTRACT_ID,
-      issuer: config.NEXT_PUBLIC_USDC_ISSUER,
-    };
+    usdc = configuredAsset();
   } catch {
     usdc = null;
   }

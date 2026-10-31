@@ -3,11 +3,12 @@
 import { useId } from "react";
 import { unixSecondsOf } from "@/app/request/schedule";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
+import { AssetLabel } from "@/components/money/AssetLabel";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
-import { ASSET_CODE, MAX_TRANCHES } from "@/lib/constants";
+import { MAX_TRANCHES } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { hasMessage, t } from "@/lib/i18n/messages";
-import { fromBaseUnits } from "@/lib/sdk";
+import { type ConfiguredAsset, fromBaseUnits } from "@/lib/sdk";
 import { idsOf, localCurrencyOf, preflightKey } from "./send-logic";
 import { type SendForm as Form, useSendForm } from "./useSendForm";
 
@@ -18,12 +19,12 @@ export interface PayeeOption {
 }
 
 /** The sender flow. Markup only; state lives in useSendForm. Roadmap M3-06. */
-export function SendForm({ payees, issuer }: { payees: PayeeOption[]; issuer: string }) {
+export function SendForm({ payees, asset }: { payees: PayeeOption[]; asset: ConfiguredAsset }) {
   const f = useSendForm(idsOf(payees));
-  return f.stage === "done" ? <Done f={f} /> : <Editor f={f} payees={payees} issuer={issuer} />;
+  return f.stage === "done" ? <Done f={f} /> : <Editor f={f} payees={payees} asset={asset} />;
 }
 
-function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer: string }) {
+function Editor({ f, payees, asset }: { f: Form; payees: PayeeOption[]; asset: ConfiguredAsset }) {
   const ids = {
     payee: useId(),
     reference: useId(),
@@ -85,7 +86,9 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
               {t("pages.send.trancheLabel")} {i + 1}
             </span>
             <label className="flex flex-col gap-1">
-              <span>{t("pages.send.amountLabel")}</span>
+              <span className="flex items-baseline gap-2">
+                {t("pages.send.amountLabel")} <AssetLabel code={asset.code} issuer={asset.issuer} />
+              </span>
               <input
                 inputMode="decimal"
                 value={row.amount}
@@ -146,8 +149,8 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
           {t("pages.send.total")}:{" "}
           <AmountDisplay
             decimal={fromBaseUnits(f.totalBase)}
-            assetCode={ASSET_CODE}
-            issuer={issuer}
+            assetCode={asset.code}
+            issuer={asset.issuer}
             locale={f.locale}
             localCurrency={localCurrency}
           />

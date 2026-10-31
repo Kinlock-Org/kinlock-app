@@ -1,11 +1,10 @@
 import type { Lock, VerifyReceiptResult } from "@kinlock/sdk";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
-import { ASSET_CODE } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { t } from "@/lib/i18n/messages";
 import { kindMessageKey, reasonMessageKey } from "@/lib/receipts/receipt-text";
-import { fromBaseUnits } from "@/lib/sdk";
+import { type ConfiguredAsset, fromBaseUnits } from "@/lib/sdk";
 
 /**
  * The verification result, shared by `/r/[txHash]/[eventIndex]` and `/verify`. Shows "Payment to
@@ -24,7 +23,7 @@ export function ReceiptResult({
   result: VerifyReceiptResult;
   locale: string;
   lock: Lock | null;
-  usdc: { contractId: string; issuer: string } | null;
+  usdc: ConfiguredAsset | null;
 }) {
   const reasonKey = reasonMessageKey(result.reason);
   return (
@@ -48,7 +47,7 @@ function Details({
   result: VerifyReceiptResult;
   locale: string;
   lock: Lock | null;
-  usdc: { contractId: string; issuer: string } | null;
+  usdc: ConfiguredAsset | null;
 }) {
   const receipt = result.receipt;
   if (!receipt) return null;
@@ -68,12 +67,15 @@ function Details({
         {lock && usdc ? (
           <AmountDisplay
             decimal={fromBaseUnits(receipt.amount)}
-            assetCode={ASSET_CODE}
+            assetCode={usdc.code}
             issuer={lock.token === usdc.contractId ? usdc.issuer : lock.token}
             locale={locale}
           />
         ) : (
-          fromBaseUnits(receipt.amount)
+          <span>
+            {fromBaseUnits(receipt.amount)}{" "}
+            <small className="text-sm">{t("receipt.assetUnknown")}</small>
+          </span>
         )}
       </dd>
       {receipt.trancheIndex !== undefined ? (

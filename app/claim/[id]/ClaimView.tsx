@@ -3,7 +3,6 @@
 import { useEffect, useRef } from "react";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
-import { ASSET_CODE } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { t } from "@/lib/i18n/messages";
 import { fromBaseUnits } from "@/lib/sdk";
@@ -28,7 +27,7 @@ function Amount({ c, baseUnits }: { c: Claim; baseUnits: bigint }) {
   return c.lock?.token === c.usdc.contractId ? (
     <AmountDisplay
       decimal={fromBaseUnits(baseUnits)}
-      assetCode={ASSET_CODE}
+      assetCode={c.usdc.code}
       issuer={c.usdc.issuer}
       locale={c.locale}
     />

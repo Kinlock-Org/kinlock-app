@@ -8,6 +8,7 @@ const env = {
   NEXT_PUBLIC_INDEXER_URL: "https://indexer.example",
   NEXT_PUBLIC_USDC_CONTRACT_ID: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA",
   NEXT_PUBLIC_USDC_ISSUER: "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5",
+  NEXT_PUBLIC_USDC_ASSET_CODE: "USDC",
 };
 
 describe("loadPublicConfig", () => {
@@ -34,8 +35,18 @@ describe("loadPublicConfig", () => {
       { NEXT_PUBLIC_USDC_ISSUER: "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA" },
       { NEXT_PUBLIC_RPC_URLS: "not a url" },
       { NEXT_PUBLIC_INDEXER_URL: "" },
+      { NEXT_PUBLIC_USDC_ASSET_CODE: undefined },
+      { NEXT_PUBLIC_USDC_ASSET_CODE: "" },
+      { NEXT_PUBLIC_USDC_ASSET_CODE: "usdc" },
+      { NEXT_PUBLIC_USDC_ASSET_CODE: "TOO_LONG_ASSET_CODE" },
     ]) {
       expect(() => loadPublicConfig({ ...env, ...bad })).toThrow();
     }
+  });
+
+  it("labels whatever asset is configured, so the code shown is not an assumption", () => {
+    expect(
+      loadPublicConfig({ ...env, NEXT_PUBLIC_USDC_ASSET_CODE: "E2E" }).NEXT_PUBLIC_USDC_ASSET_CODE,
+    ).toBe("E2E");
   });
 });

@@ -14,6 +14,8 @@ env:
   E2E_START_LEDGER: "5421502"
   E2E_TOKEN_ID: CD22WCDXZ5KITQHLC54YQNV3JVMC6T4GZ55EIBZW3UZFW4SMJ6YFI3NW
   E2E_TOKEN_ISSUER: GBJLTOM4QCYNMLI3473IMQQIBTM6BP3STOZPATHZW2YSFA3HKAOLNNKX
+  # The code of that token: Horizon lists exactly one asset for the issuer above.
+  E2E_TOKEN_CODE: E2E
   E2E_RPC_URL: https://soroban-testnet.stellar.org
   E2E_NETWORK_PASSPHRASE: "Test SDF Network ; September 2015"
   # sha256("ng-kinlock-e2e-test"), matching happy-path.spec.ts's PAYEE_ID and the registry
@@ -104,6 +106,7 @@ jobs:
           NEXT_PUBLIC_INDEXER_URL: http://localhost:3001
           NEXT_PUBLIC_USDC_CONTRACT_ID: ${{ env.E2E_TOKEN_ID }}
           NEXT_PUBLIC_USDC_ISSUER: ${{ env.E2E_TOKEN_ISSUER }}
+          NEXT_PUBLIC_USDC_ASSET_CODE: ${{ env.E2E_TOKEN_CODE }}
           E2E_SENDER_SECRET: ${{ secrets.E2E_SENDER_SECRET }}
           E2E_PAYEE_SECRET: ${{ secrets.E2E_PAYEE_SECRET }}
           # claim-fragment-privacy.spec.ts's default (lock 11) is on the standing testnet

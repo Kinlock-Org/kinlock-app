@@ -3,11 +3,10 @@
 import { useId } from "react";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
-import { ASSET_CODE } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { t } from "@/lib/i18n/messages";
 import { type IndexedPayee, LOCK_STATES } from "@/lib/indexer";
-import { fromBaseUnits, publicConfig } from "@/lib/sdk";
+import { configuredAsset, fromBaseUnits } from "@/lib/sdk";
 import { usePayeeDashboard } from "./usePayeeDashboard";
 
 /** The payee dashboard: connect, see every lock sent to this wallet, filter, find one. Roadmap M3-11. */
@@ -115,7 +114,7 @@ function LockRow({
   lock: ReturnType<typeof usePayeeDashboard>["locks"][number];
   locale: string;
 }) {
-  const usdc = publicConfig();
+  const usdc = configuredAsset();
   const createdSeconds = BigInt(Math.floor(Date.parse(lock.createdAt) / 1000));
   return (
     <li className="flex flex-col gap-2 rounded border p-3">
@@ -129,12 +128,8 @@ function LockRow({
         {t("pages.payee.totalLabel")}:{" "}
         <AmountDisplay
           decimal={fromBaseUnits(BigInt(lock.total))}
-          assetCode={ASSET_CODE}
-          issuer={
-            lock.token === usdc.NEXT_PUBLIC_USDC_CONTRACT_ID
-              ? usdc.NEXT_PUBLIC_USDC_ISSUER
-              : lock.token
-          }
+          assetCode={usdc.code}
+          issuer={lock.token === usdc.contractId ? usdc.issuer : lock.token}
           locale={locale}
         />
       </div>
