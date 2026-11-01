@@ -27,7 +27,11 @@ const nowSeconds = () => BigInt(Math.floor(Date.now() / 1000));
 export function useSendForm(payeeIds: string[]) {
   const wallet = useRef<WalletAdapter | null>(null);
   const [locale, setLocale] = useState("en");
+  const [mode, setMode] = useState<"verified" | "direct">(
+    payeeIds.length > 0 ? "verified" : "direct",
+  );
   const [payeeId, setPayeeId] = useState(payeeIds[0] ?? "");
+  const [recipient, setRecipient] = useState("");
   const [reference, setReferenceValue] = useState("");
   const [rows, setRows] = useState<ScheduleRow[]>([{ key: 0, amount: "", date: todayUtc() }]);
   const [expiryDate, setExpiryDate] = useState(() => defaultExpiryDate([], nowSeconds()));
@@ -89,7 +93,7 @@ export function useSendForm(payeeIds: string[]) {
     }
   }
 
-  const draft = () => ({ payeeId, reference, rows, expiryDate });
+  const draft = () => ({ mode, payeeId, recipient, reference, rows, expiryDate });
   const total = () => rows.reduce((sum, r) => sum + toBaseUnits(r.amount.trim()), 0n);
 
   async function review() {
@@ -104,7 +108,7 @@ export function useSendForm(payeeIds: string[]) {
         await preflight({
           sender: address,
           token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
-          payeeId,
+          ...(mode === "direct" ? { recipient } : { payeeId }),
           total: total(),
           refHash,
         }),
@@ -127,7 +131,7 @@ export function useSendForm(payeeIds: string[]) {
         {
           sender: address,
           token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
-          payeeId,
+          ...(mode === "direct" ? { recipient } : { payeeId }),
           tranches: rows.map((r) => ({
             amount: toBaseUnits(r.amount.trim()),
             unlockAt: unixSecondsOf(r.date),
@@ -183,10 +187,20 @@ export function useSendForm(payeeIds: string[]) {
   }
   return {
     locale,
+    mode,
+    setMode: (m: "verified" | "direct") => {
+      setMode(m);
+      backToEdit();
+    },
     payeeId,
     setPayeeId: (id: string) => {
       setPayeeId(id);
       setUnknownPayee(false);
+      backToEdit();
+    },
+    recipient,
+    setRecipient: (r: string) => {
+      setRecipient(r);
       backToEdit();
     },
     reference,

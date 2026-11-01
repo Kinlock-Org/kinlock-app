@@ -46,21 +46,60 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
       ) : null}
       {f.unknownPayee ? <p role="alert">{t("pages.send.prefillUnknownPayee")}</p> : null}
 
-      <label htmlFor={ids.payee} className="flex flex-col gap-1">
-        <span className="font-medium">{t("pages.send.payeeLabel")}</span>
-        <select
-          id={ids.payee}
-          value={f.payeeId}
-          onChange={(e) => f.setPayeeId(e.target.value)}
-          className="rounded border p-2"
-        >
-          {payees.map((p) => (
-            <option key={p.payeeId} value={p.payeeId} dir="auto">
-              {p.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      <div className="flex gap-4 border-b pb-2">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="send-mode"
+            checked={f.mode === "verified"}
+            onChange={() => f.setMode("verified")}
+          />
+          <span className="text-sm font-medium">{t("pages.send.modeVerified")}</span>
+        </label>
+        <label className="flex items-center gap-2 cursor-pointer">
+          <input
+            type="radio"
+            name="send-mode"
+            checked={f.mode === "direct"}
+            onChange={() => f.setMode("direct")}
+          />
+          <span className="text-sm font-medium">{t("pages.send.modeDirect")}</span>
+        </label>
+      </div>
+
+      {f.mode === "verified" ? (
+        <label htmlFor={ids.payee} className="flex flex-col gap-1">
+          <span className="font-medium">{t("pages.send.payeeLabel")}</span>
+          <select
+            id={ids.payee}
+            value={f.payeeId}
+            onChange={(e) => f.setPayeeId(e.target.value)}
+            className="rounded border p-2"
+          >
+            {payees.length === 0 ? (
+              <option value="">{t("pages.send.payeeNone")}</option>
+            ) : (
+              payees.map((p) => (
+                <option key={p.payeeId} value={p.payeeId} dir="auto">
+                  {p.label}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
+      ) : (
+        <label htmlFor="direct-recipient" className="flex flex-col gap-1">
+          <span className="font-medium">{t("pages.send.recipientLabel")}</span>
+          <input
+            id="direct-recipient"
+            type="text"
+            placeholder={t("pages.send.recipientPlaceholder")}
+            value={f.recipient}
+            onChange={(e) => f.setRecipient(e.target.value)}
+            className="rounded border p-2 font-mono text-sm"
+          />
+        </label>
+      )}
 
       <label htmlFor={ids.reference} className="flex flex-col gap-1">
         <span className="font-medium">{t("pages.send.referenceLabel")}</span>

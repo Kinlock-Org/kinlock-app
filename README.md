@@ -9,6 +9,14 @@ The Next.js front end: payee payment requests, the sender's lock flow, the payee
 
 **Live app (testnet):** [kinlock-app.vercel.app](https://kinlock-app.vercel.app) · **Docs:** [kinlock-org.github.io](https://kinlock-org.github.io)
 
+## See it in action
+
+A 25-second overview of the flow — lock USDC for a verified payee, the payee claims, and the receipt reads "Payment to verified payee." Testnet, illustrative data.
+
+<video src="media/kinlock-brag.mp4" controls width="640" poster="media/kinlock-brag-poster.jpg"></video>
+
+> If the clip doesn't play inline, download it: [media/kinlock-brag.mp4](media/kinlock-brag.mp4).
+
 ## What works today
 
 | Route | State |
@@ -47,6 +55,26 @@ Next.js 16 (App Router), React 19, TypeScript 7, Tailwind 4. Node 20 in CI.
 Configuration is Zod-validated in `lib/config.ts`. Required: `NEXT_PUBLIC_STELLAR_NETWORK`, `NEXT_PUBLIC_RPC_URLS`, `NEXT_PUBLIC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_ISSUER`. `NEXT_PUBLIC_INDEXER_URL` is optional — only list views need it, and the deployed testnet app currently runs without it. Copy `.env.example` to `.env.local`; never commit values.
 
 Deploys to Vercel are currently **manual** (`vercel --prod`) — there's no deploy workflow, so a merged PR does not go live by itself.
+
+## Maintainers
+
+| Name | Role | GitHub | Contact |
+|---|---|---|---|
+| Adenike Ajala | Core Maintainer (Smart Contracts & Protocol) | [@abrcrmb](https://github.com/abrcrmb) | [Email](mailto:adenikeajala2018@gmail.com) |
+| Ayobami Yazar | Core Maintainer (Full-Stack & Integrations) | [@YazarAyobami](https://github.com/YazarAyobami) | [Email](mailto:Yazarayobami76@gmail.com) |
+
+## Community & Discussions
+
+- **Discussions:** [GitHub Discussions](https://github.com/Kinlock-Org/kinlock-app/discussions)
+- **Live Testnet Demo:** [kinlock-app.vercel.app](https://kinlock-app.vercel.app)
+- **Documentation Portal:** [kinlock-org.github.io](https://kinlock-org.github.io)
+- **Report Security Vulnerabilities:** Follow [`SECURITY.md`](SECURITY.md)
+
+## Contributors
+
+Thanks to everyone who has contributed to Kinlock!
+
+[![Contributors](https://contrib.rocks/image?repo=Kinlock-Org/kinlock-app)](https://github.com/Kinlock-Org/kinlock-app/graphs/contributors)
 
 ## Read first
 

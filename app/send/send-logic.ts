@@ -28,7 +28,9 @@ export function defaultExpiryDate(rows: ScheduleRow[], now: bigint): string {
 }
 
 export interface Draft {
-  payeeId: string;
+  mode?: "verified" | "direct";
+  payeeId?: string;
+  recipient?: string;
   reference: string;
   rows: ScheduleRow[];
   expiryDate: string;
@@ -36,7 +38,14 @@ export interface Draft {
 
 /** The first problem with the draft, as a message key, or null. Mirrors the contract's checks. */
 export function draftProblem(d: Draft, now: bigint): MessageKey | null {
-  if (!d.payeeId) return "pages.send.errorPayee";
+  if (d.mode === "direct") {
+    const r = (d.recipient ?? "").trim();
+    if (!r || (!r.startsWith("G") && !r.startsWith("C")) || r.length !== 56) {
+      return "pages.send.errorRecipient";
+    }
+  } else {
+    if (!d.payeeId) return "pages.send.errorPayee";
+  }
   if (!d.reference.trim()) return "pages.send.errorReference";
   if (d.rows.some((r) => !r.date) || !d.expiryDate) return "pages.send.errorDate";
   let total = 0n;
@@ -54,15 +63,17 @@ export function draftProblem(d: Draft, now: bigint): MessageKey | null {
   if (unlocks.some((at, i) => i !== 0 && (unlocks[i - 1] ?? at) > at))
     return "pages.send.errorOrder";
   const expiresAt = unixSecondsOf(d.expiryDate);
-  if (unlocks.some((at) => at > expiresAt)) return "pages.send.errorUnlockAfterExpiry";
   if (expiresAt < now + MIN_EXPIRY_AHEAD_SECS + EXPIRY_MARGIN_SECS)
     return "pages.send.errorExpirySoon";
   if (expiresAt > now + MAX_LOCK_DURATION_SECS) return "pages.send.errorExpiryFar";
+  if (unlocks.some((at) => at >= expiresAt)) return "pages.send.errorUnlockAfterExpiry";
   return null;
 }
 
 /** Form values from a payment-request link (`/send?payee=…&ref=…&schedule=…`), or null. */
-export function prefillFrom(href: string): Pick<Draft, "payeeId" | "reference" | "rows"> | null {
+export function prefillFrom(
+  href: string,
+): { payeeId: string; reference: string; rows: ScheduleRow[] } | null {
   if (!new URL(href).searchParams.has("payee")) return null;
   try {
     const parts = parseRequestLink(href);
