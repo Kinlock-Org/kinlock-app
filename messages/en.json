@@ -22,6 +22,7 @@
   },
   "receipt": {
     "headline": "Payment to verified payee",
+    "headlineDirect": "Payment to recipient",
     "valid": "Valid",
     "notValid": "Not valid",
     "kind": {
@@ -102,7 +103,12 @@
     },
     "send": {
       "title": "Send a locked payment",
-      "intro": "Lock USDC for a verified payee. It can only be paid to them, or come back to you.",
+      "intro": "Lock USDC on Stellar. It can only be paid to the recipient, or come back to you.",
+      "modeLabel": "Recipient type",
+      "modeVerified": "Verified payee",
+      "modeDirect": "Any Stellar address",
+      "recipientLabel": "Recipient address",
+      "recipientPlaceholder": "G... or C... address",
       "prefilled": "Filled in from a payment request. Check everything before sending: the request can't move money.",
       "prefillUnknownPayee": "The payee in this request isn't available right now (not verified or not active). Don't send until you've checked with them.",
       "payeeLabel": "Who you're paying",
@@ -139,6 +145,7 @@
       "viewLock": "View this lock",
       "sendAnother": "Send another payment",
       "errorPayee": "Choose who you're paying.",
+      "errorRecipient": "Enter a valid Stellar address (starting with G or C).",
       "errorReference": "Enter a payment reference.",
       "errorDate": "Choose a date for every payment and for when it can be taken back.",
       "errorAmount": "Check the amounts: use numbers like 150 or 150.25, with at most 7 decimals.",

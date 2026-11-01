@@ -60,11 +60,19 @@ function Details({ p }: { p: LockPage }) {
         <dd>
           <Amount p={p} baseUnits={lock.returned} />
         </dd>
-        <dt className="font-medium">{t("pages.lock.payeeLabel")}</dt>
-        <dd>
-          {p.payee ? t(`pages.lock.payeeStatus.${p.payee.status}`) : t("pages.lock.payeeUnknown")}
-        </dd>
-        <dt className="font-medium">{t("pages.claim.payoutLabel")}</dt>
+        {lock.payeeId !== null ? (
+          <>
+            <dt className="font-medium">{t("pages.lock.payeeLabel")}</dt>
+            <dd>
+              {p.payee
+                ? t(`pages.lock.payeeStatus.${p.payee.status}`)
+                : t("pages.lock.payeeUnknown")}
+            </dd>
+          </>
+        ) : null}
+        <dt className="font-medium">
+          {t(lock.payeeId !== null ? "pages.claim.payoutLabel" : "pages.send.recipientLabel")}
+        </dt>
         <dd>
           <code title={lock.payout}>{shortAddress(lock.payout)}</code>
           <span className="sr-only">{lock.payout}</span>
