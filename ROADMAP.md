@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-01 (`feat/universal-direct-locks`: added M3-34 DONE; ADR-0031) |
+| **Last updated** | 2026-11-01 (feat/route-loading-error-states: M3-27 DONE; closes #37) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 1 | 1 | 0 | 0 | 0 | 0 | 0 | 100% |
+| 4 App | 34 | 24 | 7 | 3 | 0 | 0 | 0 | 71% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **185** | **61** | **14** | **85** | **0** | **25** | **0** | **38%** |
+| **All** | **218** | **84** | **21** | **88** | **0** | **25** | **0** | **44%** |
 
 ---
 
@@ -295,6 +295,41 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 **Goal:** the full payee, sender, attester, and receipt experience on testnet.
 **Exit:** completes Gate G3.
 
+| ID | Task | Repo | Pri | Status | Depends on | Done when |
+|---|---|---|---|---|---|---|
+| M3-01 | Scaffold `kinlock-app`: Next.js, Tailwind, lint, CI | app | P0 | DONE | G1 | CI green |
+| M3-02 | Wallet abstraction (Freighter and others behind one interface) | app | P0 | DONE | M3-01 | Wallets swappable; signing flow tested — `lib/wallet/` defines the `WalletAdapter` interface with one implementation (`createStellarWalletsKitAdapter`, Stellar Wallets Kit) exposing Freighter, xBull, Albedo, and Lobstr behind it; wired into all 4 money-moving flows (`/send`, `/claim/[id]`, `/locks/[id]`, `/payee`); signing flow tested in `lib/sdk.test.ts` (`walletSigner` bridges the adapter to the SDK `Signer`, asserts the adapter's `signTransaction` is called with the right XDR/passphrase/address, and the resulting signer round-trips through a real SDK call) — verified 2026-10-27 via `pnpm test` (166/166 passing) |
+| M3-03 | `lib/sdk.ts` and Zod-validated public config | app | P0 | DONE | M2-02 | Single SDK instance; env validation |
+| M3-04 | Landing page and plain-language explainer | app | P1 | DONE | M3-01 | Content reviewed against wording rules |
+| M3-05 | `/request`: payee creates a payment-request link | app | P0 | DONE | M2-03 | Link pre-fills the sender form; carries no authority |
+| M3-06 | `/send`: sender flow with preflight results, USD amount, indicative local-currency equivalent (USD-only fallback), rate-risk note | app | P0 | IN PROGRESS | M2-05, M3-16 | Creates a lock on testnet end to end |
+| M3-07 | Claim-link generation, browser-only storage, export option | app | P0 | DONE | M2-03 | Nothing stored or sent server-side |
+| M3-08 | `/locks/[id]`: sender detail from chain and refund action | app | P0 | IN PROGRESS | M2-02 | Refund shown only when allowed |
+| M3-09 | `/claim/[id]`: payee claim page; verify reference against `ref_hash`; release | app | P0 | DONE | M2-03 | Release works; wrong reference flagged |
+| M3-10 | Payee `decline` action | app | P0 | DONE | M3-09 | Returns remainder; confirmation step |
+| M3-11 | `/payee` dashboard (lists via indexer) | app | P0 | DONE | M2-12 | Filter by status and reference |
+| M3-12 | `/attester` tooling: read-only account checks (trustline, authorization, XLM float) | app | P1 | TODO | M1-26 | Checks match the checklist script |
+| M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | DONE | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
+| M3-14 | Security headers, strict CSP, `Referrer-Policy`, no third-party scripts on `/claim/*` | app | P0 | DONE | M3-09 | Automated test confirms fragment never appears in any network request |
+| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | IN PROGRESS | M3-01 | Used everywhere money or time is shown |
+| M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
+| M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | IN PROGRESS | M3-13 | Audit checklist passed |
+| M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
+| M3-19 | Playwright happy-path: request → send → claim → verify | app | P0 | DONE | M3-13 | Green in CI against testnet. Met 2026-10-29 on `feat/e2e-happy-path` head `479ef58`: `e2e` run `40830959873` conclusion `success`, log shows `Running 2 tests using 2 workers` then `2 passed (24.7s)` under `Run pnpm e2e`, and `ci`, `roadmap-check`, `docs-in-sync` and CodeQL are green on the same head. The last blocker was a defect in the **published** SDK tarball, not a test or CI config problem — see Changelog update 6. Locally re-run on this tip: `pnpm install --frozen-lockfile`, `pnpm lint` (84 files clean), `pnpm typecheck` clean, `pnpm test` (15 files / 167 tests). `pnpm e2e` cannot be run by an agent: the two wallet-signing secrets are owner-only by design (`AGENTS.md` §2), so the suite's green state is proven by CI, not by me. |
+| M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | IN PROGRESS | M3-13 | Reviewer sign-off |
+| M3-21 | Error and empty states: trustline failure, expired, revoked, suspended, indexer lag | app | P0 | DONE | M3-09 | Each state has clear guidance |
+| M3-22 | Testnet hosting and environment config | app | P0 | IN PROGRESS | M3-19 | Public testnet URL live |
+| M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | DONE | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
+| M3-24 | CI guard: fail on hard-coded country, currency, anchor, or locale literals outside registry data, tests, and fixtures | all | P1 | DONE | M3-01, M2-01 | Guard runs in app and sdk CI; passing and failing examples tested |
+| M3-25 | Favicon/app icon, persistent site header (nav, docs and GitHub links), mobile hamburger menu, reduced-motion-safe entrance motion | app | P2 | DONE | M3-01, M3-04 | Favicon set in every browser; nav usable one-handed on a narrow viewport; `prefers-reduced-motion` honored |
+| M3-26 | Interim chain-verified payee source for `/send` and `/request`, since no indexer is deployed (`M2-18`) | app | P1 | DONE | M3-05, M3-06 | `/send` and `/request` list real, on-chain `Active` payees and complete their flow up to wallet connect; **retired 2026-10-08**, superseded now that `M2-18`'s indexer is live (code removed, pages point at the real indexer again) |
+| M3-27 | Route-level `loading.tsx`, `error.tsx` and `not-found.tsx` for the user-facing routes | app | P1 | DONE | M3-01 | Every in-scope route has a designed pending/error/404 state; no stack trace or file path reaches the UI; `/claim/*` untouched |
+| M3-28 | CI `malware-scan` job: `pnpm audit` against the npm advisory database plus a Semgrep source scan on every PR | app | P1 | DONE | — | Job runs on every PR; a known-vulnerable dependency or an injected malicious-pattern test case trips it; verified green on a real PR |
+| M3-29 | Bump `next` off the vulnerable `16.3.8` pin: 2 critical unauthenticated-RCE advisories (Image Optimization API, `use cache`) plus a high-severity Server Actions DoS | app | P0 | DONE | — | `pnpm audit --audit-level=high` clean of the three advisories; lint, typecheck, full test suite, build, and e2e all still pass |
+| M3-30 | Add OpenSSF Scorecard CI (`ossf/scorecard-action`): weekly supply-chain security posture scan published to the public Scorecard API/badge | app | P2 | DONE | — | `.github/workflows/scorecard.yml` runs on push to `main` and weekly; results visible on the Security tab and via `https://api.scorecard.dev/projects/github.com/Kinlock-Org/kinlock-app/badge`; verified on a real run — merged 2026-10-26, confirmed live at `api.scorecard.dev` (score 4.9, informing `M3-31`) |
+| M3-31 | Scorecard remediation, Tier 1: pin every `uses:` in every workflow file to a commit SHA (`Pinned-Dependencies` was 3/10); add `.github/dependabot.yml` for `npm` + `github-actions` (`Dependency-Update-Tool` was 0/10); enable CodeQL default setup for `actions`+`javascript-typescript` via the Code Scanning API (`SAST` was 0/10) | app | P2 | DONE | M3-30 | Next scheduled Scorecard run shows `Pinned-Dependencies` at 10/10 and `Dependency-Update-Tool`/`SAST` both non-zero; verified against a real re-run, not assumed — merged; Dependabot and CodeQL both confirmed working for real |
+| M3-32 | `roadmap-check.yml` exempts Dependabot (`if: github.actor != 'dependabot[bot]'`): Dependabot has no way to know AGENTS.md §12's ROADMAP.md convention and can't be configured to edit it, so every Dependabot PR opened after `M3-31` was failing this required check for a reason unrelated to the dependency bump itself | app | P1 | DONE | M3-31 | `roadmap-check` reports success (skipped) on a real Dependabot PR; confirmed via GitHub's own status-checks docs that a job skipped by a job-level `if` reports "Success" and does not block a required check, not assumed |
+| M3-33 | Scorecard remediation, Tier 2: switch CodeQL from GitHub's default setup (`weekly` schedule only — not configurable via the Code Scanning API, confirmed against GitHub's own REST docs) to an advanced `codeql.yml` running on every push and PR, matching `kinlock-contracts`'s pattern (`SAST` was 0/10, "not run on all commits"); group `github/codeql-action*` in `dependabot.yml` so `init`/`analyze` can't drift apart the way they did in `kinlock-contracts` PR #47 | app | P2 | IN PROGRESS | M3-31 | Next scheduled Scorecard run shows `SAST` above 0; not yet verified against a real re-run (pending merge) |
 | M3-34 | Universal payments UI support: add dual-mode selector (Verified payee vs Any Stellar address) in /send, wire direct recipient to preflight and createLock, update receipts and lock views to show "Payment to recipient" for direct locks | app | P0 | DONE | M2-28 | ADR-0031; Biome lint passes; 167 tests pass; production build succeeds |
 
 ---
@@ -507,6 +542,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-01 | `feat/route-loading-error-states` | app | M3-27 DONE | Closes #37: added route-level designed states (app/loading.tsx, app/locks/loading.tsx, app/payee/loading.tsx, app/error.tsx with autofocus retry, and honest app/not-found.tsx); added accessible Spinner and StatePanel in components/ui/; externalized strings to messages/en.json. |
 | 2026-11-01 | `feat/universal-direct-locks` | app | M3-34 DONE (new row) | Implemented Dual-Mode UI support (ADR-0031): added mode selector to /send supporting direct locks to any Stellar address, wired recipient into preflight and createLock, updated /locks/[id] and /r/... views to display "Payment to recipient" when payeeId is null. Biome lint, typecheck, 167 tests, and production build all pass. |
 | 2026-10-29 | `#64` | kinlock-app | no row changes | chore(deps-dev): bump vitest from 5.0.3 to 5.0.5 Dependabot PR landed by a maintainer. `roadmap-check.yml:14` only exempts runs whose actor is dependabot[bot], and a maintainer has already pushed to this branch, so the job runs here and needs a real ROADMAP.md diff: this row is that diff. No source, config or lockfile change is introduced by this commit and no row status moves. |
 | 2026-10-29 | `#62` | kinlock-app | no row changes | chore(deps): bump zod from 4.6.5 to 4.6.7 Dependabot PR landed by a maintainer. `roadmap-check.yml:14` only exempts runs whose actor is dependabot[bot], and a maintainer has already pushed to this branch, so the job runs here and needs a real ROADMAP.md diff: this row is that diff. No source, config or lockfile change is introduced by this commit and no row status moves. |
