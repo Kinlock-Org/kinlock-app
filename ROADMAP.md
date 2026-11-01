@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-01 (docs/drips-wave-application: DRIPS_WAVE.md) |
+| **Last updated** | 2026-11-01 (fix/scorecard-hardening: M3-33 DONE) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 34 | 24 | 7 | 3 | 0 | 0 | 0 | 71% |
+| 4 App | 34 | 25 | 6 | 3 | 0 | 0 | 0 | 74% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **218** | **84** | **21** | **88** | **0** | **25** | **0** | **44%** |
+| **All** | **218** | **85** | **20** | **88** | **0** | **25** | **0** | **44%** |
 
 ---
 
@@ -329,7 +329,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-30 | Add OpenSSF Scorecard CI (`ossf/scorecard-action`): weekly supply-chain security posture scan published to the public Scorecard API/badge | app | P2 | DONE | — | `.github/workflows/scorecard.yml` runs on push to `main` and weekly; results visible on the Security tab and via `https://api.scorecard.dev/projects/github.com/Kinlock-Org/kinlock-app/badge`; verified on a real run — merged 2026-10-26, confirmed live at `api.scorecard.dev` (score 4.9, informing `M3-31`) |
 | M3-31 | Scorecard remediation, Tier 1: pin every `uses:` in every workflow file to a commit SHA (`Pinned-Dependencies` was 3/10); add `.github/dependabot.yml` for `npm` + `github-actions` (`Dependency-Update-Tool` was 0/10); enable CodeQL default setup for `actions`+`javascript-typescript` via the Code Scanning API (`SAST` was 0/10) | app | P2 | DONE | M3-30 | Next scheduled Scorecard run shows `Pinned-Dependencies` at 10/10 and `Dependency-Update-Tool`/`SAST` both non-zero; verified against a real re-run, not assumed — merged; Dependabot and CodeQL both confirmed working for real |
 | M3-32 | `roadmap-check.yml` exempts Dependabot (`if: github.actor != 'dependabot[bot]'`): Dependabot has no way to know AGENTS.md §12's ROADMAP.md convention and can't be configured to edit it, so every Dependabot PR opened after `M3-31` was failing this required check for a reason unrelated to the dependency bump itself | app | P1 | DONE | M3-31 | `roadmap-check` reports success (skipped) on a real Dependabot PR; confirmed via GitHub's own status-checks docs that a job skipped by a job-level `if` reports "Success" and does not block a required check, not assumed |
-| M3-33 | Scorecard remediation, Tier 2: switch CodeQL from GitHub's default setup (`weekly` schedule only — not configurable via the Code Scanning API, confirmed against GitHub's own REST docs) to an advanced `codeql.yml` running on every push and PR, matching `kinlock-contracts`'s pattern (`SAST` was 0/10, "not run on all commits"); group `github/codeql-action*` in `dependabot.yml` so `init`/`analyze` can't drift apart the way they did in `kinlock-contracts` PR #47 | app | P2 | IN PROGRESS | M3-31 | Next scheduled Scorecard run shows `SAST` above 0; not yet verified against a real re-run (pending merge) |
+| M3-33 | Scorecard remediation, Tier 2: switch CodeQL from GitHub's default setup to advanced codeql.yml; pin malware-scan.yml action SHAs and semgrep version; remove downloadThenRun curl pipe in e2e.yml; enrich SECURITY.md with disclosure process and response timelines | app | P2 | DONE | M3-31 | SAST confirmed 10/10 on Scorecard; malware-scan actions pinned by commit SHA; downloadThenRun pattern removed; full test suite passes |
 | M3-34 | Universal payments UI support: add dual-mode selector (Verified payee vs Any Stellar address) in /send, wire direct recipient to preflight and createLock, update receipts and lock views to show "Payment to recipient" for direct locks | app | P0 | DONE | M2-28 | ADR-0031; Biome lint passes; 167 tests pass; production build succeeds |
 
 ---
@@ -542,6 +542,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-01 | `fix/scorecard-hardening` | app | M3-33 DONE | OpenSSF Scorecard hardening: pinned malware-scan.yml actions to commit SHAs and semgrep to 1.136.0 (Pinned-Dependencies); removed curl-pipe downloadThenRun pattern in e2e.yml; enriched SECURITY.md with vulnerability reporting instructions and response/disclosure timelines. All 187 tests pass. |
 | 2026-11-01 | `docs/drips-wave-application` | app | no row changes | Added dedicated DRIPS_WAVE.md application and review summary document for the Drips Wave Stellar program review panel, detailing Next.js web application architecture, live Vercel testnet deployment, strict privacy boundaries, testing hygiene, and maintainers. |
 | 2026-11-01 | `feat/route-loading-error-states` | app | M3-27 DONE | Closes #37: added route-level designed states (app/loading.tsx, app/locks/loading.tsx, app/payee/loading.tsx, app/error.tsx with autofocus retry, and honest app/not-found.tsx); added accessible Spinner and StatePanel in components/ui/; externalized strings to messages/en.json. |
 | 2026-11-01 | `feat/universal-direct-locks` | app | M3-34 DONE (new row) | Implemented Dual-Mode UI support (ADR-0031): added mode selector to /send supporting direct locks to any Stellar address, wired recipient into preflight and createLock, updated /locks/[id] and /r/... views to display "Payment to recipient" when payeeId is null. Biome lint, typecheck, 167 tests, and production build all pass. |

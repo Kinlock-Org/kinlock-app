@@ -75,12 +75,9 @@ jobs:
           # satisfies that while this one's displayName is still null. Wait for this specific
           # payee to actually show joined display data.
           for i in $(seq 1 45); do
-            joined=$(curl -sf "http://localhost:3001/payees?payee_id=$E2E_FIXTURE_PAYEE_ID" | node -e \
-              "let c=''; process.stdin.on('data', d => c+=d); \
-               process.stdin.on('end', () => { \
-                 const p = JSON.parse(c).payees[0]; \
-                 console.log(p && p.displayName ? 1 : 0); \
-               })" 2>/dev/null || echo 0)
+            res=$(curl -sf "http://localhost:3001/payees?payee_id=$E2E_FIXTURE_PAYEE_ID" 2>/dev/null || echo "")
+            joined=$(PAYEES_DATA="$res" node -e \
+              "try { const p = JSON.parse(process.env.PAYEES_DATA || '{}').payees?.[0]; console.log(p && p.displayName ? 1 : 0); } catch { console.log(0); }")
             if [ "$joined" = "1" ]; then echo "indexer ready: fixture payee joined"; exit 0; fi
             sleep 2
           done
