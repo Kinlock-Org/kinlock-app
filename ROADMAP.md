@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-01 (feat/route-loading-error-states: M3-27 DONE; closes #37) |
+| **Last updated** | 2026-11-01 (docs/drips-wave-application: DRIPS_WAVE.md) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -542,6 +542,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-01 | `docs/drips-wave-application` | app | no row changes | Added dedicated DRIPS_WAVE.md application and review summary document for the Drips Wave Stellar program review panel, detailing Next.js web application architecture, live Vercel testnet deployment, strict privacy boundaries, testing hygiene, and maintainers. |
 | 2026-11-01 | `feat/route-loading-error-states` | app | M3-27 DONE | Closes #37: added route-level designed states (app/loading.tsx, app/locks/loading.tsx, app/payee/loading.tsx, app/error.tsx with autofocus retry, and honest app/not-found.tsx); added accessible Spinner and StatePanel in components/ui/; externalized strings to messages/en.json. |
 | 2026-11-01 | `feat/universal-direct-locks` | app | M3-34 DONE (new row) | Implemented Dual-Mode UI support (ADR-0031): added mode selector to /send supporting direct locks to any Stellar address, wired recipient into preflight and createLock, updated /locks/[id] and /r/... views to display "Payment to recipient" when payeeId is null. Biome lint, typecheck, 167 tests, and production build all pass. |
 | 2026-10-29 | `#64` | kinlock-app | no row changes | chore(deps-dev): bump vitest from 5.0.3 to 5.0.5 Dependabot PR landed by a maintainer. `roadmap-check.yml:14` only exempts runs whose actor is dependabot[bot], and a maintainer has already pushed to this branch, so the job runs here and needs a real ROADMAP.md diff: this row is that diff. No source, config or lockfile change is introduced by this commit and no row status moves. |
