@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-01 (fix/scorecard-hardening: M3-33 DONE) |
+| **Last updated** | 2026-11-02 (test/wallet-errors-78) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -542,6 +542,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-02 | `test/wallet-errors-78` | app | no row changes | Closes #78: added unit tests in lib/wallet/__tests__/wallet-errors.test.ts simulating wallet disconnection, user rejection in modal/signing, extension locked state, and fee/insufficient XLM errors, asserting recovery guidance and message mapping (M3-02, M3-21). |
 | 2026-11-01 | `fix/scorecard-hardening` | app | M3-33 DONE | OpenSSF Scorecard hardening: pinned malware-scan.yml actions to commit SHAs and semgrep to 1.136.0 (Pinned-Dependencies); removed curl-pipe downloadThenRun pattern in e2e.yml; enriched SECURITY.md with vulnerability reporting instructions and response/disclosure timelines. All 187 tests pass. |
 | 2026-11-01 | `docs/drips-wave-application` | app | no row changes | Added dedicated DRIPS_WAVE.md application and review summary document for the Drips Wave Stellar program review panel, detailing Next.js web application architecture, live Vercel testnet deployment, strict privacy boundaries, testing hygiene, and maintainers. |
 | 2026-11-01 | `feat/route-loading-error-states` | app | M3-27 DONE | Closes #37: added route-level designed states (app/loading.tsx, app/locks/loading.tsx, app/payee/loading.tsx, app/error.tsx with autofocus retry, and honest app/not-found.tsx); added accessible Spinner and StatePanel in components/ui/; externalized strings to messages/en.json. |
