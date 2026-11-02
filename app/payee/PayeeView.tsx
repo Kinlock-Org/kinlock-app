@@ -2,6 +2,7 @@
 
 import { useId } from "react";
 import { AmountDisplay } from "@/components/money/AmountDisplay";
+import { ExportCSVButton } from "@/components/payee/ExportCSVButton";
 import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
 import { ASSET_CODE } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
@@ -94,6 +95,11 @@ export function PayeeView({ payees }: { payees: IndexedPayee[] }) {
 
           {d.phase === "loading" ? <p role="status">{t("pages.payee.loading")}</p> : null}
           {d.phase === "readFailed" ? <p role="alert">{t("pages.payee.readFailed")}</p> : null}
+          {d.phase === "ready" ? (
+            <div className="flex items-center justify-end">
+              <ExportCSVButton locks={d.locks} disabled={d.locks.length === 0} />
+            </div>
+          ) : null}
           {d.phase === "ready" && d.locks.length === 0 ? <p>{t("pages.payee.empty")}</p> : null}
           {d.phase === "ready" && d.locks.length > 0 ? (
             <ul className="flex flex-col gap-3">

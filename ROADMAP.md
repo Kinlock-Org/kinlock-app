@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-01 (fix/scorecard-hardening: M3-33 DONE) |
+| **Last updated** | 2026-11-02 (feat/payee-csv-export-76: X-05 DONE) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -394,7 +394,7 @@ Resolve each with an ADR and link it here. Move resolved rows to the bottom with
 | X-02 | `LCK-10` Payee "applied" acknowledgment (contract event) and UI                | contracts | P1  | TODO   | P-05                   | Event emitted and shown on receipt; ADR if contract surface changes |
 | X-03 | `REG-7` New-payee release delay in contract; set parameters via ADR            | contracts | P1  | TODO   | DEC-14                 | Property tests updated; docs updated                                |
 | X-04 | `SND-8` Email notifications (opt-in, provider-agnostic, `subscriptions` table) | sdk       | P1  | TODO   | P-05                   | Opt-in and unsubscribe work; no personal data in logs               |
-| X-05 | `PAY-6` Payee CSV export                                                       | app       | P1  | TODO   | M3-11                  | Export matches dashboard                                            |
+| X-05 | `PAY-6` Payee CSV export                                                       | app       | P1  | DONE   | M3-11                  | Export matches dashboard                                            |
 | X-06 | `PLT-4` Per-lock and global caps: set values and test enforcement              | contracts | P1  | TODO   | M1-10                  | Cap breach rejected in tests; values documented                     |
 | X-07 | `PLT-5` Upgrade timelock before mainnet                                        | contracts | P1  | TODO   | M1-20                  | Timelock enforced; upgrade runbook updated                          |
 | X-08 | Re-run property, budget, and integration suites after P1 contract changes      | contracts | P1  | TODO   | X-02, X-03, X-06, X-07 | All green; budgets recorded                                         |
@@ -542,6 +542,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-02 | `feat/payee-csv-export-76` | app | X-05 DONE | Closes #76: added ExportCSVButton and lib/csv.ts for payee lock history export with RFC-4180 escaping, BigInt base units conversion to USDC decimals, and ISO 8601 UTC date formatting; externalized strings in messages/en.json. All 214 tests pass and build clean. |
 | 2026-11-01 | `fix/scorecard-hardening` | app | M3-33 DONE | OpenSSF Scorecard hardening: pinned malware-scan.yml actions to commit SHAs and semgrep to 1.136.0 (Pinned-Dependencies); removed curl-pipe downloadThenRun pattern in e2e.yml; enriched SECURITY.md with vulnerability reporting instructions and response/disclosure timelines. All 187 tests pass. |
 | 2026-11-01 | `docs/drips-wave-application` | app | no row changes | Added dedicated DRIPS_WAVE.md application and review summary document for the Drips Wave Stellar program review panel, detailing Next.js web application architecture, live Vercel testnet deployment, strict privacy boundaries, testing hygiene, and maintainers. |
 | 2026-11-01 | `feat/route-loading-error-states` | app | M3-27 DONE | Closes #37: added route-level designed states (app/loading.tsx, app/locks/loading.tsx, app/payee/loading.tsx, app/error.tsx with autofocus retry, and honest app/not-found.tsx); added accessible Spinner and StatePanel in components/ui/; externalized strings to messages/en.json. |

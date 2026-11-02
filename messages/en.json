@@ -269,7 +269,8 @@
       "lockLabel": "Payment",
       "totalLabel": "Total",
       "createdLabel": "Created",
-      "viewLink": "View and claim"
+      "viewLink": "View and claim",
+      "exportCsv": "Export CSV"
     },
     "attester": {
       "title": "Attester checks"
