@@ -2,6 +2,7 @@
 
 @theme {
   --color-ink: var(--ink);
+  --color-muted: var(--muted);
   --color-paper: var(--paper);
   --color-accent: var(--accent);
   --color-accent-ink: var(--accent-ink);
@@ -13,6 +14,10 @@
 
 :root {
   --ink: #141a17;
+  /* Muted text for secondary body copy, step counters, and meta hints (M3-17 / #38).
+   * WCAG AA requires contrast >= 4.5:1 on --paper (#f6f7f5). #525a56 achieves 6.54:1.
+   * Avoid raw opacity on --ink (e.g. text-ink/50 or text-ink/60) which fails or skirts the threshold. */
+  --muted: #525a56;
   --paper: #f6f7f5;
   --accent: #1c7c68;
   --accent-ink: #f6f7f5;
@@ -22,6 +27,8 @@
 @media (prefers-color-scheme: dark) {
   :root {
     --ink: #e8ede9;
+    /* Muted text in dark mode on --paper (#0f1512). #949f99 achieves 6.74:1 (WCAG AA >= 4.5:1). */
+    --muted: #949f99;
     --paper: #0f1512;
     --accent: #35a085;
     --accent-ink: #0f1512;
