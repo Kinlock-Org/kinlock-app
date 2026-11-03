@@ -4,6 +4,7 @@
     "tagline": "Money that can only reach the verified payee it was meant for."
   },
   "common": {
+    "skipToContent": "Skip to main content",
     "testnetBanner": "Testnet only. No real money moves here.",
     "notImplemented": "This page is not built yet.",
     "indicative": "Indicative",
