@@ -13,6 +13,7 @@ export function useSavedClaimLinks() {
   const [available, setAvailable] = useState(true);
   const [links, setLinks] = useState<SavedClaimLink[]>([]);
   const [copiedLockId, setCopiedLockId] = useState<string | null>(null);
+  const [locale, setLocale] = useState("en");
 
   const refresh = useCallback(() => {
     const store = browserStore();
@@ -22,6 +23,7 @@ export function useSavedClaimLinks() {
 
   useEffect(() => {
     refresh();
+    setLocale(navigator.language);
     // Another tab saving a link updates this list too.
     window.addEventListener("storage", refresh);
     return () => window.removeEventListener("storage", refresh);
@@ -53,5 +55,5 @@ export function useSavedClaimLinks() {
     URL.revokeObjectURL(url);
   }
 
-  return { available, links, copiedLockId, copy, remove, exportAll };
+  return { available, links, copiedLockId, copy, remove, exportAll, locale };
 }
