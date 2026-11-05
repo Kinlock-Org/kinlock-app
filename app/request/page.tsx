@@ -1,7 +1,7 @@
 /** Payee creates a payment-request link. Roadmap M3-05. */
 import { LagNotice } from "@/components/indexer/LagNotice";
 import { type MessageKey, t } from "@/lib/i18n/messages";
-import { type IndexedPayee, indexerLagging, listPayees, payable } from "@/lib/indexer";
+import { type IndexedPayee, indexerLagging, listPayees, MOCK_PAYEES, payable } from "@/lib/indexer";
 import { RequestForm } from "./RequestForm";
 
 export const dynamic = "force-dynamic";
@@ -12,7 +12,7 @@ export default async function Page() {
   try {
     [payees, lagging] = await Promise.all([listPayees().then(payable), indexerLagging()]);
   } catch {
-    payees = null;
+    payees = payable(MOCK_PAYEES);
   }
   return (
     <main className="mx-auto max-w-xl p-4">
