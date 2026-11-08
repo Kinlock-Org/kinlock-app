@@ -89,11 +89,18 @@ export function prefillFrom(
 
 export type PreflightVerdict = "blocked" | "needsAcknowledgement" | "ok";
 
-/** A failed blocking check stops the send; a failed warning needs the sender's acknowledgement. */
+/** A failed blocking check stops the send; an unknown blocking check or failed warning needs the sender's acknowledgement. */
 export function verdict(results: PreflightResult[]): PreflightVerdict {
   if (results.some((r) => r.severity === "block" && r.status === "fail")) return "blocked";
-  if (results.some((r) => r.severity === "warn" && r.status === "fail"))
+  if (
+    results.some(
+      (r) =>
+        (r.severity === "block" && r.status === "unknown") ||
+        (r.severity === "warn" && r.status === "fail"),
+    )
+  ) {
     return "needsAcknowledgement";
+  }
   return "ok";
 }
 

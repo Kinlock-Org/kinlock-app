@@ -103,9 +103,10 @@ describe("verdict", () => {
     status,
     messageKey: "x",
   });
-  it("blocks on a failed blocking check, asks to acknowledge a failed warning, else ok", () => {
+  it("blocks on a failed blocking check, asks to acknowledge an unknown block check or failed warning, else ok", () => {
     expect(verdict([r("block", "fail"), r("warn", "fail")])).toBe("blocked");
     expect(verdict([r("block", "pass"), r("warn", "fail")])).toBe("needsAcknowledgement");
-    expect(verdict([r("block", "pass"), r("block", "unknown"), r("warn", "unknown")])).toBe("ok");
+    expect(verdict([r("block", "unknown"), r("warn", "pass")])).toBe("needsAcknowledgement");
+    expect(verdict([r("block", "pass"), r("warn", "unknown")])).toBe("ok");
   });
 });

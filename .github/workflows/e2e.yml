@@ -1,12 +1,13 @@
-# Playwright happy path (request -> send -> claim -> verify) against a dedicated, throwaway
-# testnet contract (roadmap M3-19). Signing uses a test-only keypair adapter
-# (lib/wallet/test-adapter.ts), active only when NEXT_PUBLIC_E2E_TEST_MODE=1 -- never in a real
-# deployment. The indexer is built from kinlock-sdk's own Dockerfile and run against a
-# throwaway Postgres container, mirroring the pattern already proven in kinlock-sdk's own CI
-# (ci.yml's indexer-image job).
+# On pull requests, run the browser privacy test without signing secrets. Run the signed
+# request -> send -> claim -> verify flow only after reviewed code is pushed to protected main.
+# The test-only keypair adapter (lib/wallet/test-adapter.ts) is active only when
+# NEXT_PUBLIC_E2E_TEST_MODE=1 and is never enabled in the pull-request job or a deployment.
+# The indexer is built from kinlock-sdk's Dockerfile and run against throwaway Postgres.
 name: e2e
 on:
   pull_request:
+  push:
+    branches: [main]
 permissions:
   contents: read
 env:
@@ -31,10 +32,6 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           repository: Kinlock-Org/kinlock-registry
-          # TEMPORARY: the fixture payee this job needs is still on an unmerged branch
-          # (kinlock-registry PR #38, self-authored, needs the owner's own review/merge --
-          # AGENTS.md's self-approval rule). Revert to the default (main) once it merges.
-          ref: feat/e2e-fixture-payee
           path: kinlock-registry-src
 
       - name: Start Postgres and build the indexer image
@@ -92,7 +89,23 @@ jobs:
           cache: pnpm
       - run: pnpm install --frozen-lockfile
       - run: pnpm exec playwright install --with-deps chromium
-      - run: pnpm e2e
+      - name: Run privacy E2E on pull requests (no signing secrets)
+        if: github.event_name == 'pull_request'
+        run: pnpm exec playwright test e2e/claim-fragment-privacy.spec.ts
+        env:
+          NEXT_PUBLIC_STELLAR_NETWORK: testnet
+          NEXT_PUBLIC_RPC_URLS: ${{ env.E2E_RPC_URL }}
+          NEXT_PUBLIC_CONTRACT_ID: ${{ env.E2E_CONTRACT_ID }}
+          NEXT_PUBLIC_INDEXER_URL: http://localhost:3001
+          NEXT_PUBLIC_USDC_CONTRACT_ID: ${{ env.E2E_TOKEN_ID }}
+          NEXT_PUBLIC_USDC_ISSUER: ${{ env.E2E_TOKEN_ISSUER }}
+          # Lock 1 on this job's dedicated fixture contract (the test default 11 is on the
+          # standing testnet contract).
+          E2E_PRIVACY_TEST_LOCK_ID: "1"
+
+      - name: Run full signed testnet E2E on protected main
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
+        run: pnpm e2e
         env:
           NEXT_PUBLIC_E2E_TEST_MODE: "1"
           NEXT_PUBLIC_STELLAR_NETWORK: testnet
@@ -103,8 +116,6 @@ jobs:
           NEXT_PUBLIC_USDC_ISSUER: ${{ env.E2E_TOKEN_ISSUER }}
           E2E_SENDER_SECRET: ${{ secrets.E2E_SENDER_SECRET }}
           E2E_PAYEE_SECRET: ${{ secrets.E2E_PAYEE_SECRET }}
-          # claim-fragment-privacy.spec.ts's default (lock 11) is on the standing testnet
-          # contract, not this job's dedicated fixture one -- lock 1 there is the equivalent.
           E2E_PRIVACY_TEST_LOCK_ID: "1"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         if: ${{ !cancelled() }}

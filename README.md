@@ -27,9 +27,10 @@ A 25-second overview of the flow — lock USDC for a verified payee, the payee c
 | `/claim/[id]` | Payee verifies the reference against the on-chain `ref_hash`, then releases or declines |
 | `/locks/[id]` | Lock detail with refund, shown only when the contract allows it |
 | `/r/[txHash]/[eventIndex]`, `/verify` | Receipts rebuilt from chain data. "Payment to verified payee" — nothing more |
-| `/payee`, `/attester` | **Stubs** (`M3-11`, `M3-12`) |
+| `/payee` | Payee dashboard: connect a wallet, view and filter locks addressed to the payee, and open a lock's claim page. List data comes from the indexer; actions read chain state. |
+| `/attester` | Placeholder page; the read-only account-check tooling is not implemented yet (`M3-12`). |
 
-> **Status: the core money flows are real; the dashboard isn't.** Claim, decline, refund, receipts and verify read the **chain** through the SDK, never the indexer. `/send` is `M3-06` in progress, the Playwright happy path (`M3-19`) is still a `test.fixme` stub, and there is no live FX rate yet, so amounts show **USD only with a note**. Full state in `ROADMAP.md` (Phase 4: 11 `DONE`, 6 `IN PROGRESS`, 9 `TODO`).
+> **Status:** the sender, claim, lock-detail, payee dashboard and receipt flows are implemented. Money-moving actions and receipt verification read chain state through the SDK; the payee dashboard uses indexer data for lists. The Playwright request → send → claim → verify test is implemented, and the roadmap records it as passing in CI (`M3-19`). Local E2E runs need the dedicated testnet setup and signing secrets. There is no live FX-rate provider yet, so the app shows USD only with an explanatory note. See `ROADMAP.md` for current status and remaining work.
 
 ## The rules this repo exists to enforce
 
@@ -39,22 +40,22 @@ A 25-second overview of the flow — lock USDC for a verified payee, the payee c
 - **Nothing is hard-coded to a country.** Country and `local_currency` come from registry data. Every user-visible string lives in `messages/en.json`, keys are type-checked, and a test fails the build on an inline string; `Intl` handles numbers, currencies and dates (`M3-23` done — other locales are deferred, not missing by accident).
 - **Only `lib/sdk.ts` talks to the contract.** Wallets go through `lib/wallet/` using the Stellar Wallets Kit, so Freighter, xBull, Albedo and Lobstr are swappable.
 
-One caveat worth knowing: until the app is wired to the deployed indexer, `/send` and `/request` offer the payees in `lib/payees/known.ts` — a checked-in snapshot of the three testnet fixture payees (KE, NG, PH). It is not trusted for display: each entry's `payee_id` and `meta_hash` are re-derived locally and matched against a live `getPayee` chain read, and status and payout address always come from chain.
+Payee discovery in `/send`, `/request`, and `/payee` reads from the configured indexer. If the indexer is not configured or is unavailable, the pages display an honest unavailable state (`pages.*.indexerDown`). Money-moving actions and receipt verification read chain state directly through the SDK (hard rule 3: chain is truth).
 
 ## Quick start
 
 ```
 pnpm install
 pnpm dev
-pnpm lint && pnpm typecheck && pnpm test    # biome, tsc, vitest (13 files, 69 cases)
-pnpm e2e                                    # placeholder until M3-19
+pnpm lint && pnpm typecheck && pnpm test
+pnpm e2e                                    # Playwright; requires configured testnet E2E setup and secrets
 ```
 
 Next.js 16 (App Router), React 19, TypeScript 7, Tailwind 4. Node 20 in CI.
 
 Configuration is Zod-validated in `lib/config.ts`. Required: `NEXT_PUBLIC_STELLAR_NETWORK`, `NEXT_PUBLIC_RPC_URLS`, `NEXT_PUBLIC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_CONTRACT_ID`, `NEXT_PUBLIC_USDC_ISSUER`. `NEXT_PUBLIC_INDEXER_URL` is optional — only list views need it, and the deployed testnet app currently runs without it. Copy `.env.example` to `.env.local`; never commit values.
 
-Deploys to Vercel are currently **manual** (`vercel --prod`) — there's no deploy workflow, so a merged PR does not go live by itself.
+Vercel deploys are currently **manual** (`vercel --prod`); a merged PR does not go live by itself.
 
 ## Maintainers
 
