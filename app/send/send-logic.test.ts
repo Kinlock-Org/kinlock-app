@@ -45,6 +45,29 @@ describe("draftProblem mirrors the contract's create_lock checks", () => {
   it("accepts exactly the 1 USDC minimum", () => {
     expect(draftProblem(draft({ rows: [row("1", "2026-10-07")] }), NOW)).toBeNull();
   });
+
+  it("validates direct mode recipient requirements", () => {
+    const validG = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+    const validC = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
+    expect(
+      draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: validG }), NOW),
+    ).toBeNull();
+    expect(
+      draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: validC }), NOW),
+    ).toBeNull();
+    expect(draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: "" }), NOW)).toBe(
+      "pages.send.errorRecipient",
+    );
+    expect(
+      draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: "GSHORT" }), NOW),
+    ).toBe("pages.send.errorRecipient");
+    expect(
+      draftProblem(
+        draft({ mode: "direct", payeeId: undefined, recipient: `X${"A".repeat(55)}` }),
+        NOW,
+      ),
+    ).toBe("pages.send.errorRecipient");
+  });
 });
 
 describe("defaultExpiryDate", () => {

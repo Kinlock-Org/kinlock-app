@@ -40,7 +40,11 @@ function Body({ payees }: { payees: IndexedPayee[] | null }) {
           {t("pages.send.indexerDown")}
         </p>
       ) : null}
-      <SendForm payees={options} issuer={publicConfig().NEXT_PUBLIC_USDC_ISSUER} />
+      <SendForm
+        payees={options}
+        issuer={publicConfig().NEXT_PUBLIC_USDC_ISSUER}
+        enableDirectPayments={publicConfig().NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS}
+      />
     </div>
   );
 }

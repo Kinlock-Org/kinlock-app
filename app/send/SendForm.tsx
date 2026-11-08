@@ -7,7 +7,7 @@ import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
 import { ASSET_CODE, MAX_TRANCHES } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { hasMessage, t } from "@/lib/i18n/messages";
-import { fromBaseUnits } from "@/lib/sdk";
+import { fromBaseUnits, publicConfig } from "@/lib/sdk";
 import { idsOf, localCurrencyOf, preflightKey } from "./send-logic";
 import { type SendForm as Form, useSendForm } from "./useSendForm";
 
@@ -18,8 +18,17 @@ export interface PayeeOption {
 }
 
 /** The sender flow. Markup only; state lives in useSendForm. Roadmap M3-06. */
-export function SendForm({ payees, issuer }: { payees: PayeeOption[]; issuer: string }) {
-  const f = useSendForm(idsOf(payees));
+export function SendForm({
+  payees,
+  issuer,
+  enableDirectPayments,
+}: {
+  payees: PayeeOption[];
+  issuer: string;
+  enableDirectPayments?: boolean;
+}) {
+  const directEnabled = enableDirectPayments ?? publicConfig().NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS;
+  const f = useSendForm(idsOf(payees), directEnabled);
   return f.stage === "done" ? <Done f={f} /> : <Editor f={f} payees={payees} issuer={issuer} />;
 }
 
@@ -46,28 +55,30 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
       ) : null}
       {f.unknownPayee ? <p role="alert">{t("pages.send.prefillUnknownPayee")}</p> : null}
 
-      <div className="flex gap-4 border-b pb-2">
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="send-mode"
-            checked={f.mode === "verified"}
-            onChange={() => f.setMode("verified")}
-          />
-          <span className="text-sm font-medium">{t("pages.send.modeVerified")}</span>
-        </label>
-        <label className="flex items-center gap-2 cursor-pointer">
-          <input
-            type="radio"
-            name="send-mode"
-            checked={f.mode === "direct"}
-            onChange={() => f.setMode("direct")}
-          />
-          <span className="text-sm font-medium">{t("pages.send.modeDirect")}</span>
-        </label>
-      </div>
+      {f.directEnabled ? (
+        <div className="flex gap-4 border-b pb-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="send-mode"
+              checked={f.mode === "verified"}
+              onChange={() => f.setMode("verified")}
+            />
+            <span className="text-sm font-medium">{t("pages.send.modeVerified")}</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="send-mode"
+              checked={f.mode === "direct"}
+              onChange={() => f.setMode("direct")}
+            />
+            <span className="text-sm font-medium">{t("pages.send.modeDirect")}</span>
+          </label>
+        </div>
+      ) : null}
 
-      {f.mode === "verified" ? (
+      {f.mode === "verified" || !f.directEnabled ? (
         <label htmlFor={ids.payee} className="flex flex-col gap-1">
           <span className="font-medium">{t("pages.send.payeeLabel")}</span>
           <select

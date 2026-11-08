@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-08 (feat/mock-payee-fallback: M3-36 DONE, M3-26 restored) |
+| **Last updated** | 2026-11-08 (feat/mock-payee-fallback: M3-37 DONE) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 36 | 26 | 7 | 3 | 0 | 0 | 0 | 72% |
+| 4 App | 37 | 27 | 7 | 3 | 0 | 0 | 0 | 73% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **220** | **86** | **21** | **88** | **0** | **25** | **0** | **44%** |
+| **All** | **221** | **87** | **21** | **88** | **0** | **25** | **0** | **44%** |
 
 ---
 
@@ -333,6 +333,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-34 | Universal payments UI support: add dual-mode selector (Verified payee vs Any Stellar address) in /send, wire direct recipient to preflight and createLock, update receipts and lock views to show "Payment to recipient" for direct locks | app | P0 | DONE | M2-28 | ADR-0031; Biome lint passes; 167 tests pass; production build succeeds |
 | M3-35 | Make the required E2E check safe and actionable for external fork PRs, where GitHub does not expose testnet signing secrets | app | P1 | IN PROGRESS | M3-19 | A real fork PR completes required checks without exposing signing secrets to untrusted code; the testnet happy-path still runs in a trusted context and cannot be silently skipped |
 | M3-36 | Revert mock payee fallback on indexer downtime: show unavailable state (`payees = null`) and delete mock-data.ts | app | P0 | DONE | M3-26 | Prelaunch review Item 2; hard rule 11 and hard rule 3 respected; `listPayees()` throws on indexer failure / unset URL; `mock-data.ts` and `NEXT_PUBLIC_USE_MOCK_DATA` removed; tests verify indexer downtime yields unavailable state |
+| M3-37 | Gate direct-mode UI behind `NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS` (default false) until deployed contract supports `create_direct_lock` | app | P0 | DONE | M3-34 | Prelaunch review Item 3; direct mode hidden by default to prevent simulation errors on pre-ADR-0031 deployed contract; mode toggle suppressed when flag is false; unit tests verify flag parsing and default |
 
 ---
 
@@ -544,6 +545,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-08 | `feat/mock-payee-fallback` (Item 3 fix) | app | M3-37 DONE (new row) | Hide direct mode in kinlock-app behind `NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS` flag (default false) until deployed contract supports `create_direct_lock` (Item 3 from PRELAUNCH_REVIEW.md). In `/send`, mode toggle is suppressed and forced to verified when flag is false; unit tests verify flag parsing and default; lint, typecheck, tests, and build pass. |
 | 2026-11-08 | `fix/revert-mock-payee-fallback` (Item 2 fix) | app | M3-36 DONE, M3-26 updated | Reverted mock payee fallback on indexer downtime: `listPayees()` throws when unconfigured or on fetch failure, server pages catch and set `payees = null` (rendering `pages.*.indexerDown`), deleted `lib/indexer/mock-data.ts`, removed `NEXT_PUBLIC_USE_MOCK_DATA`, and removed mock fallback tests. Restores country-agnostic core (hard rule 11) and chain is truth (hard rule 3). All 195 tests pass, Biome clean, Next.js build succeeds. |
 | 2026-11-06 | `feat/mock-payee-fallback` (README and Wave-readiness review) | app | M3-35 IN PROGRESS | Updated the app README and Drips Wave summary to match current functionality and tests; corrected stale counts and placeholder claims. Live branch-protection and fork PR checks exposed a blocker: the required E2E job failed because GitHub withholds signing secrets from fork PRs. Updated the workflow to run the no-secret privacy test for every PR and the full signed testnet flow only on protected-main pushes; removed the stale registry-fixture branch pin. M3-35 remains IN PROGRESS pending a real fork-PR run and trusted-main E2E verification. |
 | 2026-11-05 | `feat/mock-payee-fallback` | app | M3-26 (status unchanged, DONE) | Added active fixture mock payee fallback data for `/send`, `/request`, and `/payee` so verified payee selection and locked payment flows work even when the external indexer is unconfigured or unreachable. Falls back to mock payees if indexer returns error/404 or `NEXT_PUBLIC_INDEXER_URL` is unset, or if `NEXT_PUBLIC_USE_MOCK_DATA=true`. All 197 tests pass. |
