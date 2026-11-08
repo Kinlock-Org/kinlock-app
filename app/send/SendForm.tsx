@@ -29,7 +29,13 @@ export function SendForm({
 }) {
   const directEnabled = enableDirectPayments ?? publicConfig().NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS;
   const f = useSendForm(idsOf(payees), directEnabled);
-  return f.stage === "done" ? <Done f={f} /> : <Editor f={f} payees={payees} issuer={issuer} />;
+  if (f.stage === "done") {
+    return <Done f={f} />;
+  }
+  if (f.stage === "pending") {
+    return <Pending f={f} />;
+  }
+  return <Editor f={f} payees={payees} issuer={issuer} />;
 }
 
 function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer: string }) {
@@ -305,6 +311,41 @@ function Done({ f }: { f: Form }) {
         </a>
         <button type="button" onClick={f.reset} className="underline">
           {t("pages.send.sendAnother")}
+        </button>
+      </span>
+    </section>
+  );
+}
+
+function Pending({ f }: { f: Form }) {
+  return (
+    <section aria-live="polite" className="mt-6 flex flex-col gap-3 rounded border p-4">
+      <h2 className="text-xl font-semibold">{t("pages.send.pendingHeading")}</h2>
+      <p>{t("pages.send.pendingBody")}</p>
+      {f.pendingTxHash ? (
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium">{t("pages.send.pendingTxHash")}</span>
+          <code className="break-all rounded bg-gray-50 p-2 text-xs font-mono">
+            {f.pendingTxHash}
+          </code>
+        </div>
+      ) : null}
+      <p role="alert" className="text-sm font-medium text-amber-700">
+        {t("pages.send.pendingWarning")}
+      </p>
+      {f.error ? (
+        <p role="alert" className="text-sm font-medium text-red-600">
+          {t(f.error)}
+        </p>
+      ) : null}
+      <span className="flex gap-3">
+        <button
+          type="button"
+          onClick={f.checkPendingStatus}
+          disabled={f.checking}
+          className="rounded border px-4 py-2 font-medium disabled:opacity-50"
+        >
+          {f.checking ? t("pages.send.checking") : t("pages.send.pendingCheckAgain")}
         </button>
       </span>
     </section>

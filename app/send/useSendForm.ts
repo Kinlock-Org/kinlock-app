@@ -7,12 +7,19 @@ import type { PreflightResult } from "@kinlock/sdk";
 import { useEffect, useRef, useState } from "react";
 import type { ScheduleRow } from "@/app/request/schedule";
 import { nextRow, todayUtc, unixSecondsOf } from "@/app/request/schedule";
-import { browserStore, newClaimLink, saveClaimLink } from "@/lib/claim-links";
+import {
+  browserStore,
+  newClaimLink,
+  removePendingSubmission,
+  saveClaimLink,
+  savePendingSubmission,
+} from "@/lib/claim-links";
 import type { MessageKey } from "@/lib/i18n/messages";
 import {
   computeRefHash,
   createLock,
   generateSalt,
+  pollTransaction,
   preflight,
   publicConfig,
   toBaseUnits,
@@ -21,7 +28,7 @@ import {
 import { createDefaultWalletAdapter, type WalletAdapter } from "@/lib/wallet";
 import { defaultExpiryDate, draftProblem, prefillFrom, verdict } from "./send-logic";
 
-type Stage = "edit" | "review" | "sending" | "done";
+type Stage = "edit" | "review" | "sending" | "pending" | "done";
 const nowSeconds = () => BigInt(Math.floor(Date.now() / 1000));
 
 export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = false) {
@@ -45,6 +52,8 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
   const [acknowledged, setAcknowledged] = useState(false);
   const [error, setError] = useState<MessageKey | null>(null);
   const [salt, setSalt] = useState("");
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
+  const [pendingSubmissionId, setPendingSubmissionId] = useState<string | null>(null);
   const [done, setDone] = useState<{ lockId: string; claimLink: string; saved: boolean } | null>(
     null,
   );
@@ -124,12 +133,81 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
     }
   }
 
+  async function handlePendingConfirmation(hash: string, subId: string, ref: string, slt: string) {
+    const store = browserStore();
+    try {
+      const res = await pollTransaction(hash);
+      if (res.status === "SUCCESS") {
+        const finalLockId = res.lockId ?? 1n;
+        const claimLink = newClaimLink(window.location.origin, finalLockId, ref, slt);
+        const saved = store ? saveClaimLink(store, claimLink) : false;
+        if (store) {
+          removePendingSubmission(store, subId);
+          removePendingSubmission(store, hash);
+        }
+        setDone({
+          lockId: finalLockId.toString(),
+          claimLink,
+          saved,
+        });
+        setPendingTxHash(null);
+        setPendingSubmissionId(null);
+        setStage("done");
+        window.dispatchEvent(new StorageEvent("storage"));
+        return;
+      }
+      if (store) {
+        removePendingSubmission(store, subId);
+        removePendingSubmission(store, hash);
+      }
+      setPendingTxHash(null);
+      setPendingSubmissionId(null);
+      setError("pages.send.errorTx");
+      setStage("review");
+    } catch {
+      setError("pages.send.pendingTimeout");
+    }
+  }
+
+  async function checkPendingStatus() {
+    if (!pendingTxHash) return;
+    setError(null);
+    setChecking(true);
+    try {
+      await handlePendingConfirmation(
+        pendingTxHash,
+        pendingSubmissionId ?? pendingTxHash,
+        reference,
+        salt,
+      );
+    } finally {
+      setChecking(false);
+    }
+  }
+
   async function send() {
     if (!wallet.current || !address) return setError("pages.send.errorWallet");
     setError(null);
     setStage("sending");
+
+    const submissionId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+    const store = browserStore();
+    if (store) {
+      savePendingSubmission(store, {
+        id: submissionId,
+        reference,
+        salt,
+        mode: activeMode,
+        recipientOrPayee: activeMode === "direct" ? recipient : payeeId,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     try {
-      const { lockId } = await createLock(
+      const { lockId, txHash } = await createLock(
         {
           sender: address,
           token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
@@ -144,16 +222,44 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
         walletSigner(wallet.current, address),
       );
       const claimLink = newClaimLink(window.location.origin, lockId, reference, salt);
-      const store = browserStore();
+      const saved = store ? saveClaimLink(store, claimLink) : false;
+      if (store) {
+        removePendingSubmission(store, submissionId);
+        if (txHash) removePendingSubmission(store, txHash);
+      }
       setDone({
         lockId: lockId.toString(),
         claimLink,
-        saved: store ? saveClaimLink(store, claimLink) : false,
+        saved,
       });
       setStage("done");
       window.dispatchEvent(new StorageEvent("storage"));
     } catch (e) {
-      const code = (e as { code?: string }).code;
+      const err = e as { code?: string; txHash?: string };
+      if (err.code === "TX_PENDING" && err.txHash) {
+        const hash = err.txHash;
+        if (store) {
+          savePendingSubmission(store, {
+            id: submissionId,
+            reference,
+            salt,
+            mode: activeMode,
+            recipientOrPayee: activeMode === "direct" ? recipient : payeeId,
+            txHash: hash,
+            createdAt: new Date().toISOString(),
+          });
+        }
+        setPendingTxHash(hash);
+        setPendingSubmissionId(submissionId);
+        setStage("pending");
+        await handlePendingConfirmation(hash, submissionId, reference, salt);
+        return;
+      }
+
+      if (store) {
+        removePendingSubmission(store, submissionId);
+      }
+      const code = err.code;
       setError(
         code === "TX_FAILED"
           ? "pages.send.errorTx"
@@ -174,6 +280,8 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
   function reset() {
     setDone(null);
     setCopied(false);
+    setPendingTxHash(null);
+    setPendingSubmissionId(null);
     setSalt(generateSalt());
     setReferenceValue("");
     setRows([{ key: 0, amount: "", date: todayUtc() }]);
@@ -224,6 +332,8 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
     address,
     connect,
     stage,
+    pendingTxHash,
+    checkPendingStatus,
     checking,
     results,
     verdict: v,

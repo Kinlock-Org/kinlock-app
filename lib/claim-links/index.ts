@@ -99,3 +99,71 @@ export function exportClaimLinks(store: KeyValueStore, now = new Date()): string
     2,
   )}\n`;
 }
+
+export interface PendingSubmission {
+  id: string;
+  reference: string;
+  salt: string;
+  mode: "verified" | "direct";
+  recipientOrPayee: string;
+  txHash?: string;
+  createdAt: string;
+}
+
+export const PENDING_STORAGE_KEY = "kinlock.pendingSubmissions.v1";
+
+const PendingSchema = z.array(
+  z.object({
+    id: z.string(),
+    reference: z.string(),
+    salt: z.string(),
+    mode: z.enum(["verified", "direct"]),
+    recipientOrPayee: z.string(),
+    txHash: z.string().optional(),
+    createdAt: z.string(),
+  }),
+);
+
+export function listPendingSubmissions(store: KeyValueStore): PendingSubmission[] {
+  let raw: unknown;
+  try {
+    raw = JSON.parse(store.getItem(PENDING_STORAGE_KEY) ?? "[]");
+  } catch {
+    return [];
+  }
+  const parsed = PendingSchema.safeParse(raw);
+  if (!parsed.success) return [];
+  return parsed.data.sort((a, b) => (a.createdAt < b.createdAt ? 1 : -1));
+}
+
+export function savePendingSubmission(
+  store: KeyValueStore,
+  submission: PendingSubmission,
+): boolean {
+  const others = listPendingSubmissions(store).filter(
+    (s) => s.id !== submission.id && (!submission.txHash || s.txHash !== submission.txHash),
+  );
+  try {
+    store.setItem(PENDING_STORAGE_KEY, JSON.stringify([submission, ...others]));
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+export function getPendingSubmission(store: KeyValueStore, id?: string): PendingSubmission | null {
+  const all = listPendingSubmissions(store);
+  if (id) {
+    return all.find((s) => s.id === id || s.txHash === id) ?? null;
+  }
+  return all[0] ?? null;
+}
+
+export function removePendingSubmission(store: KeyValueStore, id: string): void {
+  const remaining = listPendingSubmissions(store).filter((s) => s.id !== id && s.txHash !== id);
+  try {
+    store.setItem(PENDING_STORAGE_KEY, JSON.stringify(remaining));
+  } catch {
+    // ignore
+  }
+}
