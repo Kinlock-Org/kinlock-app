@@ -7,9 +7,6 @@
  */
 import { z } from "zod";
 import { publicConfig } from "@/lib/sdk";
-import { MOCK_PAYEES } from "./mock-data";
-
-export { MOCK_PAYEES };
 
 const PayeeSchema = z.object({
   payeeId: z.string(),
@@ -30,35 +27,23 @@ const PayeesResponse = z.object({
   next: z.string().nullable(),
 });
 
-/**
- * Every payee the indexer knows, following pagination.
- * Falls back to fixture mock data if the indexer is unconfigured, down, or fails to respond.
- */
+/** Every payee the indexer knows, following pagination. Throws if the indexer can't be read. */
 export async function listPayees(): Promise<IndexedPayee[]> {
-  if (process.env.NEXT_PUBLIC_USE_MOCK_DATA === "true") {
-    return MOCK_PAYEES;
-  }
   const base = publicConfig().NEXT_PUBLIC_INDEXER_URL;
-  if (!base) {
-    return MOCK_PAYEES;
-  }
+  if (!base) throw new Error("NEXT_PUBLIC_INDEXER_URL is not set");
   const all: IndexedPayee[] = [];
   let after: string | null = null;
-  try {
-    do {
-      const url = new URL("/payees", base);
-      url.searchParams.set("limit", "100");
-      if (after) url.searchParams.set("after", after);
-      const response = await fetch(url, { next: { revalidate: 60 } });
-      if (!response.ok) throw new Error(`indexer /payees: HTTP ${response.status}`);
-      const page = PayeesResponse.parse(await response.json());
-      all.push(...page.payees);
-      after = page.next;
-    } while (after);
-    return all.length > 0 ? all : MOCK_PAYEES;
-  } catch {
-    return MOCK_PAYEES;
-  }
+  do {
+    const url = new URL("/payees", base);
+    url.searchParams.set("limit", "100");
+    if (after) url.searchParams.set("after", after);
+    const response = await fetch(url, { next: { revalidate: 60 } });
+    if (!response.ok) throw new Error(`indexer /payees: HTTP ${response.status}`);
+    const page = PayeesResponse.parse(await response.json());
+    all.push(...page.payees);
+    after = page.next;
+  } while (after);
+  return all;
 }
 
 /** Payees a sender can pay: Active, with registry display data joined (hash-bound). */
@@ -70,7 +55,7 @@ export const LOCK_STATES = ["Open", "Completed", "Refunded", "Declined"] as cons
 const IndexedLockSchema = z.object({
   id: z.string(),
   sender: z.string(),
-  payeeId: z.string(),
+  payeeId: z.string().nullable(),
   payout: z.string(),
   token: z.string(),
   total: z.string(),

@@ -4,7 +4,7 @@ const { publicConfig } = vi.hoisted(() => ({ publicConfig: vi.fn() }));
 vi.mock("@/lib/sdk", () => ({ publicConfig }));
 publicConfig.mockReturnValue({ NEXT_PUBLIC_INDEXER_URL: "https://indexer.example" });
 
-const { indexerLagging, listPayees, listLocks, MOCK_PAYEES } = await import("./index");
+const { indexerLagging, listPayees, listLocks } = await import("./index");
 
 afterEach(() => {
   vi.unstubAllGlobals();
@@ -89,36 +89,19 @@ describe("listPayees", () => {
     expect(payees).toEqual([mockPayee]);
   });
 
-  it("falls back to mock payees when indexer returns a non-ok HTTP status (e.g. 404)", async () => {
+  it("throws when indexer returns a non-ok HTTP status (e.g. 404)", async () => {
     vi.stubGlobal("fetch", vi.fn().mockResolvedValue({ ok: false, status: 404 }));
-    const payees = await listPayees();
-    expect(payees).toEqual(MOCK_PAYEES);
+    await expect(listPayees()).rejects.toThrow("indexer /payees: HTTP 404");
   });
 
-  it("falls back to mock payees when indexer fetch rejects (e.g. network down)", async () => {
+  it("throws when indexer fetch rejects (e.g. network down)", async () => {
     vi.stubGlobal("fetch", vi.fn().mockRejectedValue(new Error("fetch failed")));
-    const payees = await listPayees();
-    expect(payees).toEqual(MOCK_PAYEES);
+    await expect(listPayees()).rejects.toThrow("fetch failed");
   });
 
-  it("falls back to mock payees when no indexer URL is configured", async () => {
+  it("throws when no indexer URL is configured", async () => {
     publicConfig.mockReturnValueOnce({ NEXT_PUBLIC_INDEXER_URL: undefined });
-    const payees = await listPayees();
-    expect(payees).toEqual(MOCK_PAYEES);
-  });
-
-  it("uses mock payees when NEXT_PUBLIC_USE_MOCK_DATA is 'true'", async () => {
-    const prev = process.env.NEXT_PUBLIC_USE_MOCK_DATA;
-    try {
-      process.env.NEXT_PUBLIC_USE_MOCK_DATA = "true";
-      const fetchSpy = vi.fn();
-      vi.stubGlobal("fetch", fetchSpy);
-      const payees = await listPayees();
-      expect(payees).toEqual(MOCK_PAYEES);
-      expect(fetchSpy).not.toHaveBeenCalled();
-    } finally {
-      process.env.NEXT_PUBLIC_USE_MOCK_DATA = prev;
-    }
+    await expect(listPayees()).rejects.toThrow("NEXT_PUBLIC_INDEXER_URL is not set");
   });
 });
 

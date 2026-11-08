@@ -2,7 +2,7 @@
 
 import { LagNotice } from "@/components/indexer/LagNotice";
 import { t } from "@/lib/i18n/messages";
-import { type IndexedPayee, indexerLagging, listPayees, MOCK_PAYEES } from "@/lib/indexer";
+import { type IndexedPayee, indexerLagging, listPayees } from "@/lib/indexer";
 import { PayeeView } from "./PayeeView";
 
 export const dynamic = "force-dynamic";
@@ -13,7 +13,7 @@ export default async function Page() {
   try {
     [payees, lagging] = await Promise.all([listPayees(), indexerLagging()]);
   } catch {
-    payees = MOCK_PAYEES;
+    payees = null;
   }
   return (
     <main className="mx-auto max-w-xl p-4">

@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-05 (feat/mock-payee-fallback: M3-26 updated) |
+| **Last updated** | 2026-11-08 (feat/mock-payee-fallback: M3-36 DONE, M3-26 restored) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 34 | 25 | 6 | 3 | 0 | 0 | 0 | 74% |
+| 4 App | 36 | 26 | 7 | 3 | 0 | 0 | 0 | 72% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **218** | **85** | **20** | **88** | **0** | **25** | **0** | **44%** |
+| **All** | **220** | **86** | **21** | **88** | **0** | **25** | **0** | **44%** |
 
 ---
 
@@ -322,7 +322,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-23 | Externalize all UI strings (`messages/en.json`) and add `Intl`-based locale-aware formatting; handle zero- and three-decimal currencies, non-Latin text, and RTL-safe layout | app | P0 | DONE | M3-01 | Lint or test fails on inline strings; formatting tests across at least 3 locales and currencies |
 | M3-24 | CI guard: fail on hard-coded country, currency, anchor, or locale literals outside registry data, tests, and fixtures | all | P1 | DONE | M3-01, M2-01 | Guard runs in app and sdk CI; passing and failing examples tested |
 | M3-25 | Favicon/app icon, persistent site header (nav, docs and GitHub links), mobile hamburger menu, reduced-motion-safe entrance motion | app | P2 | DONE | M3-01, M3-04 | Favicon set in every browser; nav usable one-handed on a narrow viewport; `prefers-reduced-motion` honored |
-| M3-26 | Mock payee fallback data for `/send`, `/request`, and `/payee` when indexer is unavailable or unconfigured | app | P1 | DONE | M3-05, M3-06 | `/send`, `/request`, and `/payee` gracefully fall back to active testnet fixture payees when indexer is unconfigured or unreachable |
+| M3-26 | Interim chain-verified payee source for `/send` and `/request`, since no indexer is deployed (`M2-18`) | app | P1 | DONE | M3-05, M3-06 | `/send` and `/request` list real, on-chain `Active` payees and complete their flow up to wallet connect; **retired 2026-10-08**, superseded now that `M2-18`'s indexer is live (code removed, pages point at the real indexer again) |
 | M3-27 | Route-level `loading.tsx`, `error.tsx` and `not-found.tsx` for the user-facing routes | app | P1 | DONE | M3-01 | Every in-scope route has a designed pending/error/404 state; no stack trace or file path reaches the UI; `/claim/*` untouched |
 | M3-28 | CI `malware-scan` job: `pnpm audit` against the npm advisory database plus a Semgrep source scan on every PR | app | P1 | DONE | — | Job runs on every PR; a known-vulnerable dependency or an injected malicious-pattern test case trips it; verified green on a real PR |
 | M3-29 | Bump `next` off the vulnerable `16.3.8` pin: 2 critical unauthenticated-RCE advisories (Image Optimization API, `use cache`) plus a high-severity Server Actions DoS | app | P0 | DONE | — | `pnpm audit --audit-level=high` clean of the three advisories; lint, typecheck, full test suite, build, and e2e all still pass |
@@ -331,6 +331,8 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-32 | `roadmap-check.yml` exempts Dependabot (`if: github.actor != 'dependabot[bot]'`): Dependabot has no way to know AGENTS.md §12's ROADMAP.md convention and can't be configured to edit it, so every Dependabot PR opened after `M3-31` was failing this required check for a reason unrelated to the dependency bump itself | app | P1 | DONE | M3-31 | `roadmap-check` reports success (skipped) on a real Dependabot PR; confirmed via GitHub's own status-checks docs that a job skipped by a job-level `if` reports "Success" and does not block a required check, not assumed |
 | M3-33 | Scorecard remediation, Tier 2: switch CodeQL from GitHub's default setup to advanced codeql.yml; pin malware-scan.yml action SHAs and semgrep version; remove downloadThenRun curl pipe in e2e.yml; enrich SECURITY.md with disclosure process and response timelines | app | P2 | DONE | M3-31 | SAST confirmed 10/10 on Scorecard; malware-scan actions pinned by commit SHA; downloadThenRun pattern removed; full test suite passes |
 | M3-34 | Universal payments UI support: add dual-mode selector (Verified payee vs Any Stellar address) in /send, wire direct recipient to preflight and createLock, update receipts and lock views to show "Payment to recipient" for direct locks | app | P0 | DONE | M2-28 | ADR-0031; Biome lint passes; 167 tests pass; production build succeeds |
+| M3-35 | Make the required E2E check safe and actionable for external fork PRs, where GitHub does not expose testnet signing secrets | app | P1 | IN PROGRESS | M3-19 | A real fork PR completes required checks without exposing signing secrets to untrusted code; the testnet happy-path still runs in a trusted context and cannot be silently skipped |
+| M3-36 | Revert mock payee fallback on indexer downtime: show unavailable state (`payees = null`) and delete mock-data.ts | app | P0 | DONE | M3-26 | Prelaunch review Item 2; hard rule 11 and hard rule 3 respected; `listPayees()` throws on indexer failure / unset URL; `mock-data.ts` and `NEXT_PUBLIC_USE_MOCK_DATA` removed; tests verify indexer downtime yields unavailable state |
 
 ---
 
@@ -542,6 +544,8 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-08 | `fix/revert-mock-payee-fallback` (Item 2 fix) | app | M3-36 DONE, M3-26 updated | Reverted mock payee fallback on indexer downtime: `listPayees()` throws when unconfigured or on fetch failure, server pages catch and set `payees = null` (rendering `pages.*.indexerDown`), deleted `lib/indexer/mock-data.ts`, removed `NEXT_PUBLIC_USE_MOCK_DATA`, and removed mock fallback tests. Restores country-agnostic core (hard rule 11) and chain is truth (hard rule 3). All 195 tests pass, Biome clean, Next.js build succeeds. |
+| 2026-11-06 | `feat/mock-payee-fallback` (README and Wave-readiness review) | app | M3-35 IN PROGRESS | Updated the app README and Drips Wave summary to match current functionality and tests; corrected stale counts and placeholder claims. Live branch-protection and fork PR checks exposed a blocker: the required E2E job failed because GitHub withholds signing secrets from fork PRs. Updated the workflow to run the no-secret privacy test for every PR and the full signed testnet flow only on protected-main pushes; removed the stale registry-fixture branch pin. M3-35 remains IN PROGRESS pending a real fork-PR run and trusted-main E2E verification. |
 | 2026-11-05 | `feat/mock-payee-fallback` | app | M3-26 (status unchanged, DONE) | Added active fixture mock payee fallback data for `/send`, `/request`, and `/payee` so verified payee selection and locked payment flows work even when the external indexer is unconfigured or unreachable. Falls back to mock payees if indexer returns error/404 or `NEXT_PUBLIC_INDEXER_URL` is unset, or if `NEXT_PUBLIC_USE_MOCK_DATA=true`. All 197 tests pass. |
 | 2026-11-01 | `fix/scorecard-hardening` | app | M3-33 DONE | OpenSSF Scorecard hardening: pinned malware-scan.yml actions to commit SHAs and semgrep to 1.136.0 (Pinned-Dependencies); removed curl-pipe downloadThenRun pattern in e2e.yml; enriched SECURITY.md with vulnerability reporting instructions and response/disclosure timelines. All 187 tests pass. |
 | 2026-11-01 | `docs/drips-wave-application` | app | no row changes | Added dedicated DRIPS_WAVE.md application and review summary document for the Drips Wave Stellar program review panel, detailing Next.js web application architecture, live Vercel testnet deployment, strict privacy boundaries, testing hygiene, and maintainers. |
