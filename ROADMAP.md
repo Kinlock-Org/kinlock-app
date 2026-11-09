@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 39 | 29 | 7 | 3 | 0 | 0 | 0 | 74% |
+| 4 App | 40 | 30 | 7 | 3 | 0 | 0 | 0 | 75% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **223** | **89** | **21** | **88** | **0** | **25** | **0** | **45%** |
+| **All** | **224** | **90** | **21** | **88** | **0** | **25** | **0** | **45%** |
 
 ---
 
@@ -336,6 +336,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-37 | Gate direct-mode UI behind `NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS` (default false) until deployed contract supports `create_direct_lock` | app | P0 | DONE | M3-34 | Prelaunch review Item 3; direct mode hidden by default to prevent simulation errors on pre-ADR-0031 deployed contract; mode toggle suppressed when flag is false; unit tests verify flag parsing and default |
 | M3-38 | Prevent double payment and preserve claim link on pending tx | app | P0 | DONE | M3-06, M2-30 | Prelaunch review Item 4; save pending submission to local storage before submit; on TX_PENDING enter pending state with txHash and poll getTransaction without re-enabling Send; on confirmation build and store claim link in claimLinks.v1 and clean up pending; on failure return to review; unit tests verify pending submission helpers, SDK pollTransaction, and hook lifecycle |
 | M3-39 | Preflight verdict: require acknowledgement on unknown block check | app | P0 | DONE | M3-06, M2-31 | Prelaunch review Item 7; `verdict()` returns `needsAcknowledgement` when any `severity === "block"` check has `status === "unknown"`; unit tests verify unknown block checks do not pass automatically; 202 tests pass |
+| M3-40 | Apply nonce CSP site-wide to protect stored claim links across all application routes | app | P0 | DONE | M3-14 | Prelaunch review Item 8; proxy matcher applies nonce CSP site-wide excluding static assets and images; connect-src covers self, rpcOrigins, indexer origin, https://*.stellar.org, and https://albedo.link; tests verify connect-src and policy; 203 tests pass |
 
 ---
 
@@ -547,6 +548,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-08 | `feat/mock-payee-fallback` (Item 8 fix) | app | M3-40 DONE (new row) | Fix PRELAUNCH_REVIEW Item 8 (app): apply nonce CSP site-wide to protect stored claim links across all application routes, include indexer origin in originsOf, and cover wildcard stellar.org and albedo.link in connect-src (203/203 tests pass). |
 | 2026-11-08 | `fix/preflight-verdict-unknown-ack` | app | M3-39 DONE (new row) | Fix PRELAUNCH_REVIEW Item 7 (App): require sender acknowledgement when a block check returns unknown in preflight verdict (202/202 tests pass). |
 | 2026-11-08 | `feat/mock-payee-fallback` (Item 4 fix) | app | M3-38 DONE (new row) | Fix PRELAUNCH_REVIEW Item 4 (app): prevent double payment and preserve claim link on pending tx. Save pending submission before submit; on TX_PENDING enter pending state with txHash and poll getTransaction without re-enabling Send button; on confirmation build and save claim link in claimLinks.v1 and remove pending; on permanent failure return to review; added Pending UI with externalized messages; unit tests verify pending submission helpers and SDK pollTransaction (202/202 tests pass, Biome clean, Next.js build clean). |
 | 2026-11-08 | `feat/mock-payee-fallback` (Item 3 fix) | app | M3-37 DONE (new row) | Hide direct mode in kinlock-app behind `NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS` flag (default false) until deployed contract supports `create_direct_lock` (Item 3 from PRELAUNCH_REVIEW.md). In `/send`, mode toggle is suppressed and forced to verified when flag is false; unit tests verify flag parsing and default; lint, typecheck, tests, and build pass. |
