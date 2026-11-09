@@ -18,8 +18,8 @@ importers:
         specifier: 2.7.1
         version: 2.7.1(@types/react@19.3.0)(bufferutil@4.1.0)(near-api-js@5.1.1)(react@19.3.1)(tslib@2.8.1)(typescript@7.0.2)(utf-8-validate@6.0.6)(zod@4.6.7)
       '@kinlock/sdk':
-        specifier: file:./vendor/kinlock-sdk-0.3.2.tgz
-        version: file:vendor/kinlock-sdk-0.3.2.tgz
+        specifier: file:./vendor/kinlock-sdk-0.3.3.tgz
+        version: file:vendor/kinlock-sdk-0.3.3.tgz
       '@stellar/stellar-sdk':
         specifier: 17.4.0
         version: 17.4.0
@@ -347,9 +347,9 @@ packages:
     resolution: {tarball: https://github.com/Kinlock-Org/kinlock-contracts/releases/download/bindings-v0.2.0/kinlock-contract-0.2.0.tgz}
     version: 0.2.0
 
-  '@kinlock/sdk@file:vendor/kinlock-sdk-0.3.2.tgz':
-    resolution: {integrity: sha512-8fSAnZAX1iQzB2lgbQ7jBrKtoozvQ9AVCgydrVLmrFI4rw1JDqqJhknOZ7lmqm9FdXdC6+hln7o+p+9xjfuvFA==, tarball: file:vendor/kinlock-sdk-0.3.2.tgz}
-    version: 0.3.2
+  '@kinlock/sdk@file:vendor/kinlock-sdk-0.3.3.tgz':
+    resolution: {integrity: sha512-spORRFKZvfukp4v6V2Laly+HwyGwLgN5DcMyv/7FLaFQCiFn1HEAGZ6urG9owJLfzpx4PdA0sO/VEShL0Y9jXg==, tarball: file:vendor/kinlock-sdk-0.3.3.tgz}
+    version: 0.3.3
 
   '@ledgerhq/devices@8.6.1':
     resolution: {integrity: sha512-PQR2fyWz7P/wMFHY9ZLz17WgFdxC/Im0RVDcWXpp24+iRQRyxhQeX2iG4mBKUzfaAW6pOIEiWt+vmJh88QP9rQ==}
@@ -3281,7 +3281,7 @@ snapshots:
       - debug
       - supports-color
 
-  '@kinlock/sdk@file:vendor/kinlock-sdk-0.3.2.tgz':
+  '@kinlock/sdk@file:vendor/kinlock-sdk-0.3.3.tgz':
     dependencies:
       '@kinlock/contract': https://github.com/Kinlock-Org/kinlock-contracts/releases/download/bindings-v0.2.0/kinlock-contract-0.2.0.tgz
       '@stellar/stellar-sdk': 17.2.1

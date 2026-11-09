@@ -3,7 +3,8 @@ import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WalletAdapter } from "./wallet";
 
 const calls: unknown[][] = [];
-vi.mock("@kinlock/sdk", () => ({
+vi.mock("@kinlock/sdk", async (importOriginal) => ({
+  KinlockError: (await importOriginal<typeof import("@kinlock/sdk")>()).KinlockError,
   getLock: vi.fn(async (...args: unknown[]) => {
     calls.push(["getLock", ...args]);
     return null;
@@ -99,6 +100,11 @@ describe("lib/sdk", () => {
     getTxSpy.mockRestore();
   });
 
+  it("re-exports the SDK's own KinlockError, so instanceof matches errors the SDK throws", async () => {
+    const actual = await vi.importActual<typeof import("@kinlock/sdk")>("@kinlock/sdk");
+    expect(lib.KinlockError).toBe(actual.KinlockError);
+  });
+
   it("pollTransaction throws KinlockError with TX_PENDING on timeout", async () => {
     const { rpc } = await import("@stellar/stellar-sdk");
     const getTxSpy = vi.spyOn(rpc.Server.prototype, "getTransaction").mockResolvedValue({
@@ -106,7 +112,9 @@ describe("lib/sdk", () => {
     } as unknown as rpc.Api.GetTransactionResponse);
 
     const hash = "ef".repeat(32);
-    await expect(lib.pollTransaction(hash, 50, 10)).rejects.toMatchObject({
+    const error = await lib.pollTransaction(hash, 50, 10).catch((e) => e);
+    expect(error).toBeInstanceOf(lib.KinlockError);
+    await expect(Promise.reject(error)).rejects.toMatchObject({
       code: "TX_PENDING",
       txHash: hash,
     });

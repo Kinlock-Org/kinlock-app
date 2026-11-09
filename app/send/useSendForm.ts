@@ -9,6 +9,7 @@ import type { ScheduleRow } from "@/app/request/schedule";
 import { nextRow, todayUtc, unixSecondsOf } from "@/app/request/schedule";
 import {
   browserStore,
+  listPendingSubmissions,
   newClaimLink,
   removePendingSubmission,
   saveClaimLink,
@@ -26,7 +27,13 @@ import {
   walletSigner,
 } from "@/lib/sdk";
 import { createDefaultWalletAdapter, type WalletAdapter } from "@/lib/wallet";
-import { defaultExpiryDate, draftProblem, prefillFrom, verdict } from "./send-logic";
+import {
+  confirmedLockId,
+  defaultExpiryDate,
+  draftProblem,
+  prefillFrom,
+  verdict,
+} from "./send-logic";
 
 type Stage = "edit" | "review" | "sending" | "pending" | "done";
 const nowSeconds = () => BigInt(Math.floor(Date.now() / 1000));
@@ -63,11 +70,31 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
   // every render would overwrite the sender's edits and change the salt.)
   const initialized = useRef(false);
   const knownPayees = useRef(payeeIds);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per page load (guarded by `initialized`); handlePendingConfirmation only uses its arguments and state setters
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
     setLocale(navigator.language);
     setSalt(generateSalt());
+    // A send whose confirmation timed out before a reload or closed tab: resume tracking it, so
+    // its claim link (reference and salt are only in this browser) can still be produced.
+    const store = browserStore();
+    const unresolved = store ? listPendingSubmissions(store).find((s) => s.txHash) : undefined;
+    if (unresolved?.txHash) {
+      setReferenceValue(unresolved.reference);
+      setSalt(unresolved.salt);
+      setPendingTxHash(unresolved.txHash);
+      setPendingSubmissionId(unresolved.id);
+      setStage("pending");
+      setChecking(true);
+      void handlePendingConfirmation(
+        unresolved.txHash,
+        unresolved.id,
+        unresolved.reference,
+        unresolved.salt,
+      ).finally(() => setChecking(false));
+      return;
+    }
     const fill = prefillFrom(window.location.href);
     if (fill) {
       setPrefilled(true);
@@ -138,7 +165,13 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
     try {
       const res = await pollTransaction(hash);
       if (res.status === "SUCCESS") {
-        const finalLockId = res.lockId ?? 1n;
+        // Never guess the id: a claim link to the wrong lock would point at someone else's
+        // funds. Keep the pending record so the sender can check again later.
+        const finalLockId = confirmedLockId(res);
+        if (finalLockId === null) {
+          setError("pages.send.pendingNoLockId");
+          return;
+        }
         const claimLink = newClaimLink(window.location.origin, finalLockId, ref, slt);
         const saved = store ? saveClaimLink(store, claimLink) : false;
         if (store) {

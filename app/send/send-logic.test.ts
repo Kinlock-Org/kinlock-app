@@ -1,6 +1,13 @@
 import type { PreflightResult } from "@kinlock/sdk";
 import { describe, expect, it } from "vitest";
-import { dateOf, defaultExpiryDate, draftProblem, prefillFrom, verdict } from "./send-logic";
+import {
+  confirmedLockId,
+  dateOf,
+  defaultExpiryDate,
+  draftProblem,
+  prefillFrom,
+  verdict,
+} from "./send-logic";
 
 const NOW = 1_791_331_200n; // 2026-10-07T00:00:00Z
 const PAYEE = "44".repeat(32);
@@ -108,5 +115,16 @@ describe("verdict", () => {
     expect(verdict([r("block", "pass"), r("warn", "fail")])).toBe("needsAcknowledgement");
     expect(verdict([r("block", "unknown"), r("warn", "pass")])).toBe("needsAcknowledgement");
     expect(verdict([r("block", "pass"), r("warn", "unknown")])).toBe("ok");
+  });
+});
+
+describe("confirmedLockId", () => {
+  it("returns the lock id of a confirmed transaction", () => {
+    expect(confirmedLockId({ status: "SUCCESS", lockId: 42n })).toBe(42n);
+  });
+
+  it("never falls back to a default id when the id couldn't be read", () => {
+    expect(confirmedLockId({ status: "SUCCESS" })).toBeNull();
+    expect(confirmedLockId({ status: "FAILED", lockId: 1n })).toBeNull();
   });
 });

@@ -132,7 +132,12 @@ export async function pollTransaction(
               filters: [{ type: "contract", contractIds: [config.contractId] }],
               limit: 1000,
             });
-            const created = events.find((e) => e.txHash === txHash);
+            const created = events.find(
+              (e) =>
+                e.txHash === txHash &&
+                e.topic[0] !== undefined &&
+                scValToNative(e.topic[0]) === "lock_created",
+            );
             if (created?.topic[1]) {
               const val = scValToNative(created.topic[1]);
               if (typeof val === "bigint") lockId = val;
@@ -152,24 +157,12 @@ export async function pollTransaction(
     }
     await new Promise((resolve) => setTimeout(resolve, intervalMs));
   }
-  throw new KinlockError(
+  throw new sdk.KinlockError(
     `timed out waiting for transaction ${txHash} to confirm`,
     "TX_PENDING",
     undefined,
     txHash,
   );
-}
-
-export class KinlockError extends Error {
-  override name = "KinlockError";
-  constructor(
-    message: string,
-    readonly code: sdk.KinlockErrorCode | "TX_PENDING",
-    readonly contractError?: string,
-    readonly txHash?: string,
-  ) {
-    super(message);
-  }
 }
 
 export {
@@ -178,6 +171,7 @@ export {
   computeRefHash,
   fromBaseUnits,
   generateSalt,
+  KinlockError,
   parseClaimLink,
   parseRequestLink,
   toBaseUnits,

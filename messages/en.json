@@ -140,6 +140,7 @@
       "pendingTxHash": "Transaction hash",
       "pendingWarning": "Do not submit another payment while this transaction is pending.",
       "pendingCheckAgain": "Check status again",
+      "pendingNoLockId": "The transaction is confirmed, but its lock number could not be read yet. Do not submit again. Check again in a moment.",
       "pendingTimeout": "The transaction confirmation is taking longer than expected. Do not submit again. You can check again or track the transaction hash.",
       "doneHeading": "Payment locked",
       "doneLock": "Lock number",

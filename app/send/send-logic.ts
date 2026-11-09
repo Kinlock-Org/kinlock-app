@@ -123,3 +123,14 @@ export function localCurrencyOf(
 }
 
 export const idsOf = (payees: { payeeId: string }[]): string[] => payees.map((p) => p.payeeId);
+
+/**
+ * The lock id a confirmed transaction created, or null when it couldn't be read. Never a guess:
+ * a claim link built from a wrong id would point at someone else's lock.
+ */
+export function confirmedLockId(res: {
+  status: "SUCCESS" | "FAILED";
+  lockId?: bigint;
+}): bigint | null {
+  return res.status === "SUCCESS" && res.lockId !== undefined ? res.lockId : null;
+}
