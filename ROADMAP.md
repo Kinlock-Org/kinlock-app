@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-09 (fix/prelaunch-hardening: M3-42 DONE, M3-43 DONE) |
+| **Last updated** | 2026-11-09 (fix/prelaunch-hardening: M3-42..M3-44 DONE, M3-45 TODO) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 43 | 33 | 7 | 3 | 0 | 0 | 0 | 77% |
+| 4 App | 45 | 34 | 7 | 4 | 0 | 0 | 0 | 76% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **227** | **93** | **21** | **88** | **0** | **25** | **0** | **46%** |
+| **All** | **229** | **94** | **21** | **89** | **0** | **25** | **0** | **46%** |
 
 ---
 
@@ -340,6 +340,8 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-41 | Vendor @kinlock/sdk tarball to pin sha512 integrity in pnpm-lock.yaml | app | P0 | DONE | M3-03 | Prelaunch review Item 9; vendor kinlock-sdk-0.3.2.tgz in vendor/ with file: dependency in package.json; pnpm-lock.yaml pins sha512 integrity; 203 tests pass; build clean |
 | M3-42 | Make the pending-send fix (M3-38) real: vendor `@kinlock/sdk` 0.3.3 (the 0.3.2 tarball lacked `TX_PENDING` and the trustline fix), never default a claim link to lock 1 when the lock id can't be read, resume a pending send after a reload, and re-export the SDK's own `KinlockError` so `instanceof` checks match SDK errors again | app | P0 | DONE | M3-38, M3-41, M2-33 | Vendored tarball contains `TX_PENDING` and `trustLine()` handling with a `sha512` in the lockfile; `confirmedLockId` returns null instead of a default; reload of `/send` with a pending record shows the pending screen and keeps the record on timeout (checked in a production build); `lib.KinlockError` is the SDK class; 206 tests pass |
 | M3-43 | Render every route per request so the site-wide nonce CSP (M3-40) doesn't block prerendered pages | app | P0 | DONE | M3-40 | `pnpm build` lists every page as dynamic; in `pnpm start`, `/` and `/attester` load with every script carrying the request nonce and no CSP violations (previously every script on `/` was blocked) |
+| M3-44 | Run the pull-request privacy E2E without the indexer: it only reads chain state, and the indexer exits at startup once `E2E_START_LEDGER` ages out of RPC's ~7-day event window, which failed every PR | app | P0 | DONE | M3-35 | Indexer steps in `e2e.yml` run only on pushes to `main`; `claim-fragment-privacy.spec.ts` passes locally against a production build with no indexer running and lock 1 on the fixture contract |
+| M3-45 | Keep the signed main-branch E2E working past RPC retention: the fixture contract's `PayeeRegistered` event (ledger 5421502) is older than testnet RPC history, so its indexer can't ingest the fixture payee. Redeploy and register a fresh fixture contract per run (or on a schedule shorter than retention) | app | P0 | TODO | M3-19 | The `main` E2E run ingests the fixture payee from a contract deployed within RPC retention and passes the request, send, claim, verify flow |
 
 ---
 
@@ -551,6 +553,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-09 | `fix/prelaunch-hardening` (#91) | app | M3-44 DONE, M3-45 TODO (new rows) | Fix the failing `e2e` check on PRs. The indexer exited at startup with `startLedger must be within the ledger range: 5511598 - 5632557`: `E2E_START_LEDGER` (5421502) has aged out of testnet RPC's ~7-day event history. The PR job only runs the claim-fragment privacy test, which reads chain state and doesn't need the indexer, so the indexer steps now run only on `main` pushes. Verified locally: the privacy test passes against a production build with no indexer. The signed `main` run still needs a fixture contract inside RPC retention (M3-45). Progress counts computed with `scripts/roadmap-progress` on a copy and updated by hand. |
 | 2026-11-09 | `fix/prelaunch-hardening` | app | M3-42 DONE, M3-43 DONE (new rows) | Follow-up after verifying the pre-launch review fixes. M3-38 and M3-40 were marked DONE before they worked: the app still vendored SDK 0.3.2 (no `TX_PENDING`, no trustline fix), a pending send could build a claim link to lock 1, pending sends were never resumed after a reload, the app's own `KinlockError` broke `instanceof` in the request form, and the nonce CSP blocked every script on prerendered pages. This PR vendors SDK 0.3.3, removes the lock-id default, resumes pending sends on load, re-exports the SDK error class, and forces dynamic rendering at the root layout. `pnpm lint`, `pnpm typecheck`, `pnpm test` (206/206), `pnpm build` run and green; `/`, `/attester` and pending recovery on `/send` checked in a browser against `pnpm start`. Progress counts computed with `scripts/roadmap-progress` on a copy (it can't parse this file's column-padded §3 header) and updated by hand. |
 | 2026-11-08 | `fix/sdk-vendor-integrity` | app | M3-41 DONE (new row) | Fix PRELAUNCH_REVIEW Item 9: vendor @kinlock/sdk tarball in vendor/ to pin sha512 integrity in pnpm-lock.yaml (203/203 tests pass, build clean). |
 | 2026-11-08 | `feat/mock-payee-fallback` (Item 8 fix) | app | M3-40 DONE (new row) | Fix PRELAUNCH_REVIEW Item 8 (app): apply nonce CSP site-wide to protect stored claim links across all application routes, include indexer origin in originsOf, and cover wildcard stellar.org and albedo.link in connect-src (203/203 tests pass). |

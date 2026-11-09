@@ -3,6 +3,12 @@
 # The test-only keypair adapter (lib/wallet/test-adapter.ts) is active only when
 # NEXT_PUBLIC_E2E_TEST_MODE=1 and is never enabled in the pull-request job or a deployment.
 # The indexer is built from kinlock-sdk's Dockerfile and run against throwaway Postgres.
+#
+# Only the signed main-branch run needs the indexer (/send lists payees from it). The pull-request
+# privacy test opens /claim/{id}, which reads chain state over RPC, so it runs without the
+# indexer. Keeping the indexer off the PR path matters because RPC only serves about 7 days of
+# events: once E2E_START_LEDGER ages out of that window the indexer exits at startup, which would
+# fail every PR for a reason unrelated to the change under review.
 name: e2e
 on:
   pull_request:
@@ -26,15 +32,18 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           repository: Kinlock-Org/kinlock-sdk
           path: kinlock-sdk-src
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         with:
           repository: Kinlock-Org/kinlock-registry
           path: kinlock-registry-src
 
       - name: Start Postgres and build the indexer image
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           docker network create ci
           docker run -d --name pg --network ci -e POSTGRES_PASSWORD=ci postgres:17
@@ -50,6 +59,7 @@ jobs:
           rm -rf kinlock-sdk-src
 
       - name: Migrate and start the indexer against the fixture contract
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           docker run --rm --network ci -e DATABASE_URL=postgres://postgres:ci@pg:5432/postgres \
             --entrypoint node kinlock-indexer:e2e dist/db/migrate.js
@@ -65,6 +75,7 @@ jobs:
             kinlock-indexer:e2e
 
       - name: Wait for the indexer to ingest and registry-join the fixture payee
+        if: github.event_name == 'push' && github.ref == 'refs/heads/main'
         run: |
           # Event ingestion and the registry join run on separate schedules (the join re-runs
           # every REGISTRY_SYNC_MS, 60s by default, not on every new row) -- checking for "any
