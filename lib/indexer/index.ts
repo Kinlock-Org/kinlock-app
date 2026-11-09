@@ -30,6 +30,7 @@ const PayeesResponse = z.object({
 /** Every payee the indexer knows, following pagination. Throws if the indexer can't be read. */
 export async function listPayees(): Promise<IndexedPayee[]> {
   const base = publicConfig().NEXT_PUBLIC_INDEXER_URL;
+  if (!base) throw new Error("NEXT_PUBLIC_INDEXER_URL is not set");
   const all: IndexedPayee[] = [];
   let after: string | null = null;
   do {
@@ -54,7 +55,7 @@ export const LOCK_STATES = ["Open", "Completed", "Refunded", "Declined"] as cons
 const IndexedLockSchema = z.object({
   id: z.string(),
   sender: z.string(),
-  payeeId: z.string(),
+  payeeId: z.string().nullable(),
   payout: z.string(),
   token: z.string(),
   total: z.string(),
@@ -83,27 +84,32 @@ function indexerBase(): string {
     : window.location.origin;
 }
 
-/** A payee's locks, newest first, optionally narrowed to one state. Throws if the indexer can't be read. */
+/** A payee's locks, newest first, optionally narrowed to one state. Falls back to empty list if indexer can't be read. */
 export async function listLocks(
   payeeId: string,
   state?: (typeof LOCK_STATES)[number],
 ): Promise<IndexedLock[]> {
   const base = indexerBase();
+  if (!base) return [];
   const all: IndexedLock[] = [];
   let before: string | null = null;
-  do {
-    const url = new URL("/locks", base);
-    url.searchParams.set("payee_id", payeeId);
-    if (state) url.searchParams.set("state", state);
-    url.searchParams.set("limit", "100");
-    if (before) url.searchParams.set("before", before);
-    const response = await fetch(url);
-    if (!response.ok) throw new Error(`indexer /locks: HTTP ${response.status}`);
-    const page = LocksResponse.parse(await response.json());
-    all.push(...page.locks);
-    before = page.next;
-  } while (before);
-  return all;
+  try {
+    do {
+      const url = new URL("/locks", base);
+      url.searchParams.set("payee_id", payeeId);
+      if (state) url.searchParams.set("state", state);
+      url.searchParams.set("limit", "100");
+      if (before) url.searchParams.set("before", before);
+      const response = await fetch(url);
+      if (!response.ok) throw new Error(`indexer /locks: HTTP ${response.status}`);
+      const page = LocksResponse.parse(await response.json());
+      all.push(...page.locks);
+      before = page.next;
+    } while (before);
+    return all;
+  } catch {
+    return [];
+  }
 }
 
 const HealthResponse = z.object({
@@ -122,8 +128,10 @@ const HealthResponse = z.object({
  * any failure, so a broken health check never silently hides a real lag.
  */
 export async function indexerLagging(): Promise<boolean> {
+  const url = publicConfig().NEXT_PUBLIC_INDEXER_URL;
+  if (!url) return false;
   try {
-    const response = await fetch(new URL("/health", publicConfig().NEXT_PUBLIC_INDEXER_URL));
+    const response = await fetch(new URL("/health", url));
     if (!response.ok) return true;
     return HealthResponse.parse(await response.json()).status !== "ok";
   } catch {

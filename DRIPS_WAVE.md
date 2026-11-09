@@ -12,7 +12,7 @@ This document provides a single-page executive and technical summary for the Dri
 
 **Kinlock App** is the user-facing web portal allowing senders to create locks, payees to issue payment requests and claim funds, and public observers to verify institutional receipts on Stellar.
 
-- **Real-World Problem:** International payments for education, housing, and contracts suffer from lack of trust, opaque fee deductions, and custodial vulnerability. Kinlock provides a non-custodial, scheduled escrow interface directly bound to Soroban smart contracts.
+- **Real-World Problem:** Payments for education and housing can be difficult to reconcile and verify, especially when sender and payee are far apart. Kinlock provides a non-custodial way to lock USDC for a verified institution or any Stellar address, with scheduled releases and public on-chain receipts. The product is market-agnostic and launches market by market; it does not claim that a receipt proves a service was delivered.
 - **Frontend Architecture & Stellar Integration:**
   - **Framework:** Next.js 16 (App Router), React 19, TypeScript, Tailwind CSS.
   - **Wallet Integration:** Swappable multi-wallet support via `@creit.tech/stellar-wallets-kit` (Freighter, xBull, Albedo, Lobstr).
@@ -21,9 +21,9 @@ This document provides a single-page executive and technical summary for the Dri
     - Reference identifiers live exclusively in URL hash fragments (`#r=...&s=...`), strictly preventing client credentials and private references from reaching web servers, analytics tools, or access logs.
     - Nonce-enforced Content Security Policy (CSP) and site-wide `Referrer-Policy: no-referrer`. Zero third-party analytics scripts on sensitive claim paths.
   - **Universal & Market-Agnostic Core:**
-    - 100% externalized internationalization strings (`messages/en.json`).
-    - Dynamic currency and date formatting using native `Intl` APIs.
-    - Zero hardcoded national currencies or assumptions; payee metadata is fetched from canonical registry definitions.
+    - User-visible strings are externalized in the English message file; translated language packs are not yet provided.
+    - Number, currency, and date formatting use native `Intl` APIs.
+    - Country and local-currency values come from payee registry data. The sender currently displays USD only because the app has no live FX-rate provider.
 
 ---
 
@@ -45,7 +45,7 @@ This document provides a single-page executive and technical summary for the Dri
 
 - [x] **Hosted under Organization:** [`Kinlock-Org`](https://github.com/Kinlock-Org)
 - [x] **Permissive License:** Apache-2.0 ([`LICENSE`](LICENSE))
-- [x] **Branch Protection:** Enforced on `main` (peer reviews required, required checks passing)
+- [x] **Branch Protection:** The live `main` rules require one approval and the `ci`, `docs-in-sync`, `e2e`, and `roadmap-check` status checks (checked 2026-11-06).
 - [x] **Continuous Integration (CI):** Green GitHub Actions validating Biome linting, TypeScript `tsc --noEmit`, Vitest test runner, and Next.js production build
 - [x] **Security Hardening:**
   - CodeQL SAST scanning (Actions, JavaScript/TypeScript)
@@ -53,23 +53,21 @@ This document provides a single-page executive and technical summary for the Dri
   - Strict input sanitization with Zod
   - Hardened headers: CSP with dynamic script-src hashes, HSTS, `X-Content-Type-Options: nosniff`, `Referrer-Policy: no-referrer`
 - [x] **Testing Rigor:**
-  - 16 test files with 187 passing unit and integration tests
-  - Automated tests validating CSP headers, schedule calculation, refund triggers, receipt validation, inline string exclusions, and country-agnostic neutrality
+  - 16 test files and 197 passing tests on the reviewed working branch (`pnpm test`, run 2026-11-06)
+  - Automated tests cover CSP headers, schedule calculation, receipt and claim behavior, inline strings, and country-agnostic neutrality. Pull requests run the browser claim-fragment privacy test without signing credentials; the full testnet request → send → claim → verify Playwright flow runs only on protected-main pushes. The full flow previously passed in CI (`M3-19`); the updated workflow still needs a real fork-PR and protected-main run.
 - [x] **Roadmap & Progress Tracking:** Every PR tracked and enforced via [`ROADMAP.md`](ROADMAP.md)
 
 ---
 
 ## 4. Drips Wave Task Queue & Issue Board
 
-Issues for external contributors follow a strict three-tier complexity mapping aligned with Drips Wave points:
-- **Trivial (100 points):** Copy updates, accessibility improvements, ARIA landmarks, and UI state polish.
-- **Medium (150 points):** Client-side export conveniences, locale selector enhancements, and transaction receipt formatting components.
-- **High (200 points):** Comprehensive end-to-end integration workflows (Playwright happy-path test harnesses) and multi-wallet pairing fallbacks.
+The live issue tracker is authoritative for available work; tasks and point values change as issues are completed or program guidance changes. Before starting, contributors should confirm an issue is still open, assigned as required, mapped to a current roadmap item, and within the safe contribution scope. Contract fund logic and other security-sensitive changes require maintainer review and are not ordinary Wave tasks.
 
-> **Task Safety Rule:** Under `AGENTS.md`, money-moving state transitions must never read from intermediary Postgres services, and URL fragment references must never be logged or sent off-device. Wave tasks strictly reinforce these guardrails.
+> **Task safety:** Money-moving decisions read chain state, not Postgres. Claim-link references stay in the browser and must never be logged or sent to a server. Follow the repository contribution guide and issue acceptance criteria.
 
-- **Active Bounty Issues:** [Kinlock App Wave Issues](https://github.com/Kinlock-Org/kinlock-app/issues?q=is%3Aissue+is%3Aopen+label%3Adrips-wave%2Cwave)
-- **Contribution Guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md) and [`docs/wave-issue-format.md`](https://github.com/Kinlock-Org/.github/blob/main/docs/wave-issue-format.md)
+- **Open issues:** [Kinlock App issues](https://github.com/Kinlock-Org/kinlock-app/issues?q=is%3Aissue+is%3Aopen)
+- **Contribution guide:** [`CONTRIBUTING.md`](CONTRIBUTING.md) and the [Wave issue format](https://github.com/Kinlock-Org/.github/blob/main/docs/wave-issue-format.md)
+- **Current implementation and remaining tasks:** [`ROADMAP.md`](ROADMAP.md)
 
 ---
 

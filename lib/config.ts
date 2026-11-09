@@ -32,6 +32,16 @@ const PublicConfigSchema = z.object({
   NEXT_PUBLIC_USDC_CONTRACT_ID: z.string().regex(/^C[A-Z2-7]{55}$/),
   /** USDC issuer, shown with the asset code everywhere (AssetLabel). */
   NEXT_PUBLIC_USDC_ISSUER: z.string().regex(/^G[A-Z2-7]{55}$/),
+  /**
+   * Whether direct locks to any Stellar address are enabled.
+   * Defaults to false: the standing testnet contract was deployed before ADR-0031
+   * and lacks `create_direct_lock`.
+   */
+  NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS: z
+    .string()
+    .optional()
+    .default("false")
+    .transform((v) => v === "true"),
 });
 
 export type PublicConfig = z.infer<typeof PublicConfigSchema> & { networkPassphrase: string };
@@ -45,6 +55,7 @@ export function loadPublicConfig(
     NEXT_PUBLIC_INDEXER_URL: process.env.NEXT_PUBLIC_INDEXER_URL,
     NEXT_PUBLIC_USDC_CONTRACT_ID: process.env.NEXT_PUBLIC_USDC_CONTRACT_ID,
     NEXT_PUBLIC_USDC_ISSUER: process.env.NEXT_PUBLIC_USDC_ISSUER,
+    NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS: process.env.NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS,
   },
 ): PublicConfig {
   const parsed = PublicConfigSchema.parse(env);

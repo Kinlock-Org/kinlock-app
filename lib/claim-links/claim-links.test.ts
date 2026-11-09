@@ -2,12 +2,17 @@ import { readFileSync } from "node:fs";
 import { describe, expect, it, vi } from "vitest";
 import {
   exportClaimLinks,
+  getPendingSubmission,
   type KeyValueStore,
   listClaimLinks,
+  listPendingSubmissions,
   newClaimLink,
+  PENDING_STORAGE_KEY,
   removeClaimLink,
+  removePendingSubmission,
   STORAGE_KEY,
   saveClaimLink,
+  savePendingSubmission,
 } from "./index";
 
 const SALT = "AAECAwQFBgcICQoLDA0ODw"; // 16 bytes, base64url
@@ -83,6 +88,54 @@ describe("claim links (browser-only storage)", () => {
     });
     expect(file.links).toHaveLength(1);
     expect(file.links[0].url).toContain("#r=RENT-OCT");
+  });
+
+  it("saves, retrieves, lists, and removes pending submissions safely in browser storage", () => {
+    const store = memoryStore();
+    const sub1 = {
+      id: "sub-1",
+      reference: "INV-1",
+      salt: SALT,
+      mode: "verified" as const,
+      recipientOrPayee: "payee-1",
+      createdAt: "2026-10-07T10:00:00Z",
+    };
+    const sub2 = {
+      id: "sub-2",
+      reference: "INV-2",
+      salt: SALT,
+      mode: "direct" as const,
+      recipientOrPayee: "GABC...",
+      txHash: "11".repeat(32),
+      createdAt: "2026-10-07T11:00:00Z",
+    };
+    expect(savePendingSubmission(store, sub1)).toBe(true);
+    expect(savePendingSubmission(store, sub2)).toBe(true);
+
+    const list = listPendingSubmissions(store);
+    expect(list.map((s) => s.id)).toEqual(["sub-2", "sub-1"]);
+
+    expect(getPendingSubmission(store, "sub-1")?.reference).toBe("INV-1");
+    expect(getPendingSubmission(store, "11".repeat(32))?.reference).toBe("INV-2");
+    expect(getPendingSubmission(store)?.id).toBe("sub-2");
+
+    removePendingSubmission(store, "11".repeat(32));
+    expect(listPendingSubmissions(store).map((s) => s.id)).toEqual(["sub-1"]);
+
+    removePendingSubmission(store, "sub-1");
+    expect(listPendingSubmissions(store)).toEqual([]);
+
+    store.setItem(PENDING_STORAGE_KEY, "invalid-json");
+    expect(listPendingSubmissions(store)).toEqual([]);
+    expect(getPendingSubmission(store)).toBeNull();
+
+    const failingStore: KeyValueStore = {
+      getItem: () => null,
+      setItem: () => {
+        throw new Error("QuotaExceeded");
+      },
+    };
+    expect(savePendingSubmission(failingStore, sub1)).toBe(false);
   });
 
   it("never touches the network", () => {

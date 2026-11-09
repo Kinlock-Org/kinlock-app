@@ -7,28 +7,43 @@ import type { PreflightResult } from "@kinlock/sdk";
 import { useEffect, useRef, useState } from "react";
 import type { ScheduleRow } from "@/app/request/schedule";
 import { nextRow, todayUtc, unixSecondsOf } from "@/app/request/schedule";
-import { browserStore, newClaimLink, saveClaimLink } from "@/lib/claim-links";
+import {
+  browserStore,
+  listPendingSubmissions,
+  newClaimLink,
+  removePendingSubmission,
+  saveClaimLink,
+  savePendingSubmission,
+} from "@/lib/claim-links";
 import type { MessageKey } from "@/lib/i18n/messages";
 import {
   computeRefHash,
   createLock,
   generateSalt,
+  pollTransaction,
   preflight,
   publicConfig,
   toBaseUnits,
   walletSigner,
 } from "@/lib/sdk";
 import { createDefaultWalletAdapter, type WalletAdapter } from "@/lib/wallet";
-import { defaultExpiryDate, draftProblem, prefillFrom, verdict } from "./send-logic";
+import {
+  confirmedLockId,
+  defaultExpiryDate,
+  draftProblem,
+  prefillFrom,
+  verdict,
+} from "./send-logic";
 
-type Stage = "edit" | "review" | "sending" | "done";
+type Stage = "edit" | "review" | "sending" | "pending" | "done";
 const nowSeconds = () => BigInt(Math.floor(Date.now() / 1000));
 
-export function useSendForm(payeeIds: string[]) {
+export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = false) {
   const wallet = useRef<WalletAdapter | null>(null);
   const [locale, setLocale] = useState("en");
+  const directEnabled = enableDirectPayments;
   const [mode, setMode] = useState<"verified" | "direct">(
-    payeeIds.length > 0 ? "verified" : "direct",
+    directEnabled && payeeIds.length === 0 ? "direct" : "verified",
   );
   const [payeeId, setPayeeId] = useState(payeeIds[0] ?? "");
   const [recipient, setRecipient] = useState("");
@@ -44,6 +59,8 @@ export function useSendForm(payeeIds: string[]) {
   const [acknowledged, setAcknowledged] = useState(false);
   const [error, setError] = useState<MessageKey | null>(null);
   const [salt, setSalt] = useState("");
+  const [pendingTxHash, setPendingTxHash] = useState<string | null>(null);
+  const [pendingSubmissionId, setPendingSubmissionId] = useState<string | null>(null);
   const [done, setDone] = useState<{ lockId: string; claimLink: string; saved: boolean } | null>(
     null,
   );
@@ -53,11 +70,31 @@ export function useSendForm(payeeIds: string[]) {
   // every render would overwrite the sender's edits and change the salt.)
   const initialized = useRef(false);
   const knownPayees = useRef(payeeIds);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: runs once per page load (guarded by `initialized`); handlePendingConfirmation only uses its arguments and state setters
   useEffect(() => {
     if (initialized.current) return;
     initialized.current = true;
     setLocale(navigator.language);
     setSalt(generateSalt());
+    // A send whose confirmation timed out before a reload or closed tab: resume tracking it, so
+    // its claim link (reference and salt are only in this browser) can still be produced.
+    const store = browserStore();
+    const unresolved = store ? listPendingSubmissions(store).find((s) => s.txHash) : undefined;
+    if (unresolved?.txHash) {
+      setReferenceValue(unresolved.reference);
+      setSalt(unresolved.salt);
+      setPendingTxHash(unresolved.txHash);
+      setPendingSubmissionId(unresolved.id);
+      setStage("pending");
+      setChecking(true);
+      void handlePendingConfirmation(
+        unresolved.txHash,
+        unresolved.id,
+        unresolved.reference,
+        unresolved.salt,
+      ).finally(() => setChecking(false));
+      return;
+    }
     const fill = prefillFrom(window.location.href);
     if (fill) {
       setPrefilled(true);
@@ -93,7 +130,8 @@ export function useSendForm(payeeIds: string[]) {
     }
   }
 
-  const draft = () => ({ mode, payeeId, recipient, reference, rows, expiryDate });
+  const activeMode = directEnabled ? mode : "verified";
+  const draft = () => ({ mode: activeMode, payeeId, recipient, reference, rows, expiryDate });
   const total = () => rows.reduce((sum, r) => sum + toBaseUnits(r.amount.trim()), 0n);
 
   async function review() {
@@ -108,7 +146,7 @@ export function useSendForm(payeeIds: string[]) {
         await preflight({
           sender: address,
           token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
-          ...(mode === "direct" ? { recipient } : { payeeId }),
+          ...(activeMode === "direct" ? { recipient } : { payeeId }),
           total: total(),
           refHash,
         }),
@@ -122,16 +160,91 @@ export function useSendForm(payeeIds: string[]) {
     }
   }
 
+  async function handlePendingConfirmation(hash: string, subId: string, ref: string, slt: string) {
+    const store = browserStore();
+    try {
+      const res = await pollTransaction(hash);
+      if (res.status === "SUCCESS") {
+        // Never guess the id: a claim link to the wrong lock would point at someone else's
+        // funds. Keep the pending record so the sender can check again later.
+        const finalLockId = confirmedLockId(res);
+        if (finalLockId === null) {
+          setError("pages.send.pendingNoLockId");
+          return;
+        }
+        const claimLink = newClaimLink(window.location.origin, finalLockId, ref, slt);
+        const saved = store ? saveClaimLink(store, claimLink) : false;
+        if (store) {
+          removePendingSubmission(store, subId);
+          removePendingSubmission(store, hash);
+        }
+        setDone({
+          lockId: finalLockId.toString(),
+          claimLink,
+          saved,
+        });
+        setPendingTxHash(null);
+        setPendingSubmissionId(null);
+        setStage("done");
+        window.dispatchEvent(new StorageEvent("storage"));
+        return;
+      }
+      if (store) {
+        removePendingSubmission(store, subId);
+        removePendingSubmission(store, hash);
+      }
+      setPendingTxHash(null);
+      setPendingSubmissionId(null);
+      setError("pages.send.errorTx");
+      setStage("review");
+    } catch {
+      setError("pages.send.pendingTimeout");
+    }
+  }
+
+  async function checkPendingStatus() {
+    if (!pendingTxHash) return;
+    setError(null);
+    setChecking(true);
+    try {
+      await handlePendingConfirmation(
+        pendingTxHash,
+        pendingSubmissionId ?? pendingTxHash,
+        reference,
+        salt,
+      );
+    } finally {
+      setChecking(false);
+    }
+  }
+
   async function send() {
     if (!wallet.current || !address) return setError("pages.send.errorWallet");
     setError(null);
     setStage("sending");
+
+    const submissionId =
+      typeof crypto !== "undefined" && typeof crypto.randomUUID === "function"
+        ? crypto.randomUUID()
+        : `${Date.now()}-${Math.random()}`;
+    const store = browserStore();
+    if (store) {
+      savePendingSubmission(store, {
+        id: submissionId,
+        reference,
+        salt,
+        mode: activeMode,
+        recipientOrPayee: activeMode === "direct" ? recipient : payeeId,
+        createdAt: new Date().toISOString(),
+      });
+    }
+
     try {
-      const { lockId } = await createLock(
+      const { lockId, txHash } = await createLock(
         {
           sender: address,
           token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
-          ...(mode === "direct" ? { recipient } : { payeeId }),
+          ...(activeMode === "direct" ? { recipient } : { payeeId }),
           tranches: rows.map((r) => ({
             amount: toBaseUnits(r.amount.trim()),
             unlockAt: unixSecondsOf(r.date),
@@ -142,16 +255,44 @@ export function useSendForm(payeeIds: string[]) {
         walletSigner(wallet.current, address),
       );
       const claimLink = newClaimLink(window.location.origin, lockId, reference, salt);
-      const store = browserStore();
+      const saved = store ? saveClaimLink(store, claimLink) : false;
+      if (store) {
+        removePendingSubmission(store, submissionId);
+        if (txHash) removePendingSubmission(store, txHash);
+      }
       setDone({
         lockId: lockId.toString(),
         claimLink,
-        saved: store ? saveClaimLink(store, claimLink) : false,
+        saved,
       });
       setStage("done");
       window.dispatchEvent(new StorageEvent("storage"));
     } catch (e) {
-      const code = (e as { code?: string }).code;
+      const err = e as { code?: string; txHash?: string };
+      if (err.code === "TX_PENDING" && err.txHash) {
+        const hash = err.txHash;
+        if (store) {
+          savePendingSubmission(store, {
+            id: submissionId,
+            reference,
+            salt,
+            mode: activeMode,
+            recipientOrPayee: activeMode === "direct" ? recipient : payeeId,
+            txHash: hash,
+            createdAt: new Date().toISOString(),
+          });
+        }
+        setPendingTxHash(hash);
+        setPendingSubmissionId(submissionId);
+        setStage("pending");
+        await handlePendingConfirmation(hash, submissionId, reference, salt);
+        return;
+      }
+
+      if (store) {
+        removePendingSubmission(store, submissionId);
+      }
+      const code = err.code;
       setError(
         code === "TX_FAILED"
           ? "pages.send.errorTx"
@@ -172,6 +313,8 @@ export function useSendForm(payeeIds: string[]) {
   function reset() {
     setDone(null);
     setCopied(false);
+    setPendingTxHash(null);
+    setPendingSubmissionId(null);
     setSalt(generateSalt());
     setReferenceValue("");
     setRows([{ key: 0, amount: "", date: todayUtc() }]);
@@ -187,8 +330,10 @@ export function useSendForm(payeeIds: string[]) {
   }
   return {
     locale,
-    mode,
+    mode: activeMode,
+    directEnabled,
     setMode: (m: "verified" | "direct") => {
+      if (!directEnabled && m === "direct") return;
       setMode(m);
       backToEdit();
     },
@@ -220,6 +365,8 @@ export function useSendForm(payeeIds: string[]) {
     address,
     connect,
     stage,
+    pendingTxHash,
+    checkPendingStatus,
     checking,
     results,
     verdict: v,

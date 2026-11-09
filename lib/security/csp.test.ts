@@ -17,6 +17,19 @@ describe("claim page CSP", () => {
 
   it("limits network access to our origin and the RPC servers", () => {
     expect(prod).toContain("connect-src 'self' https://soroban-testnet.stellar.org");
+    expect(prod).toContain("https://*.stellar.org");
+    expect(prod).toContain("https://albedo.link");
+  });
+
+  it("covers wallet kit and wildcard stellar origins in connect-src", () => {
+    const policy = buildClaimCsp({
+      nonce: "xyz",
+      rpcOrigins: ["https://indexer.example.com"],
+      dev: false,
+    });
+    expect(policy).toContain(
+      "connect-src 'self' https://indexer.example.com https://*.stellar.org https://albedo.link",
+    );
   });
 
   it("blocks framing, plugins, and base-tag tricks", () => {

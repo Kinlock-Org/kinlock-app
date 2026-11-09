@@ -27,6 +27,22 @@ describe("loadPublicConfig", () => {
     expect(c.NEXT_PUBLIC_CONTRACT_ID).toBe(env.NEXT_PUBLIC_CONTRACT_ID);
   });
 
+  it("defaults NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS to false when unset", () => {
+    const c = loadPublicConfig(env);
+    expect(c.NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS).toBe(false);
+  });
+
+  it("parses NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS correctly", () => {
+    expect(
+      loadPublicConfig({ ...env, NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS: "true" })
+        .NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS,
+    ).toBe(true);
+    expect(
+      loadPublicConfig({ ...env, NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS: "false" })
+        .NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS,
+    ).toBe(false);
+  });
+
   it("refuses missing or malformed values", () => {
     for (const bad of [
       { NEXT_PUBLIC_CONTRACT_ID: "GABC" },
