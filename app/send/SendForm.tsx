@@ -62,22 +62,24 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
       {f.unknownPayee ? <p role="alert">{t("pages.send.prefillUnknownPayee")}</p> : null}
 
       {f.directEnabled ? (
-        <div className="flex gap-4 border-b pb-2">
-          <label className="flex items-center gap-2 cursor-pointer">
+        <div className="flex flex-wrap gap-4 border-b pb-2">
+          <label className="flex min-h-[44px] min-w-[44px] cursor-pointer items-center gap-2">
             <input
               type="radio"
               name="send-mode"
               checked={f.mode === "verified"}
               onChange={() => f.setMode("verified")}
+              className="h-5 w-5"
             />
             <span className="text-sm font-medium">{t("pages.send.modeVerified")}</span>
           </label>
-          <label className="flex items-center gap-2 cursor-pointer">
+          <label className="flex min-h-[44px] min-w-[44px] cursor-pointer items-center gap-2">
             <input
               type="radio"
               name="send-mode"
               checked={f.mode === "direct"}
               onChange={() => f.setMode("direct")}
+              className="h-5 w-5"
             />
             <span className="text-sm font-medium">{t("pages.send.modeDirect")}</span>
           </label>
@@ -91,7 +93,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
             id={ids.payee}
             value={f.payeeId}
             onChange={(e) => f.setPayeeId(e.target.value)}
-            className="rounded border p-2"
+            className="min-h-[44px] w-full rounded border p-2"
           >
             {payees.length === 0 ? (
               <option value="">{t("pages.send.payeeNone")}</option>
@@ -113,7 +115,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
             placeholder={t("pages.send.recipientPlaceholder")}
             value={f.recipient}
             onChange={(e) => f.setRecipient(e.target.value)}
-            className="rounded border p-2 font-mono text-sm"
+            className="min-h-[44px] w-full rounded border p-2 font-mono text-sm"
           />
         </label>
       )}
@@ -126,7 +128,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
           onChange={(e) => f.setReference(e.target.value)}
           aria-describedby={ids.referenceHint}
           dir="auto"
-          className="rounded border p-2"
+          className="min-h-[44px] w-full rounded border p-2"
         />
         <span id={ids.referenceHint} className="text-sm">
           {t("pages.send.referenceHint")}
@@ -146,7 +148,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
                 inputMode="decimal"
                 value={row.amount}
                 onChange={(e) => f.updateRow(row.key, { amount: e.target.value })}
-                className="rounded border p-2"
+                className="min-h-[44px] w-full rounded border p-2"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -155,7 +157,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
                 type="date"
                 value={row.date}
                 onChange={(e) => f.updateRow(row.key, { date: e.target.value })}
-                className="rounded border p-2"
+                className="min-h-[44px] w-full rounded border p-2"
               />
             </label>
             {row.date ? (
@@ -165,7 +167,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
               <button
                 type="button"
                 onClick={() => f.removeRow(row.key)}
-                className="self-start underline"
+                className="min-h-[44px] min-w-[44px] self-start px-2 py-2 underline"
               >
                 {t("pages.send.removeTranche")}
               </button>
@@ -173,7 +175,11 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
           </div>
         ))}
         {f.rows.length < MAX_TRANCHES ? (
-          <button type="button" onClick={f.addRow} className="self-start underline">
+          <button
+            type="button"
+            onClick={f.addRow}
+            className="min-h-[44px] min-w-[44px] self-start px-2 py-2 underline"
+          >
             {t("pages.send.addTranche")}
           </button>
         ) : null}
@@ -187,7 +193,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
           value={f.expiryDate}
           onChange={(e) => f.setExpiryDate(e.target.value)}
           aria-describedby={ids.expiryHint}
-          className="rounded border p-2"
+          className="min-h-[44px] w-full rounded border p-2"
         />
         <span id={ids.expiryHint} className="text-sm">
           {t("pages.send.expiryHint")}
@@ -215,7 +221,11 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
         {f.address ? (
           <code title={f.address}>{shortAddress(f.address)}</code>
         ) : (
-          <button type="button" onClick={f.connect} className="self-start rounded border px-4 py-2">
+          <button
+            type="button"
+            onClick={f.connect}
+            className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2"
+          >
             {t("pages.send.connect")}
           </button>
         )}
@@ -231,7 +241,7 @@ function Editor({ f, payees, issuer }: { f: Form; payees: PayeeOption[]; issuer:
         <button
           type="submit"
           disabled={f.checking}
-          className="self-start rounded border px-4 py-2 font-medium"
+          className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2 font-medium"
         >
           {f.checking ? t("pages.send.checking") : t("pages.send.review")}
         </button>
@@ -257,21 +267,22 @@ function Review({ f }: { f: Form }) {
       </ul>
       {f.verdict === "blocked" ? <p role="alert">{t("pages.send.blocked")}</p> : null}
       {f.verdict === "needsAcknowledgement" ? (
-        <label className="flex items-start gap-2">
+        <label className="flex min-h-[44px] min-w-[44px] cursor-pointer items-center gap-2 py-2">
           <input
             type="checkbox"
             checked={f.acknowledged}
             onChange={(e) => f.setAcknowledged(e.target.checked)}
+            className="h-5 w-5 shrink-0"
           />
           <span>{t("pages.send.acknowledge")}</span>
         </label>
       ) : null}
-      <span className="flex gap-3">
+      <span className="flex flex-wrap gap-3">
         <button
           type="button"
           onClick={f.send}
           disabled={!f.canSend}
-          className="rounded border px-4 py-2 font-medium disabled:opacity-50"
+          className="min-h-[44px] min-w-[44px] rounded border px-4 py-2 font-medium disabled:opacity-50"
         >
           {f.stage === "sending" ? t("pages.send.sending") : t("pages.send.send")}
         </button>
@@ -279,7 +290,7 @@ function Review({ f }: { f: Form }) {
           type="button"
           onClick={f.backToEdit}
           disabled={f.stage === "sending"}
-          className="underline"
+          className="min-h-[44px] min-w-[44px] px-2 py-2 underline"
         >
           {t("pages.send.edit")}
         </button>
@@ -302,14 +313,25 @@ function Done({ f }: { f: Form }) {
       <p role={done.saved ? undefined : "alert"}>
         {done.saved ? t("pages.send.doneShare") : t("pages.send.doneNotSaved")}
       </p>
-      <span className="flex flex-wrap gap-3">
-        <button type="button" onClick={f.copy} className="rounded border px-4 py-2">
+      <span className="flex flex-wrap items-center gap-3">
+        <button
+          type="button"
+          onClick={f.copy}
+          className="min-h-[44px] min-w-[44px] rounded border px-4 py-2"
+        >
           {f.copied ? t("pages.send.copied") : t("pages.send.copy")}
         </button>
-        <a href={`/locks/${done.lockId}`} className="underline">
+        <a
+          href={`/locks/${done.lockId}`}
+          className="inline-flex min-h-[44px] min-w-[44px] items-center px-2 py-2 underline"
+        >
           {t("pages.send.viewLock")}
         </a>
-        <button type="button" onClick={f.reset} className="underline">
+        <button
+          type="button"
+          onClick={f.reset}
+          className="min-h-[44px] min-w-[44px] px-2 py-2 underline"
+        >
           {t("pages.send.sendAnother")}
         </button>
       </span>
@@ -338,12 +360,12 @@ function Pending({ f }: { f: Form }) {
           {t(f.error)}
         </p>
       ) : null}
-      <span className="flex gap-3">
+      <span className="flex flex-wrap gap-3">
         <button
           type="button"
           onClick={f.checkPendingStatus}
           disabled={f.checking}
-          className="rounded border px-4 py-2 font-medium disabled:opacity-50"
+          className="min-h-[44px] min-w-[44px] rounded border px-4 py-2 font-medium disabled:opacity-50"
         >
           {f.checking ? t("pages.send.checking") : t("pages.send.pendingCheckAgain")}
         </button>

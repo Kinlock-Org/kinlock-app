@@ -41,7 +41,7 @@ export function SiteHeader() {
   return (
     <header className="relative border-b border-line">
       <div className="mx-auto flex h-16 max-w-5xl items-center justify-between px-4">
-        <a href="/" className="flex items-center gap-2 font-semibold tracking-tight">
+        <a href="/" className="flex min-h-[44px] items-center gap-2 font-semibold tracking-tight">
           <svg viewBox="0 0 1024 1024" className="h-6 w-6 fill-accent" aria-hidden="true">
             <mask id="header-lock-mask">
               <rect width="1024" height="1024" fill="white" />
@@ -94,7 +94,7 @@ export function SiteHeader() {
           aria-expanded={open}
           aria-controls={menuId}
           aria-label={open ? t("nav.closeMenu") : t("nav.openMenu")}
-          className="flex h-10 w-10 items-center justify-center md:hidden"
+          className="flex h-11 w-11 min-h-[44px] min-w-[44px] items-center justify-center md:hidden"
         >
           <span className="relative block h-3.5 w-5" aria-hidden="true">
             <span
@@ -127,7 +127,7 @@ export function SiteHeader() {
               key={link.href}
               href={link.href}
               aria-current={pathname === link.href ? "page" : undefined}
-              className={`rounded-lg px-3 py-2.5 ${navLinkClass(pathname === link.href)}`}
+              className={`flex min-h-[44px] items-center rounded-lg px-3 py-2.5 ${navLinkClass(pathname === link.href)}`}
             >
               {t(link.key)}
             </a>
@@ -135,13 +135,13 @@ export function SiteHeader() {
           <div className="mt-2 flex flex-col gap-2 border-t border-line pt-3">
             <a
               href="https://kinlock-org.github.io"
-              className="rounded-full border border-line px-4 py-2 text-center text-sm font-medium text-ink"
+              className="flex min-h-[44px] items-center justify-center rounded-full border border-line px-4 py-2 text-center text-sm font-medium text-ink"
             >
               {t("nav.docs")}
             </a>
             <a
               href="https://github.com/Kinlock-Org"
-              className="rounded-full bg-ink/5 px-4 py-2 text-center text-sm font-medium text-ink"
+              className="flex min-h-[44px] items-center justify-center rounded-full bg-ink/5 px-4 py-2 text-center text-sm font-medium text-ink"
             >
               {t("nav.github")}
             </a>

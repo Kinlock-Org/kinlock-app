@@ -26,11 +26,19 @@ export function SavedClaimLinks() {
                 {link.savedAt.replace("T", " ").slice(0, 16)} {t("time.utc")}
               </time>
             </span>
-            <span className="flex gap-3">
-              <button type="button" onClick={() => s.copy(link)} className="underline">
+            <span className="flex flex-wrap gap-3">
+              <button
+                type="button"
+                onClick={() => s.copy(link)}
+                className="min-h-[44px] min-w-[44px] px-2 py-2 underline"
+              >
                 {s.copiedLockId === link.lockId ? t("claimLinks.copied") : t("claimLinks.copy")}
               </button>
-              <button type="button" onClick={() => s.remove(link.lockId)} className="underline">
+              <button
+                type="button"
+                onClick={() => s.remove(link.lockId)}
+                className="min-h-[44px] min-w-[44px] px-2 py-2 underline"
+              >
                 {t("claimLinks.remove")}
               </button>
             </span>
@@ -38,7 +46,11 @@ export function SavedClaimLinks() {
         ))}
       </ul>
       {s.links.length > 0 ? (
-        <button type="button" onClick={s.exportAll} className="self-start rounded border px-4 py-2">
+        <button
+          type="button"
+          onClick={s.exportAll}
+          className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2"
+        >
           {t("claimLinks.export")}
         </button>
       ) : null}
