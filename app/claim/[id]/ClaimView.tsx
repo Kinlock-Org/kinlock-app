@@ -70,7 +70,7 @@ function LockDetails({ c }: { c: Claim }) {
           {t("pages.claim.referenceLabel")}
         </h2>
         {c.reference.status === "missing" ? null : (
-          <p dir="auto" className="font-mono">
+          <p dir="auto" className="break-words font-mono">
             {c.reference.reference}
           </p>
         )}
@@ -104,7 +104,7 @@ function LockDetails({ c }: { c: Claim }) {
                   type="button"
                   onClick={() => c.claim(i)}
                   disabled={c.busyIndex !== null}
-                  className="self-start rounded border px-4 py-2 font-medium"
+                  className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2 font-medium"
                 >
                   {c.busyIndex === i ? t("pages.claim.releasing") : t("pages.claim.release")}
                 </button>
@@ -125,7 +125,10 @@ function LockDetails({ c }: { c: Claim }) {
         <p role="status">
           {c.receipt.kind === "Declined" ? t("pages.claim.declined") : t("pages.claim.released")}{" "}
           {c.receipt.eventIndex === null ? null : (
-            <a href={`/r/${c.receipt.txHash}/${c.receipt.eventIndex}`} className="underline">
+            <a
+              href={`/r/${c.receipt.txHash}/${c.receipt.eventIndex}`}
+              className="inline-flex min-h-[44px] min-w-[44px] items-center px-2 py-2 underline"
+            >
               {t("pages.claim.receiptLink")}
             </a>
           )}
@@ -147,7 +150,7 @@ function WalletBar({ c }: { c: Claim }) {
     <button
       type="button"
       onClick={c.connect}
-      className="self-start rounded border px-4 py-2 font-medium"
+      className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2 font-medium"
     >
       {t("pages.claim.connect")}
     </button>
@@ -189,12 +192,12 @@ function DeclinePanel({ c }: { c: Claim }) {
             <Amount c={c} baseUnits={c.lock ? remainder(c.lock) : 0n} />
           </p>
           <p>{t("pages.claim.declineConfirmNote")}</p>
-          <span className="flex gap-3">
+          <span className="flex flex-wrap gap-3">
             <button
               type="button"
               onClick={c.confirmDecline}
               disabled={c.declining}
-              className="rounded border px-4 py-2 font-medium"
+              className="min-h-[44px] min-w-[44px] rounded border px-4 py-2 font-medium"
             >
               {c.declining ? t("pages.claim.declining") : t("pages.claim.declineConfirm")}
             </button>
@@ -202,14 +205,18 @@ function DeclinePanel({ c }: { c: Claim }) {
               type="button"
               onClick={c.cancelDecline}
               disabled={c.declining}
-              className="underline"
+              className="min-h-[44px] min-w-[44px] px-2 py-2 underline"
             >
               {t("pages.claim.declineCancel")}
             </button>
           </span>
         </div>
       ) : (
-        <button type="button" onClick={c.askDecline} className="self-start underline">
+        <button
+          type="button"
+          onClick={c.askDecline}
+          className="min-h-[44px] min-w-[44px] self-start px-2 py-2 underline"
+        >
           {t("pages.claim.decline")}
         </button>
       )}

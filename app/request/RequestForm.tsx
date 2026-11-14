@@ -20,7 +20,7 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
           id={ids.payee}
           value={f.payeeId}
           onChange={(e) => f.setPayeeId(e.target.value)}
-          className="rounded border p-2"
+          className="min-h-[44px] w-full rounded border p-2"
         >
           {payees.map((p) => (
             <option key={p.payeeId} value={p.payeeId} dir="auto">
@@ -38,7 +38,7 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
           onChange={(e) => f.setReference(e.target.value)}
           aria-describedby={ids.referenceHint}
           dir="auto"
-          className="rounded border p-2"
+          className="min-h-[44px] w-full rounded border p-2"
         />
         <span id={ids.referenceHint} className="text-sm">
           {t("pages.request.referenceHint")}
@@ -58,7 +58,7 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
                 inputMode="decimal"
                 value={row.amount}
                 onChange={(e) => f.updateRow(row.key, { amount: e.target.value })}
-                className="rounded border p-2"
+                className="min-h-[44px] w-full rounded border p-2"
               />
             </label>
             <label className="flex flex-col gap-1">
@@ -67,7 +67,7 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
                 type="date"
                 value={row.date}
                 onChange={(e) => f.updateRow(row.key, { date: e.target.value })}
-                className="rounded border p-2"
+                className="min-h-[44px] w-full rounded border p-2"
               />
             </label>
             {row.date ? (
@@ -77,7 +77,7 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
               <button
                 type="button"
                 onClick={() => f.removeRow(row.key)}
-                className="self-start underline"
+                className="min-h-[44px] min-w-[44px] self-start px-2 py-2 underline"
               >
                 {t("pages.request.removeTranche")}
               </button>
@@ -85,7 +85,11 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
           </div>
         ))}
         {f.rows.length < MAX_TRANCHES ? (
-          <button type="button" onClick={f.addRow} className="self-start underline">
+          <button
+            type="button"
+            onClick={f.addRow}
+            className="min-h-[44px] min-w-[44px] self-start px-2 py-2 underline"
+          >
             {t("pages.request.addTranche")}
           </button>
         ) : null}
@@ -103,7 +107,10 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
         </p>
       ) : null}
 
-      <button type="submit" className="self-start rounded border px-4 py-2 font-medium">
+      <button
+        type="submit"
+        className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2 font-medium"
+      >
         {t("pages.request.create")}
       </button>
 
@@ -111,7 +118,11 @@ export function RequestForm({ payees }: { payees: { payeeId: string; label: stri
         <div className="flex flex-col gap-2" aria-live="polite">
           <span className="font-medium">{t("pages.request.linkLabel")}</span>
           <output className="break-all rounded border p-2">{f.link}</output>
-          <button type="button" onClick={f.copy} className="self-start rounded border px-4 py-2">
+          <button
+            type="button"
+            onClick={f.copy}
+            className="min-h-[44px] min-w-[44px] self-start rounded border px-4 py-2"
+          >
             {f.copied ? t("pages.request.copied") : t("pages.request.copy")}
           </button>
         </div>

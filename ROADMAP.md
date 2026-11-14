@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 45 | 34 | 7 | 4 | 0 | 0 | 0 | 76% |
+| 4 App | 45 | 34 | 8 | 3 | 0 | 0 | 0 | 76% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **229** | **94** | **21** | **89** | **0** | **25** | **0** | **46%** |
+| **All** | **229** | **94** | **22** | **88** | **0** | **25** | **0** | **46%** |
 
 ---
 
@@ -314,7 +314,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | IN PROGRESS | M3-01 | Used everywhere money or time is shown |
 | M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | IN PROGRESS | M3-13 | Audit checklist passed |
-| M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
+| M3-18 | Mobile and low-bandwidth performance pass | app | P1 | IN PROGRESS | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
 | M3-19 | Playwright happy-path: request → send → claim → verify | app | P0 | DONE | M3-13 | Green in CI against testnet. Met 2026-10-29 on `feat/e2e-happy-path` head `479ef58`: `e2e` run `40830959873` conclusion `success`, log shows `Running 2 tests using 2 workers` then `2 passed (24.7s)` under `Run pnpm e2e`, and `ci`, `roadmap-check`, `docs-in-sync` and CodeQL are green on the same head. The last blocker was a defect in the **published** SDK tarball, not a test or CI config problem — see Changelog update 6. Locally re-run on this tip: `pnpm install --frozen-lockfile`, `pnpm lint` (84 files clean), `pnpm typecheck` clean, `pnpm test` (15 files / 167 tests). `pnpm e2e` cannot be run by an agent: the two wallet-signing secrets are owner-only by design (`AGENTS.md` §2), so the suite's green state is proven by CI, not by me. |
 | M3-20 | Copy and wording review (plain language, no "proof of use", honest disclaimers) | app | P0 | IN PROGRESS | M3-13 | Reviewer sign-off |
 | M3-21 | Error and empty states: trustline failure, expired, revoked, suspended, indexer lag | app | P0 | DONE | M3-09 | Each state has clear guidance |
@@ -553,6 +553,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-15 | perf/mobile-touch-targets-77 (#77) | app | M3-17 IN PROGRESS, M3-18 IN PROGRESS | Audit /, /send, /claim/[id], and /request at 375x667 mobile viewport; enforce minimum 44x44px touch targets (WCAG 2.1 SC 2.5.5) across interactive buttons, form controls, mobile navigation, and saved claim-link actions with regression tests (closes #77). |
 | 2026-11-09 | `fix/prelaunch-hardening` (#91) | app | M3-44 DONE, M3-45 TODO (new rows) | Fix the failing `e2e` check on PRs. The indexer exited at startup with `startLedger must be within the ledger range: 5511598 - 5632557`: `E2E_START_LEDGER` (5421502) has aged out of testnet RPC's ~7-day event history. The PR job only runs the claim-fragment privacy test, which reads chain state and doesn't need the indexer, so the indexer steps now run only on `main` pushes. Verified locally: the privacy test passes against a production build with no indexer. The signed `main` run still needs a fixture contract inside RPC retention (M3-45). Progress counts computed with `scripts/roadmap-progress` on a copy and updated by hand. |
 | 2026-11-09 | `fix/prelaunch-hardening` | app | M3-42 DONE, M3-43 DONE (new rows) | Follow-up after verifying the pre-launch review fixes. M3-38 and M3-40 were marked DONE before they worked: the app still vendored SDK 0.3.2 (no `TX_PENDING`, no trustline fix), a pending send could build a claim link to lock 1, pending sends were never resumed after a reload, the app's own `KinlockError` broke `instanceof` in the request form, and the nonce CSP blocked every script on prerendered pages. This PR vendors SDK 0.3.3, removes the lock-id default, resumes pending sends on load, re-exports the SDK error class, and forces dynamic rendering at the root layout. `pnpm lint`, `pnpm typecheck`, `pnpm test` (206/206), `pnpm build` run and green; `/`, `/attester` and pending recovery on `/send` checked in a browser against `pnpm start`. Progress counts computed with `scripts/roadmap-progress` on a copy (it can't parse this file's column-padded §3 header) and updated by hand. |
 | 2026-11-08 | `fix/sdk-vendor-integrity` | app | M3-41 DONE (new row) | Fix PRELAUNCH_REVIEW Item 9: vendor @kinlock/sdk tarball in vendor/ to pin sha512 integrity in pnpm-lock.yaml (203/203 tests pass, build clean). |
