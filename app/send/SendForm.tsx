@@ -8,7 +8,7 @@ import { DateTimeDisplay } from "@/components/time/DateTimeDisplay";
 import { MAX_TRANCHES } from "@/lib/constants";
 import { shortAddress } from "@/lib/i18n/format";
 import { hasMessage, t } from "@/lib/i18n/messages";
-import { type ConfiguredAsset, fromBaseUnits } from "@/lib/sdk";
+import { type ConfiguredAsset, configuredAsset, fromBaseUnits, publicConfig } from "@/lib/sdk";
 import { idsOf, localCurrencyOf, preflightKey } from "./send-logic";
 import { type SendForm as Form, useSendForm } from "./useSendForm";
 
@@ -19,9 +19,25 @@ export interface PayeeOption {
 }
 
 /** The sender flow. Markup only; state lives in useSendForm. Roadmap M3-06. */
-export function SendForm({ payees, asset }: { payees: PayeeOption[]; asset: ConfiguredAsset }) {
-  const f = useSendForm(idsOf(payees));
-  return f.stage === "done" ? <Done f={f} /> : <Editor f={f} payees={payees} asset={asset} />;
+export function SendForm({
+  payees,
+  asset = configuredAsset(),
+  enableDirectPayments,
+}: {
+  payees: PayeeOption[];
+  asset?: ConfiguredAsset;
+  issuer?: string;
+  enableDirectPayments?: boolean;
+}) {
+  const directEnabled = enableDirectPayments ?? publicConfig().NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS;
+  const f = useSendForm(idsOf(payees), directEnabled);
+  if (f.stage === "done") {
+    return <Done f={f} />;
+  }
+  if (f.stage === "pending") {
+    return <Pending f={f} />;
+  }
+  return <Editor f={f} payees={payees} asset={asset} />;
 }
 
 function Editor({ f, payees, asset }: { f: Form; payees: PayeeOption[]; asset: ConfiguredAsset }) {
@@ -47,21 +63,62 @@ function Editor({ f, payees, asset }: { f: Form; payees: PayeeOption[]; asset: C
       ) : null}
       {f.unknownPayee ? <p role="alert">{t("pages.send.prefillUnknownPayee")}</p> : null}
 
-      <label htmlFor={ids.payee} className="flex flex-col gap-1">
-        <span className="font-medium">{t("pages.send.payeeLabel")}</span>
-        <select
-          id={ids.payee}
-          value={f.payeeId}
-          onChange={(e) => f.setPayeeId(e.target.value)}
-          className="rounded border p-2"
-        >
-          {payees.map((p) => (
-            <option key={p.payeeId} value={p.payeeId} dir="auto">
-              {p.label}
-            </option>
-          ))}
-        </select>
-      </label>
+      {f.directEnabled ? (
+        <div className="flex gap-4 border-b pb-2">
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="send-mode"
+              checked={f.mode === "verified"}
+              onChange={() => f.setMode("verified")}
+            />
+            <span className="text-sm font-medium">{t("pages.send.modeVerified")}</span>
+          </label>
+          <label className="flex items-center gap-2 cursor-pointer">
+            <input
+              type="radio"
+              name="send-mode"
+              checked={f.mode === "direct"}
+              onChange={() => f.setMode("direct")}
+            />
+            <span className="text-sm font-medium">{t("pages.send.modeDirect")}</span>
+          </label>
+        </div>
+      ) : null}
+
+      {f.mode === "verified" || !f.directEnabled ? (
+        <label htmlFor={ids.payee} className="flex flex-col gap-1">
+          <span className="font-medium">{t("pages.send.payeeLabel")}</span>
+          <select
+            id={ids.payee}
+            value={f.payeeId}
+            onChange={(e) => f.setPayeeId(e.target.value)}
+            className="rounded border p-2"
+          >
+            {payees.length === 0 ? (
+              <option value="">{t("pages.send.payeeNone")}</option>
+            ) : (
+              payees.map((p) => (
+                <option key={p.payeeId} value={p.payeeId} dir="auto">
+                  {p.label}
+                </option>
+              ))
+            )}
+          </select>
+        </label>
+      ) : (
+        <label htmlFor="direct-recipient" className="flex flex-col gap-1">
+          <span className="font-medium">{t("pages.send.recipientLabel")}</span>
+          <input
+            id="direct-recipient"
+            type="text"
+            placeholder={t("pages.send.recipientPlaceholder")}
+            value={f.recipient}
+            onChange={(e) => f.setRecipient(e.target.value)}
+            className="rounded border p-2 font-mono text-sm"
+          />
+        </label>
+      )}
 
       <label htmlFor={ids.reference} className="flex flex-col gap-1">
         <span className="font-medium">{t("pages.send.referenceLabel")}</span>
@@ -258,6 +315,41 @@ function Done({ f }: { f: Form }) {
         </a>
         <button type="button" onClick={f.reset} className="underline">
           {t("pages.send.sendAnother")}
+        </button>
+      </span>
+    </section>
+  );
+}
+
+function Pending({ f }: { f: Form }) {
+  return (
+    <section aria-live="polite" className="mt-6 flex flex-col gap-3 rounded border p-4">
+      <h2 className="text-xl font-semibold">{t("pages.send.pendingHeading")}</h2>
+      <p>{t("pages.send.pendingBody")}</p>
+      {f.pendingTxHash ? (
+        <div className="flex flex-col gap-1">
+          <span className="text-sm font-medium">{t("pages.send.pendingTxHash")}</span>
+          <code className="break-all rounded bg-gray-50 p-2 text-xs font-mono">
+            {f.pendingTxHash}
+          </code>
+        </div>
+      ) : null}
+      <p role="alert" className="text-sm font-medium text-amber-700">
+        {t("pages.send.pendingWarning")}
+      </p>
+      {f.error ? (
+        <p role="alert" className="text-sm font-medium text-red-600">
+          {t(f.error)}
+        </p>
+      ) : null}
+      <span className="flex gap-3">
+        <button
+          type="button"
+          onClick={f.checkPendingStatus}
+          disabled={f.checking}
+          className="rounded border px-4 py-2 font-medium disabled:opacity-50"
+        >
+          {f.checking ? t("pages.send.checking") : t("pages.send.pendingCheckAgain")}
         </button>
       </span>
     </section>

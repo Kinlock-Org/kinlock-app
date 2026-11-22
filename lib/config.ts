@@ -33,11 +33,22 @@ const PublicConfigSchema = z.object({
   /** USDC issuer, shown with the asset code everywhere (AssetLabel). */
   NEXT_PUBLIC_USDC_ISSUER: z.string().regex(/^G[A-Z2-7]{55}$/),
   /**
+  /**
    * The code of that token, from its issuer's own registration (Stellar asset codes are 1-12
    * characters). Displayed with the issuer, so a look-alike asset can never be labelled by the
    * code the app assumed. Never a literal in a component: read all three through `configuredAsset()`.
    */
   NEXT_PUBLIC_USDC_ASSET_CODE: z.string().regex(/^[A-Z0-9:_-]{1,12}$/),
+  /**
+   * Whether direct locks to any Stellar address are enabled.
+   * Defaults to false: the standing testnet contract was deployed before ADR-0031
+   * and lacks `create_direct_lock`.
+   */
+  NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS: z
+    .string()
+    .optional()
+    .default("false")
+    .transform((v) => v === "true"),
 });
 
 export type PublicConfig = z.infer<typeof PublicConfigSchema> & { networkPassphrase: string };
@@ -52,6 +63,7 @@ export function loadPublicConfig(
     NEXT_PUBLIC_USDC_CONTRACT_ID: process.env.NEXT_PUBLIC_USDC_CONTRACT_ID,
     NEXT_PUBLIC_USDC_ISSUER: process.env.NEXT_PUBLIC_USDC_ISSUER,
     NEXT_PUBLIC_USDC_ASSET_CODE: process.env.NEXT_PUBLIC_USDC_ASSET_CODE,
+    NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS: process.env.NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS,
   },
 ): PublicConfig {
   const parsed = PublicConfigSchema.parse(env);
