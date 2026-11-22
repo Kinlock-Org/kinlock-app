@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-09 (fix/prelaunch-hardening: M3-42..M3-44 DONE, M3-45 TODO) |
+| **Last updated** | 2026-11-09 (`feat/asset-code-and-issuer`: M3-15 DONE, M3-46 added) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -131,7 +131,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 1 M0 Validate | 17 | 1 | 6 | 10 | 0 | 0 | 0 | 6% |
 | 2 Contract + registry | 41 | 24 | 3 | 14 | 0 | 0 | 0 | 59% |
 | 3 SDK + indexer | 21 | 14 | 3 | 4 | 0 | 0 | 0 | 67% |
-| 4 App | 45 | 34 | 7 | 4 | 0 | 0 | 0 | 76% |
+| 4 App | 46 | 34 | 7 | 5 | 0 | 0 | 0 | 74% |
 | 5 Testnet pilot | 7 | 0 | 0 | 7 | 0 | 0 | 0 | 0% |
 | 6 Pre-mainnet features | 10 | 0 | 0 | 10 | 0 | 0 | 0 | 0% |
 | 7 Hardening | 26 | 0 | 0 | 26 | 0 | 0 | 0 | 0% |
@@ -139,7 +139,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | 9 Conditional ramp | 9 | 0 | 0 | 0 | 0 | 9 | 0 | n/a |
 | 10 Wave + community | 10 | 5 | 1 | 4 | 0 | 0 | 0 | 50% |
 | 11 Deferred parking lot | 16 | 0 | 0 | 0 | 0 | 16 | 0 | n/a |
-| **All** | **229** | **94** | **21** | **89** | **0** | **25** | **0** | **46%** |
+| **All** | **230** | **94** | **21** | **90** | **0** | **25** | **0** | **45%** |
 
 ---
 
@@ -311,7 +311,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-12 | `/attester` tooling: read-only account checks (trustline, authorization, XLM float) | app | P1 | TODO | M1-26 | Checks match the checklist script |
 | M3-13 | `/r/[txHash]/[eventIndex]` receipt page and `/verify` | app | P0 | DONE | M2-06 | Shows "Payment to verified payee"; Valid or Not valid |
 | M3-14 | Security headers, strict CSP, `Referrer-Policy`, no third-party scripts on `/claim/*` | app | P0 | DONE | M3-09 | Automated test confirms fragment never appears in any network request |
-| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | IN PROGRESS | M3-01 | Used everywhere money or time is shown |
+| M3-15 | `AssetLabel` (code and issuer), `AmountDisplay`, UTC+local time components | app | P0 | DONE | M3-01 | Used everywhere money or time is shown — met 2026-10-31 on `feat/asset-code-and-issuer`: every amount render goes through `AmountDisplay`, and its code *and* issuer both come from config (`NEXT_PUBLIC_USDC_ASSET_CODE` + `_ISSUER`, read together via `configuredAsset()`); `lib/asset-labeling.test.ts` fails any amount shown by code alone, any quoted asset code in source, and any component that reads half the asset config |
 | M3-16 | Choose and implement the `RateProvider` for indicative local-currency equivalents across currencies, with USD-only fallback and disclosure | app | P0 | TODO | M0-05 | Source documented; labeled indicative in UI |
 | M3-17 | Accessibility pass (keyboard, labels, contrast) | app | P1 | IN PROGRESS | M3-13 | Audit checklist passed |
 | M3-18 | Mobile and low-bandwidth performance pass | app | P1 | TODO | M3-13 | Dashboard loads in under 2s on a mid-range phone profile |
@@ -342,6 +342,7 @@ Readiness % = `DONE ÷ (all rows − DEFERRED − DROPPED)`. Conditional rows (P
 | M3-43 | Render every route per request so the site-wide nonce CSP (M3-40) doesn't block prerendered pages | app | P0 | DONE | M3-40 | `pnpm build` lists every page as dynamic; in `pnpm start`, `/` and `/attester` load with every script carrying the request nonce and no CSP violations (previously every script on `/` was blocked) |
 | M3-44 | Run the pull-request privacy E2E without the indexer: it only reads chain state, and the indexer exits at startup once `E2E_START_LEDGER` ages out of RPC's ~7-day event window, which failed every PR | app | P0 | DONE | M3-35 | Indexer steps in `e2e.yml` run only on pushes to `main`; `claim-fragment-privacy.spec.ts` passes locally against a production build with no indexer running and lock 1 on the fixture contract |
 | M3-45 | Keep the signed main-branch E2E working past RPC retention: the fixture contract's `PayeeRegistered` event (ledger 5421502) is older than testnet RPC history, so its indexer can't ingest the fixture payee. Redeploy and register a fresh fixture contract per run (or on a schedule shorter than retention) | app | P0 | TODO | M3-19 | The `main` E2E run ingests the fixture payee from a contract deployed within RPC retention and passes the request, send, claim, verify flow |
+| M3-46 | Asset naming in prose copy: preflight statuses, `/send` and `/request` intros say "USDC" by name while the displayed *amounts* now follow the configured asset. Needs parameterised messages (`t()` takes no arguments today) so the code shown in copy cannot drift from `NEXT_PUBLIC_USDC_ASSET_CODE` | app | P1 | TODO | M3-15, M3-23 | No message names an asset code that config does not set; copy reviewed against hard rule 7 |
 
 ---
 
@@ -553,6 +554,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-10-31 | `feat/asset-code-and-issuer` | app | DONE: M3-15. Added: M3-34 | The asset code next to every amount was a literal (`lib/constants.ts` `ASSET_CODE = "USDC"`) while the token contract and issuer came from env, so pointing the app at a different allowed token would have printed a code nobody configured — the exact look-alike risk §8.3 exists for. `NEXT_PUBLIC_USDC_ASSET_CODE` is now Zod-validated beside the other two and all three are read as one value through `configuredAsset()`; `lib/sdk.ts` exports it, and 12 call sites use it (5 `AmountDisplay` renders, the 4 chain-read hooks, `/send` + `/request` amount labels, `createLock`'s token). The two amount inputs and `/request`'s total previously showed `Amount (USDC)` and an unlabelled number; all three now show code *and* issuer. `/r/[txHash]/[eventIndex]` + `/verify` print "The asset could not be confirmed." when the lock read fails instead of a bare number. New guard `lib/asset-labeling.test.ts` (165 checks) fails an amount shown by code alone, a quoted asset code in source, or a component reading half the asset config; each of the three was proven to fail by injecting it and reverting. `pnpm build` green without env (as CI runs it). Verified in a browser against the live fixture contract: `/send` and `/request` labels and `/locks/1` amounts all read `E2E · Issuer GBJL…NNKX` from config (a11y snapshots; the app's in-app browser surface could not screenshot). CI note: `.github/workflows/e2e.yml` gains `NEXT_PUBLIC_USDC_ASSET_CODE` (E2E token code, confirmed from Horizon: that issuer has exactly one asset) and `happy-path.spec.ts`'s label selector widens to `/^Amount/` — §2 needs a human OK on workflow changes. Residual found and parked as M3-34: prose copy (preflight statuses, page intros) still names USDC by hand
 | 2026-11-09 | `fix/prelaunch-hardening` (#91) | app | M3-44 DONE, M3-45 TODO (new rows) | Fix the failing `e2e` check on PRs. The indexer exited at startup with `startLedger must be within the ledger range: 5511598 - 5632557`: `E2E_START_LEDGER` (5421502) has aged out of testnet RPC's ~7-day event history. The PR job only runs the claim-fragment privacy test, which reads chain state and doesn't need the indexer, so the indexer steps now run only on `main` pushes. Verified locally: the privacy test passes against a production build with no indexer. The signed `main` run still needs a fixture contract inside RPC retention (M3-45). Progress counts computed with `scripts/roadmap-progress` on a copy and updated by hand. |
 | 2026-11-09 | `fix/prelaunch-hardening` | app | M3-42 DONE, M3-43 DONE (new rows) | Follow-up after verifying the pre-launch review fixes. M3-38 and M3-40 were marked DONE before they worked: the app still vendored SDK 0.3.2 (no `TX_PENDING`, no trustline fix), a pending send could build a claim link to lock 1, pending sends were never resumed after a reload, the app's own `KinlockError` broke `instanceof` in the request form, and the nonce CSP blocked every script on prerendered pages. This PR vendors SDK 0.3.3, removes the lock-id default, resumes pending sends on load, re-exports the SDK error class, and forces dynamic rendering at the root layout. `pnpm lint`, `pnpm typecheck`, `pnpm test` (206/206), `pnpm build` run and green; `/`, `/attester` and pending recovery on `/send` checked in a browser against `pnpm start`. Progress counts computed with `scripts/roadmap-progress` on a copy (it can't parse this file's column-padded §3 header) and updated by hand. |
 | 2026-11-08 | `fix/sdk-vendor-integrity` | app | M3-41 DONE (new row) | Fix PRELAUNCH_REVIEW Item 9: vendor @kinlock/sdk tarball in vendor/ to pin sha512 integrity in pnpm-lock.yaml (203/203 tests pass, build clean). |

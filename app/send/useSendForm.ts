@@ -18,6 +18,7 @@ import {
 import type { MessageKey } from "@/lib/i18n/messages";
 import {
   computeRefHash,
+  configuredAsset,
   createLock,
   generateSalt,
   pollTransaction,
@@ -145,7 +146,7 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
       setResults(
         await preflight({
           sender: address,
-          token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
+          token: configuredAsset().contractId,
           ...(activeMode === "direct" ? { recipient } : { payeeId }),
           total: total(),
           refHash,
@@ -243,7 +244,7 @@ export function useSendForm(payeeIds: string[], enableDirectPayments: boolean = 
       const { lockId, txHash } = await createLock(
         {
           sender: address,
-          token: publicConfig().NEXT_PUBLIC_USDC_CONTRACT_ID,
+          token: configuredAsset().contractId,
           ...(activeMode === "direct" ? { recipient } : { payeeId }),
           tranches: rows.map((r) => ({
             amount: toBaseUnits(r.amount.trim()),

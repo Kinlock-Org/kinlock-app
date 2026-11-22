@@ -8,7 +8,15 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import { findReceiptIndex } from "@/app/claim/[id]/claim-logic";
 import type { MessageKey } from "@/lib/i18n/messages";
 import { refundEligibility } from "@/lib/locks/refund";
-import { getLock, getPayee, publicConfig, refund, verifyReceipt, walletSigner } from "@/lib/sdk";
+import {
+  configuredAsset,
+  getLock,
+  getPayee,
+  publicConfig,
+  refund,
+  verifyReceipt,
+  walletSigner,
+} from "@/lib/sdk";
 import { createStellarWalletsKitAdapter, type WalletAdapter } from "@/lib/wallet";
 import { refundErrorKey } from "./lock-view-text";
 
@@ -73,7 +81,6 @@ export function useLockPage(lockIdText: string) {
     }
   }
 
-  const config = publicConfig();
   return {
     phase,
     lock,
@@ -86,10 +93,7 @@ export function useLockPage(lockIdText: string) {
     busy,
     error,
     receipt,
-    usdc: {
-      contractId: config.NEXT_PUBLIC_USDC_CONTRACT_ID,
-      issuer: config.NEXT_PUBLIC_USDC_ISSUER,
-    },
+    usdc: configuredAsset(),
     connect,
     doRefund,
   };

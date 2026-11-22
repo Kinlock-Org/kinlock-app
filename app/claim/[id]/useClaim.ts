@@ -8,6 +8,7 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { MessageKey } from "@/lib/i18n/messages";
 import {
   computeRefHash,
+  configuredAsset,
   decline,
   getLock,
   parseClaimLink,
@@ -137,7 +138,6 @@ export function useClaim(lockIdText: string) {
     }
   }
 
-  const config = publicConfig();
   return {
     phase,
     lock,
@@ -149,10 +149,7 @@ export function useClaim(lockIdText: string) {
     busyIndex,
     error,
     receipt,
-    usdc: {
-      contractId: config.NEXT_PUBLIC_USDC_CONTRACT_ID,
-      issuer: config.NEXT_PUBLIC_USDC_ISSUER,
-    },
+    usdc: configuredAsset(),
     connect,
     claim,
     confirmingDecline,

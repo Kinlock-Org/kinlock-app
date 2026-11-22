@@ -3,7 +3,7 @@ import { SavedClaimLinks } from "@/components/claim-links/SavedClaimLinks";
 import { LagNotice } from "@/components/indexer/LagNotice";
 import { t } from "@/lib/i18n/messages";
 import { type IndexedPayee, indexerLagging, listPayees, payable } from "@/lib/indexer";
-import { publicConfig } from "@/lib/sdk";
+import { configuredAsset } from "@/lib/sdk";
 import { SendForm } from "./SendForm";
 
 export const dynamic = "force-dynamic";
@@ -40,11 +40,7 @@ function Body({ payees }: { payees: IndexedPayee[] | null }) {
           {t("pages.send.indexerDown")}
         </p>
       ) : null}
-      <SendForm
-        payees={options}
-        issuer={publicConfig().NEXT_PUBLIC_USDC_ISSUER}
-        enableDirectPayments={publicConfig().NEXT_PUBLIC_ENABLE_DIRECT_PAYMENTS}
-      />
+      <SendForm payees={options} asset={configuredAsset()} />
     </div>
   );
 }
