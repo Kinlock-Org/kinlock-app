@@ -34,7 +34,7 @@ export function useLockPage(lockIdText: string) {
       const fresh = await getLock(lockId);
       if (!fresh) return setPhase("notFound");
       setLock(fresh);
-      setPayee(await getPayee(fresh.payeeId));
+      setPayee(fresh.payeeId ? await getPayee(fresh.payeeId) : null);
       setNow(BigInt(Math.floor(Date.now() / 1000)));
       setPhase("ready");
     } catch {

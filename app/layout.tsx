@@ -6,6 +6,13 @@ import "./globals.css";
 
 const outfit = Outfit({ subsets: ["latin"], variable: "--font-outfit", display: "swap" });
 
+/**
+ * [sec] Every page is rendered per request. proxy.ts sends a nonce-based CSP on every route, and a
+ * prerendered (static) page can't carry that request's nonce, so the browser would block all of
+ * its scripts and the page would never hydrate.
+ */
+export const dynamic = "force-dynamic";
+
 export const metadata = {
   title: t("app.name"),
   description: t("app.tagline"),

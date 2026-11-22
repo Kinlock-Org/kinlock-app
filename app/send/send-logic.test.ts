@@ -1,6 +1,13 @@
 import type { PreflightResult } from "@kinlock/sdk";
 import { describe, expect, it } from "vitest";
-import { dateOf, defaultExpiryDate, draftProblem, prefillFrom, verdict } from "./send-logic";
+import {
+  confirmedLockId,
+  dateOf,
+  defaultExpiryDate,
+  draftProblem,
+  prefillFrom,
+  verdict,
+} from "./send-logic";
 
 const NOW = 1_791_331_200n; // 2026-10-07T00:00:00Z
 const PAYEE = "44".repeat(32);
@@ -45,6 +52,29 @@ describe("draftProblem mirrors the contract's create_lock checks", () => {
   it("accepts exactly the 1 USDC minimum", () => {
     expect(draftProblem(draft({ rows: [row("1", "2026-10-07")] }), NOW)).toBeNull();
   });
+
+  it("validates direct mode recipient requirements", () => {
+    const validG = "GBBD47IF6LWK7P7MDEVSCWR7DPUWV3NY3DTQEVFL4NAT4AQH3ZLLFLA5";
+    const validC = "CBIELTK6YBZJU5UP2WWQEUCYKLPU6AUNZ2BQ4WWFEIE3USCIHMXQDAMA";
+    expect(
+      draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: validG }), NOW),
+    ).toBeNull();
+    expect(
+      draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: validC }), NOW),
+    ).toBeNull();
+    expect(draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: "" }), NOW)).toBe(
+      "pages.send.errorRecipient",
+    );
+    expect(
+      draftProblem(draft({ mode: "direct", payeeId: undefined, recipient: "GSHORT" }), NOW),
+    ).toBe("pages.send.errorRecipient");
+    expect(
+      draftProblem(
+        draft({ mode: "direct", payeeId: undefined, recipient: `X${"A".repeat(55)}` }),
+        NOW,
+      ),
+    ).toBe("pages.send.errorRecipient");
+  });
 });
 
 describe("defaultExpiryDate", () => {
@@ -80,9 +110,21 @@ describe("verdict", () => {
     status,
     messageKey: "x",
   });
-  it("blocks on a failed blocking check, asks to acknowledge a failed warning, else ok", () => {
+  it("blocks on a failed blocking check, asks to acknowledge an unknown block check or failed warning, else ok", () => {
     expect(verdict([r("block", "fail"), r("warn", "fail")])).toBe("blocked");
     expect(verdict([r("block", "pass"), r("warn", "fail")])).toBe("needsAcknowledgement");
-    expect(verdict([r("block", "pass"), r("block", "unknown"), r("warn", "unknown")])).toBe("ok");
+    expect(verdict([r("block", "unknown"), r("warn", "pass")])).toBe("needsAcknowledgement");
+    expect(verdict([r("block", "pass"), r("warn", "unknown")])).toBe("ok");
+  });
+});
+
+describe("confirmedLockId", () => {
+  it("returns the lock id of a confirmed transaction", () => {
+    expect(confirmedLockId({ status: "SUCCESS", lockId: 42n })).toBe(42n);
+  });
+
+  it("never falls back to a default id when the id couldn't be read", () => {
+    expect(confirmedLockId({ status: "SUCCESS" })).toBeNull();
+    expect(confirmedLockId({ status: "FAILED", lockId: 1n })).toBeNull();
   });
 });

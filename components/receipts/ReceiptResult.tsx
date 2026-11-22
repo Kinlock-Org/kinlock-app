@@ -32,7 +32,11 @@ export function ReceiptResult({
       <p className="text-lg font-semibold" aria-live="polite">
         {result.valid ? t("receipt.valid") : t("receipt.notValid")}
       </p>
-      {result.valid ? <p className="font-medium">{t("receipt.headline")}</p> : null}
+      {result.valid ? (
+        <p className="font-medium">
+          {t(lock && lock.payeeId === null ? "receipt.headlineDirect" : "receipt.headline")}
+        </p>
+      ) : null}
       {reasonKey ? <p role={result.valid ? "status" : "alert"}>{t(reasonKey)}</p> : null}
       {result.receipt ? <Details result={result} locale={locale} lock={lock} usdc={usdc} /> : null}
     </section>

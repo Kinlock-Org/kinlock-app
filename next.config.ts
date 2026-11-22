@@ -1,5 +1,5 @@
 /**
- * [sec] Site-wide security headers. /claim/* also gets a per-request nonce CSP from proxy.ts
+ * [sec] Site-wide security headers. Application routes also get a per-request nonce CSP from proxy.ts
  * (roadmap M3-14). Referrer-Policy no-referrer keeps any URL from leaking to other sites.
  *
  * The indexer's list API is served on our own origin (rewrites below), so the browser needs no

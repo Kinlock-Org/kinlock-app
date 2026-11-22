@@ -18,6 +18,7 @@ import type {
   VerifyReceiptResult,
 } from "@kinlock/sdk";
 import * as sdk from "@kinlock/sdk";
+import { rpc, scValToNative } from "@stellar/stellar-sdk";
 import { loadPublicConfig, type PublicConfig } from "./config";
 import type { WalletAdapter } from "./wallet";
 
@@ -82,6 +83,88 @@ export const preflight = (params: PreflightParams): Promise<PreflightResult[]> =
 export const verifyReceipt = (ref: ReceiptRef): Promise<VerifyReceiptResult> =>
   sdk.verifyReceipt(kinlockConfig(), ref);
 
+export const getTransaction = async (txHash: string) => {
+  const config = kinlockConfig();
+  const server = new rpc.Server(config.rpcUrl, { allowHttp: config.allowHttp ?? false });
+  return server.getTransaction(txHash);
+};
+
+export interface PollTxResult {
+  status: "SUCCESS" | "FAILED";
+  lockId?: bigint;
+}
+
+/**
+ * Poll getTransaction on the configured Soroban RPC server until confirmation
+ * or timeout. Used to recover from post-submission timeouts (Item 4).
+ */
+export async function pollTransaction(
+  txHash: string,
+  timeoutMs = 30_000,
+  intervalMs = 1_500,
+): Promise<PollTxResult> {
+  const start = Date.now();
+  const config = kinlockConfig();
+  const server = new rpc.Server(config.rpcUrl, { allowHttp: config.allowHttp ?? false });
+
+  while (Date.now() - start < timeoutMs) {
+    try {
+      const tx = await server.getTransaction(txHash);
+      if (tx.status === rpc.Api.GetTransactionStatus.SUCCESS) {
+        let lockId: bigint | undefined;
+        if ("returnValue" in tx && tx.returnValue) {
+          try {
+            const native = scValToNative(tx.returnValue as Parameters<typeof scValToNative>[0]);
+            if (typeof native === "bigint") {
+              lockId = native;
+            } else if (typeof native === "number") {
+              lockId = BigInt(native);
+            }
+          } catch {
+            // fallback to events
+          }
+        }
+        if (lockId === undefined && "ledger" in tx && typeof tx.ledger === "number") {
+          try {
+            const { events } = await server.getEvents({
+              startLedger: tx.ledger,
+              endLedger: tx.ledger + 1,
+              filters: [{ type: "contract", contractIds: [config.contractId] }],
+              limit: 1000,
+            });
+            const created = events.find(
+              (e) =>
+                e.txHash === txHash &&
+                e.topic[0] !== undefined &&
+                scValToNative(e.topic[0]) === "lock_created",
+            );
+            if (created?.topic[1]) {
+              const val = scValToNative(created.topic[1]);
+              if (typeof val === "bigint") lockId = val;
+              else if (typeof val === "number") lockId = BigInt(val);
+            }
+          } catch {
+            // ignore
+          }
+        }
+        return { status: "SUCCESS", lockId };
+      }
+      if (tx.status === rpc.Api.GetTransactionStatus.FAILED) {
+        return { status: "FAILED" };
+      }
+    } catch {
+      // transient network/RPC error: retry
+    }
+    await new Promise((resolve) => setTimeout(resolve, intervalMs));
+  }
+  throw new sdk.KinlockError(
+    `timed out waiting for transaction ${txHash} to confirm`,
+    "TX_PENDING",
+    undefined,
+    txHash,
+  );
+}
+
 export {
   buildClaimLink,
   buildRequestLink,
@@ -94,3 +177,4 @@ export {
   toBaseUnits,
   USDC_DECIMALS,
 } from "@kinlock/sdk";
+export { scValToNative };

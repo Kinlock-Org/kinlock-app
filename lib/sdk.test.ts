@@ -1,8 +1,10 @@
+import type { rpc } from "@stellar/stellar-sdk";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 import type { WalletAdapter } from "./wallet";
 
 const calls: unknown[][] = [];
-vi.mock("@kinlock/sdk", () => ({
+vi.mock("@kinlock/sdk", async (importOriginal) => ({
+  KinlockError: (await importOriginal<typeof import("@kinlock/sdk")>()).KinlockError,
   getLock: vi.fn(async (...args: unknown[]) => {
     calls.push(["getLock", ...args]);
     return null;
@@ -73,5 +75,49 @@ describe("lib/sdk", () => {
       { lockId: 1n, trancheIndex: 0 },
       signer,
     ]);
+  });
+
+  it("pollTransaction returns status SUCCESS and lockId when confirmed", async () => {
+    const { rpc, nativeToScVal } = await import("@stellar/stellar-sdk");
+    const getTxSpy = vi.spyOn(rpc.Server.prototype, "getTransaction").mockResolvedValue({
+      status: "SUCCESS",
+      returnValue: nativeToScVal(99n, { type: "u64" }),
+    } as unknown as rpc.Api.GetTransactionResponse);
+
+    const res = await lib.pollTransaction("ab".repeat(32), 1000, 10);
+    expect(res).toEqual({ status: "SUCCESS", lockId: 99n });
+    getTxSpy.mockRestore();
+  });
+
+  it("pollTransaction returns status FAILED when transaction fails on-chain", async () => {
+    const { rpc } = await import("@stellar/stellar-sdk");
+    const getTxSpy = vi.spyOn(rpc.Server.prototype, "getTransaction").mockResolvedValue({
+      status: "FAILED",
+    } as unknown as rpc.Api.GetTransactionResponse);
+
+    const res = await lib.pollTransaction("cd".repeat(32), 1000, 10);
+    expect(res).toEqual({ status: "FAILED" });
+    getTxSpy.mockRestore();
+  });
+
+  it("re-exports the SDK's own KinlockError, so instanceof matches errors the SDK throws", async () => {
+    const actual = await vi.importActual<typeof import("@kinlock/sdk")>("@kinlock/sdk");
+    expect(lib.KinlockError).toBe(actual.KinlockError);
+  });
+
+  it("pollTransaction throws KinlockError with TX_PENDING on timeout", async () => {
+    const { rpc } = await import("@stellar/stellar-sdk");
+    const getTxSpy = vi.spyOn(rpc.Server.prototype, "getTransaction").mockResolvedValue({
+      status: "NOT_FOUND",
+    } as unknown as rpc.Api.GetTransactionResponse);
+
+    const hash = "ef".repeat(32);
+    const error = await lib.pollTransaction(hash, 50, 10).catch((e) => e);
+    expect(error).toBeInstanceOf(lib.KinlockError);
+    await expect(Promise.reject(error)).rejects.toMatchObject({
+      code: "TX_PENDING",
+      txHash: hash,
+    });
+    getTxSpy.mockRestore();
   });
 });
