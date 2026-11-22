@@ -4,7 +4,7 @@
 
 | | |
 |---|---|
-| **Last updated** | 2026-11-09 (fix/prelaunch-hardening: M3-42..M3-44 DONE, M3-45 TODO) |
+| **Last updated** | 2026-11-22 (fix/follow-redirects-audit: synchronized with origin/main) |
 | **Docs baseline** | v0.3, worldwide scope (`PRD.md`, `ARCHITECTURE.md`, `ARCHITECTURE_ESSENTIALS.md`, `AGENTS.md`, `CLAUDE.md`, `project_structure.md`) |
 | **Current phase** | Phase 0 (Foundations) → starting Phase 1 (M0 Validate)                                                                              |
 | **Readiness**     | See [§3](#3-progress-snapshot)                                                                                                      |
@@ -553,6 +553,7 @@ Newest first. One entry per PR. Required for every contribution (see §2).
 
 | Date | PR / ref | Repo | Rows touched | Summary |
 |---|---|---|---|---|
+| 2026-11-22 | `fix/follow-redirects-audit` | app | no row changes | Synchronized with origin/main. Pins `follow-redirects` past GHSA-mrwp-f3q8-3g9p in `pnpm-workspace.yaml` overrides so `dependency-audit` stays green. |
 | 2026-11-09 | `fix/prelaunch-hardening` (#91) | app | M3-44 DONE, M3-45 TODO (new rows) | Fix the failing `e2e` check on PRs. The indexer exited at startup with `startLedger must be within the ledger range: 5511598 - 5632557`: `E2E_START_LEDGER` (5421502) has aged out of testnet RPC's ~7-day event history. The PR job only runs the claim-fragment privacy test, which reads chain state and doesn't need the indexer, so the indexer steps now run only on `main` pushes. Verified locally: the privacy test passes against a production build with no indexer. The signed `main` run still needs a fixture contract inside RPC retention (M3-45). Progress counts computed with `scripts/roadmap-progress` on a copy and updated by hand. |
 | 2026-11-09 | `fix/prelaunch-hardening` | app | M3-42 DONE, M3-43 DONE (new rows) | Follow-up after verifying the pre-launch review fixes. M3-38 and M3-40 were marked DONE before they worked: the app still vendored SDK 0.3.2 (no `TX_PENDING`, no trustline fix), a pending send could build a claim link to lock 1, pending sends were never resumed after a reload, the app's own `KinlockError` broke `instanceof` in the request form, and the nonce CSP blocked every script on prerendered pages. This PR vendors SDK 0.3.3, removes the lock-id default, resumes pending sends on load, re-exports the SDK error class, and forces dynamic rendering at the root layout. `pnpm lint`, `pnpm typecheck`, `pnpm test` (206/206), `pnpm build` run and green; `/`, `/attester` and pending recovery on `/send` checked in a browser against `pnpm start`. Progress counts computed with `scripts/roadmap-progress` on a copy (it can't parse this file's column-padded §3 header) and updated by hand. |
 | 2026-11-08 | `fix/sdk-vendor-integrity` | app | M3-41 DONE (new row) | Fix PRELAUNCH_REVIEW Item 9: vendor @kinlock/sdk tarball in vendor/ to pin sha512 integrity in pnpm-lock.yaml (203/203 tests pass, build clean). |
