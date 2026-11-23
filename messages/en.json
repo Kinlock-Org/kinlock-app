@@ -276,7 +276,9 @@
       "lockLabel": "Payment",
       "totalLabel": "Total",
       "createdLabel": "Created",
-      "viewLink": "View and claim"
+      "viewLink": "View and claim",
+      "exportCsv": "Export CSV",
+      "exportCsvAria": "Export payee lock history as CSV"
     },
     "attester": {
       "title": "Attester checks"
