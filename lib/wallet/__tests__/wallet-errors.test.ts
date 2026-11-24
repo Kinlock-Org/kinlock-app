@@ -22,7 +22,11 @@ describe("Wallet error states and recovery guidance (M3-02, M3-21, #78)", () => 
       // Wrap wallet call as performed in send/claim/refund flows
       let caughtError: unknown;
       try {
-        await rejectingWallet.signTransaction("dummy-xdr", "Test SDF Network ; September 2015", "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H");
+        await rejectingWallet.signTransaction(
+          "dummy-xdr",
+          "Test SDF Network ; September 2015",
+          "GBRPYHIL2CI3FNQ4BXLFMNDLFJUNPU2HY3ZMFSHONUCEOASW7QC7OX2H",
+        );
       } catch (e) {
         caughtError = e;
       }
@@ -117,7 +121,9 @@ describe("Wallet error states and recovery guidance (M3-02, M3-21, #78)", () => 
       expect(lockErrorTx).toContain("you can try again");
 
       const refundSenderOnly = enMessages.pages.lock.refundSenderOnly;
-      expect(refundSenderOnly).toBe("Only the sender's wallet can refund. Connect the wallet that created this lock.");
+      expect(refundSenderOnly).toBe(
+        "Only the sender's wallet can refund. Connect the wallet that created this lock.",
+      );
     });
 
     it("verifies pages.payee connectError gives actionable retry copy", () => {
@@ -134,13 +140,13 @@ describe("Wallet error states and recovery guidance (M3-02, M3-21, #78)", () => 
   describe("No unhandled promise rejection in error translation", () => {
     it("handles contract error codes without throwing unhandled exceptions", () => {
       expect(releaseErrorKey({ code: "CONTRACT_ERROR", contractError: "TrancheNotUnlocked" })).toBe(
-        "pages.claim.errorNotUnlocked"
+        "pages.claim.errorNotUnlocked",
       );
       expect(releaseErrorKey({ code: "CONTRACT_ERROR", contractError: "LockExpired" })).toBe(
-        "pages.claim.errorExpired"
+        "pages.claim.errorExpired",
       );
       expect(releaseErrorKey({ code: "CONTRACT_ERROR", contractError: "PayeeNotActive" })).toBe(
-        "pages.claim.errorPayeeNotActive"
+        "pages.claim.errorPayeeNotActive",
       );
       expect(releaseErrorKey({ code: "UNKNOWN_EXCEPTION" })).toBe("pages.claim.errorGeneric");
       expect(releaseErrorKey(null)).toBe("pages.claim.errorGeneric");
@@ -150,10 +156,10 @@ describe("Wallet error states and recovery guidance (M3-02, M3-21, #78)", () => 
     it("handles refund error codes gracefully without throwing", () => {
       expect(refundErrorKey({ code: "TX_FAILED" })).toBe("pages.lock.errorTx");
       expect(refundErrorKey({ code: "CONTRACT_ERROR", contractError: "RefundNotAllowed" })).toBe(
-        "pages.lock.errorNotAllowed"
+        "pages.lock.errorNotAllowed",
       );
       expect(refundErrorKey({ code: "CONTRACT_ERROR", contractError: "LockNotOpen" })).toBe(
-        "pages.lock.errorClosed"
+        "pages.lock.errorClosed",
       );
       expect(refundErrorKey(new Error("network error"))).toBe("pages.lock.errorGeneric");
       expect(refundErrorKey(null)).toBe("pages.lock.errorGeneric");
